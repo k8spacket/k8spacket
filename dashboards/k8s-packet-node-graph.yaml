@@ -1,0 +1,177 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8spacket-node-graph-dashboard
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/name: grafana
+    dashboard-provider: default
+data:
+  k8spacket-node-graph-dashboard.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 3,
+      "iteration": 1654610569825,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": {
+            "type": "hamedkarbasi93-nodegraphapi-datasource",
+            "uid": "PC93AC6A0E760905D"
+          },
+          "gridPos": {
+            "h": 31,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "datasource": {
+                "type": "hamedkarbasi93-nodegraphapi-datasource",
+                "uid": "PC93AC6A0E760905D"
+              },
+              "queryText": "namespace=$namespace&include=$include&exclude=$exclude&stats-type=$statstype",
+              "refId": "A"
+            }
+          ],
+          "title": "Panel Title",
+          "type": "nodeGraph"
+        }
+      ],
+      "refresh": "",
+      "schemaVersion": 35,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": true,
+              "text": "connection",
+              "value": "connection"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "graph mode",
+            "multi": false,
+            "name": "statstype",
+            "options": [
+              {
+                "selected": true,
+                "text": "connection",
+                "value": "connection"
+              },
+              {
+                "selected": false,
+                "text": "bytes",
+                "value": "bytes"
+              },
+              {
+                "selected": false,
+                "text": "duration",
+                "value": "duration"
+              }
+            ],
+            "query": "connection,bytes,duration",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "",
+              "value": ""
+            },
+            "description": "",
+            "hide": 0,
+            "label": "namespace (regexp)",
+            "name": "namespace",
+            "options": [
+              {
+                "selected": true,
+                "text": "",
+                "value": ""
+              }
+            ],
+            "query": "",
+            "skipUrlSync": false,
+            "type": "textbox"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "",
+              "value": ""
+            },
+            "hide": 0,
+            "label": "include name (regexp)",
+            "name": "include",
+            "options": [
+              {
+                "selected": true,
+                "text": "",
+                "value": ""
+              }
+            ],
+            "query": "",
+            "skipUrlSync": false,
+            "type": "textbox"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "",
+              "value": ""
+            },
+            "hide": 0,
+            "label": "exclude name (regexp)",
+            "name": "exclude",
+            "options": [
+              {
+                "selected": true,
+                "text": "",
+                "value": ""
+              }
+            ],
+            "query": "",
+            "skipUrlSync": false,
+            "type": "textbox"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "k8spacket - node graph",
+      "uid": "hLAytT27k",
+      "version": 1,
+      "weekStart": ""
+    }

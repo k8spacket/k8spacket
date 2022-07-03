@@ -1,0 +1,58 @@
+{
+  "edges_fields": [
+    {
+      "field_name": "id",
+      "type": "string"
+    },
+    {
+      "field_name": "source",
+      "type": "string"
+    },
+    {
+      "field_name": "target",
+      "type": "string"
+    },
+    {
+      "field_name": "mainStat",
+      "type": "string"
+    },
+    {
+      "field_name": "secondaryStat",
+      "type": "string"
+    }
+  ],
+  "nodes_fields": [
+    {
+      "field_name": "id",
+      "type": "string"
+    },
+    {
+      "field_name": "title",
+      "type": "string"
+    },
+    {
+      "field_name": "subTitle",
+      "type": "string"
+    },
+    {
+      "field_name": "mainStat",
+      "displayName": "{{mainStatDisplayName}}",
+      "type": "string"
+    },
+    {
+      "field_name": "secondaryStat",
+      "displayName": "{{secondaryStatDisplayName}}",
+      "type": "string"
+    },
+    {
+      "color": "{{arc1color}}",
+      "field_name": "arc__1",
+      "type": "number"
+    },
+    {
+      "color": "{{arc2color}}",
+      "field_name": "arc__2",
+      "type": "number"
+    }
+  ]
+}
