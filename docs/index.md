@@ -32,13 +32,13 @@ Go to `k8spacket - node graph` in Grafana Dashboards and use filters as below
 
 ### Select graph mode (connection, bytes, duration)
 
-![graphmode.gif](docs/graphmode.gif)
+![graphmode.gif](graphmode.gif)
 
 ### Filter by namespace
 
-![namespace.gif](docs/namespace.gif)
+![namespace.gif](namespace.gif)
 
 ### Filter by include or exclude workflow name
 
-![includeexclude.gif](docs/includeexclude.gif)
+![includeexclude.gif](includeexclude.gif)
 
