@@ -1,3 +1,8 @@
+
+<p align="center">
+    <img src="logo_black.svg" width="300" alt="logo k8spacket"/>
+</p>
+
 # [k8spacket](https://github.com/k8spacket) - packets traffic visualization for kubernetes
 
 `k8spacket` helps to understand TCP packets traffic in your kubernetes cluster:
