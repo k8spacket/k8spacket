@@ -1,4 +1,4 @@
-# k8spacket - packets traffic visualization for kubernetes
+# [k8spacket](https://github.com/k8spacket) - packets traffic visualization for kubernetes
 
 `k8spacket` helps to understand TCP packets traffic in your kubernetes cluster:
 
