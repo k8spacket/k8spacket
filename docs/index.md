@@ -1,4 +1,9 @@
-# k8spacket - packets traffic visualization for kubernetes
+
+<p align="center">
+    <img src="logo_black.svg" width="300" alt="logo k8spacket"/>
+</p>
+
+# [k8spacket](https://github.com/k8spacket) - packets traffic visualization for kubernetes
 
 `k8spacket` helps to understand TCP packets traffic in your kubernetes cluster:
 
@@ -21,6 +26,7 @@ Install `k8spacket` using helm chart (https://github.com/k8spacket/k8spacket-hel
 ```
 
 Add the `Node Graph API` plugin and datasource to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
+
 ```yaml
 grafana:
   env:
@@ -55,13 +61,13 @@ Go to `k8spacket - node graph` in Grafana Dashboards and use filters as below
 
 ### Select graph mode (connection, bytes, duration)
 
-![docs/graphmode.gif](docs/graphmode.gif)
+![graphmode.gif](graphmode.gif)
 
 ### Filter by namespace
 
-![docs/namespace.gif](docs/namespace.gif)
+![namespace.gif](namespace.gif)
 
 ### Filter by include or exclude workflow name
 
-![docs/includeexclude.gif](docs/includeexclude.gif)
+![includeexclude.gif](includeexclude.gif)
 
