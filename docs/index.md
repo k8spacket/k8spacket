@@ -1,4 +1,6 @@
 
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico?">
+
 <p align="center">
     <img src="logo_black.svg" width="300" alt="logo k8spacket"/>
 </p>
