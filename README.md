@@ -20,6 +20,29 @@ Install `k8spacket` using helm chart (https://github.com/k8spacket/k8spacket-hel
   helm install k8spacket --namespace k8spacket k8spacket/k8spacket --create-namespace
 ```
 
+Add the plugin and datasource to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
+```yaml
+grafana:
+  env:
+    GF_INSTALL_PLUGINS: hamedkarbasi93-nodegraphapi-datasource
+  datasources:
+    nnodegraphapi-plugin-datasource.yaml:
+      apiVersion: 1
+      datasources:
+      - name: "Node Graph API"
+        jsonData:
+          url: "http://k8spacket.k8spacket.svc.cluster.local:8080"
+        access: "proxy"
+        basicAuth: false
+        isDefault: false
+        readOnly: false
+        type: "hamedkarbasi93-nodegraphapi-datasource"
+        typeLogoUrl: "public/plugins/hamedkarbasi93-nodegraphapi-datasource/img/logo.svg"
+        typeName: "node-graph-plugin"
+        orgId: 1
+        version: 1
+```
+
 Add dashboards configmap to Grafana stack
 
 ```bash
