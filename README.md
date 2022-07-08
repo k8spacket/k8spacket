@@ -20,7 +20,7 @@ Install `k8spacket` using helm chart (https://github.com/k8spacket/k8spacket-hel
   helm install k8spacket --namespace k8spacket k8spacket/k8spacket --create-namespace
 ```
 
-Add the plugin and datasource to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
+Add the `Node Graph API` plugin and datasource to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
 ```yaml
 grafana:
   env:
