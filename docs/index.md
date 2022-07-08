@@ -32,7 +32,7 @@ grafana:
   env:
     GF_INSTALL_PLUGINS: hamedkarbasi93-nodegraphapi-datasource
   datasources:
-    nnodegraphapi-plugin-datasource.yaml:
+    nodegraphapi-plugin-datasource.yaml:
       apiVersion: 1
       datasources:
       - name: "Node Graph API"
