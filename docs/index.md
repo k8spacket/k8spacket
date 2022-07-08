@@ -1,5 +1,7 @@
-
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico?">
+<head>
+    <title>k8spacket - packets traffic visualization for kubernetes</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?">
+</head>
 
 <p align="center">
     <img src="logo_black.svg" width="300" alt="logo k8spacket"/>
