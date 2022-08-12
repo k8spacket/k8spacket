@@ -1,6 +1,5 @@
 # Compiled binary
 k8spacket
-
+skaffold/overlays/*
 # Editor
 .idea
-

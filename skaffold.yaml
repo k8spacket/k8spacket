@@ -1,0 +1,39 @@
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: k8spacket
+build:
+  artifacts:
+  - image: k8spacket/k8spacket
+    context: .
+    docker:
+      dockerfile: Dockerfile
+deploy:
+  kustomize:
+    paths:
+    - skaffold/base
+profiles:
+- name: shokohsc
+  build:
+    artifacts:
+    - image: shokohsc/k8spacket
+      kaniko:
+        cache:
+          repo: shokohsc/k8spacket
+        dockerfile: Dockerfile
+    cluster:
+      dockerConfig:
+        secretName: kaniko-secret
+      namespace: kaniko
+      pullSecretName: kaniko-secret
+      resources:
+        limits:
+          cpu: "2"
+          memory: 2Gi
+        requests:
+          cpu: "1"
+          memory: 1Gi
+  deploy:
+    kustomize:
+      paths:
+      - skaffold/overlays/shokohsc

@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: k8spacket
+  labels:
+    app.kubernetes.io/name: k8spacket
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: k8spacket
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: k8spacket
+        name: k8spacket
+    spec:
+      serviceAccountName: k8spacket
+      hostNetwork: true
+      securityContext:
+        runAsUser: 1000
+      containers:
+        - name: k8spacket
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: true
+            capabilities:
+              add:
+              - NET_ADMIN
+          image: k8spacket/k8spacket
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1500Mi
+            requests:
+              cpu: 250m
+              memory: 1000Mi
+          env:
+          - name: K8S_PACKET_NAME_LABEL_VALUE
+            value: k8spacket
+          - name: K8S_PACKET_HIDE_SRC_PORT
+            value: "true"
+          - name: K8S_PACKET_REVERSE_GEOIP2_DB_PATH
+            value: /home/k8spacket/GeoLite2-City.mmdb
+          - name: K8S_PACKET_REVERSE_WHOIS_REGEXP
+            value: (?:OrgName:|org-name:)\s*(.*)
+          - name: K8S_PACKET_TCP_ASSEMBLER_MAX_PAGES_PER_CONN
+            value: "50"
+          - name: K8S_PACKET_TCP_ASSEMBLER_MAX_PAGES_TOTAL
+            value: "50"
+          - name: K8S_PACKET_TCP_ASSEMBLER_FLUSHING_PERIOD
+            value: 10s
+          - name: K8S_PACKET_TCP_ASSEMBLER_FLUSHING_CLOSE_OLDER_THAN
+            value: 20s
+          - name: K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND
+            value: ip address | grep @ | sed -E 's/.* (\w+)@.*/\1/' | tr '\n' ',' | sed 's/.$//'
+          - name: K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD
+            value: 10s

@@ -1,0 +1,11 @@
+# Compiled binary
+k8spacket
+skaffold/
+# Editor
+.idea
+README.md
+skaffold.yaml
+dashboards/
+docs/
+.git/
+Dockerfile

@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8spacket
+  namespace: k8spacket
+  labels:
+    app.kubernetes.io/name: k8spacket
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: k8spacket:k8spacket
+rules:
+  - apiGroups:
+    - ""
+    resources:
+    - "pods"
+    - "services"
+    verbs:
+    - "get"
+    - "watch"
+    - "list"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: k8spacket:k8spacket
+subjects:
+  - kind: ServiceAccount
+    name: k8spacket
+    namespace: k8spacket
+roleRef:
+  kind: ClusterRole
+  name: k8spacket:k8spacket
+  apiGroup: rbac.authorization.k8s.io
