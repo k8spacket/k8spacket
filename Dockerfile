@@ -33,7 +33,7 @@ RUN chown k8spacket:k8spacket /home/k8spacket/*
 
 RUN chgrp k8spacket /home/k8spacket/k8spacket && chmod 750 /home/k8spacket/k8spacket
 
-RUN setcap cap_net_raw,cap_net_admin=ep /home/k8spacket/k8spacket
+RUN setcap cap_net_raw,cap_net_admin=eip /home/k8spacket/k8spacket
 
 USER k8spacket
 
