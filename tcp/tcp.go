@@ -83,7 +83,7 @@ func interfacesRefresher() {
 		interfaces = findInterfaces()
 		var refreshK8sInfo = false
 		for _, el := range interfaces {
-			if !tools.SliceContains(currentInterfaces, el) {
+			if (strings.TrimSpace(el) != "") && (!tools.SliceContains(currentInterfaces, el)) {
 				go listenInterface(el, "tcp")
 				refreshK8sInfo = true
 			}
