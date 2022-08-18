@@ -48,7 +48,7 @@ func NodeGraphDataHandler(w http.ResponseWriter, r *http.Request) {
 	var connectionItems = make(map[string]model.ConnectionItem)
 
 	for _, ip := range k8spacketIps {
-		resp, err := http.Get(fmt.Sprintf("http://%s:8080/connections?%s", ip, r.URL.Query().Encode()))
+		resp, err := http.Get(fmt.Sprintf("http://%s:%s/connections?%s", ip, os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), r.URL.Query().Encode()))
 
 		if err != nil {
 			fmt.Print(err.Error())
