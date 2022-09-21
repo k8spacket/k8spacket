@@ -35,7 +35,9 @@ func NodeGraphFieldsHandler(w http.ResponseWriter, r *http.Request) {
 	response = strings.ReplaceAll(response, "{{mainStatDisplayName}}", config.MainStat.DisplayName)
 	response = strings.ReplaceAll(response, "{{secondaryStatDisplayName}}", config.SecondaryStat.DisplayName)
 	response = strings.ReplaceAll(response, "{{arc1color}}", config.Arc1.Color)
+	response = strings.ReplaceAll(response, "{{arc1DisplayName}}", config.Arc1.DisplayName)
 	response = strings.ReplaceAll(response, "{{arc2color}}", config.Arc2.Color)
+	response = strings.ReplaceAll(response, "{{arc2DisplayName}}", config.Arc2.DisplayName)
 
 	w.WriteHeader(200)
 	w.Write([]byte(response))

@@ -47,12 +47,14 @@
     {
       "color": "{{arc1color}}",
       "field_name": "arc__1",
-      "type": "number"
+      "type": "number",
+      "displayName": "{{arc1DisplayName}}"
     },
     {
       "color": "{{arc2color}}",
       "field_name": "arc__2",
-      "type": "number"
+      "type": "number",
+      "displayName": "{{arc2DisplayName}}"
     }
   ]
 }

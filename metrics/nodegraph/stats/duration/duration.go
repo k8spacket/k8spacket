@@ -8,8 +8,8 @@ import (
 func GetConfig() model.Config {
 	return model.Config{Arc1: model.DisplayConfig{DisplayName: "Average duration", Color: "purple"},
 		Arc2:          model.DisplayConfig{DisplayName: "Max duration", Color: "white"},
-		MainStat:      model.DisplayConfig{DisplayName: "Average duration"},
-		SecondaryStat: model.DisplayConfig{DisplayName: "Max duration"}}
+		MainStat:      model.DisplayConfig{DisplayName: "Average duration "},
+		SecondaryStat: model.DisplayConfig{DisplayName: "Max duration "}}
 }
 
 func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {

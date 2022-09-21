@@ -8,8 +8,8 @@ import (
 func GetConfig() model.Config {
 	return model.Config{Arc1: model.DisplayConfig{DisplayName: "Closed connections", Color: "green"},
 		Arc2:          model.DisplayConfig{DisplayName: "Unclosed connections", Color: "red"},
-		MainStat:      model.DisplayConfig{DisplayName: "All connections"},
-		SecondaryStat: model.DisplayConfig{DisplayName: "Closed connections"}}
+		MainStat:      model.DisplayConfig{DisplayName: "All connections "},
+		SecondaryStat: model.DisplayConfig{DisplayName: "Closed connections "}}
 }
 
 func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
