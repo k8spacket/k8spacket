@@ -9,8 +9,8 @@ import (
 func GetConfig() model.Config {
 	return model.Config{Arc1: model.DisplayConfig{DisplayName: "Bytes received", Color: "blue"},
 		Arc2:          model.DisplayConfig{DisplayName: "Bytes responded", Color: "yellow"},
-		MainStat:      model.DisplayConfig{DisplayName: "Bytes received"},
-		SecondaryStat: model.DisplayConfig{DisplayName: "Bytes responded"}}
+		MainStat:      model.DisplayConfig{DisplayName: "Bytes received "},
+		SecondaryStat: model.DisplayConfig{DisplayName: "Bytes responded "}}
 }
 
 func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
