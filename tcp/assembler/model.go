@@ -2,6 +2,7 @@ package assembler
 
 import (
 	"github.com/google/gopacket"
+	"github.com/k8spacket/k8s-api"
 	"time"
 )
 
@@ -16,3 +17,5 @@ type tcpStream struct {
 }
 
 var reverseLookupMap = make(map[string]string)
+
+var K8sInfo = make(map[string]k8s.IPResourceInfo)

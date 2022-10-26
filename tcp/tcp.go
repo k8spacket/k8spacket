@@ -90,7 +90,7 @@ func interfacesRefresher() {
 			}
 		}
 		if refreshK8sInfo {
-			k8s.FetchK8SInfo()
+			assembler.K8sInfo = k8s.FetchK8SInfo()
 		}
 		currentInterfaces = interfaces
 		time.Sleep(refreshPeriod)

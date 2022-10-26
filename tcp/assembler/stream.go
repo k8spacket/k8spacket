@@ -4,7 +4,6 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/reassembly"
-	"github.com/k8spacket/k8s-api"
 	"github.com/k8spacket/k8spacket/broker"
 	"github.com/k8spacket/plugin-api"
 	"github.com/likexian/whois"
@@ -76,17 +75,17 @@ func (s *tcpStream) ReassemblyComplete(ac reassembly.AssemblerContext) bool {
 }
 
 func enrichStream(stream *plugin_api.ReassembledStream) {
-	var srcName = k8s.K8sInfo[stream.Src].Name
+	var srcName = K8sInfo[stream.Src].Name
 	if srcName == "" {
 		stream.SrcName = reverseLookup(stream.Src)
 	}
 
-	var dstName = k8s.K8sInfo[stream.Dst].Name
+	var dstName = K8sInfo[stream.Dst].Name
 	if dstName == "" {
 		stream.DstName = reverseLookup(stream.Dst)
 	}
-	stream.SrcNamespace = k8s.K8sInfo[stream.Src].Namespace
-	stream.DstNamespace = k8s.K8sInfo[stream.Dst].Namespace
+	stream.SrcNamespace = K8sInfo[stream.Src].Namespace
+	stream.DstNamespace = K8sInfo[stream.Dst].Namespace
 }
 
 func reverseLookup(ip string) string {
