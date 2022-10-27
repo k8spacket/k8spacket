@@ -75,13 +75,13 @@ func (s *tcpStream) ReassemblyComplete(ac reassembly.AssemblerContext) bool {
 }
 
 func enrichStream(stream *plugin_api.ReassembledStream) {
-	var srcName = K8sInfo[stream.Src].Name
-	if srcName == "" {
+	stream.SrcName = K8sInfo[stream.Src].Name
+	if stream.SrcName == "" {
 		stream.SrcName = reverseLookup(stream.Src)
 	}
 
-	var dstName = K8sInfo[stream.Dst].Name
-	if dstName == "" {
+	stream.DstName = K8sInfo[stream.Dst].Name
+	if stream.DstName == "" {
 		stream.DstName = reverseLookup(stream.Dst)
 	}
 	stream.SrcNamespace = K8sInfo[stream.Src].Namespace
