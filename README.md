@@ -1,5 +1,16 @@
 # k8spacket - packets traffic visualization for kubernetes
 
+---
+###What's new in version 1.0.0-alpha
+
+- architecture of k8spacket changed to support `go plugins` (see available plugins here: https://github.com/k8spacket/plugins)
+- added new metrics about the TLS handshake process inside and outside the cluster (TLS version and cipher suite used)
+- added dashboard about TLS handshake parameters
+
+![docs/tls.gif](docs/tls.gif)
+
+---
+
 `k8spacket` helps to understand TCP packets traffic in your kubernetes cluster:
 
 - shows traffic between workloads in the cluster
@@ -16,8 +27,8 @@
 Install `k8spacket` using helm chart (https://github.com/k8spacket/k8spacket-helm-chart)
 
 ```bash
-  helm repo add k8spacket https://k8spacket.github.io/k8spacket-helm-chart
-  helm install k8spacket --namespace k8spacket k8spacket/k8spacket --create-namespace
+  helm repo add k8spacket-alpha https://k8spacket.github.io/k8spacket-helm-chart/alpha
+  helm install k8spacket --namespace k8spacket k8spacket-alpha/k8spacket --version 1.0.0-alpha --create-namespace
 ```
 
 Add the `Node Graph API` plugin and datasource to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
@@ -31,7 +42,7 @@ grafana:
       datasources:
       - name: "Node Graph API"
         jsonData:
-          url: "http://k8spacket.k8spacket.svc.cluster.local:8080"
+          url: "http://k8spacket.k8spacket.svc.cluster.local:8080/nodegraph"
         access: "proxy"
         basicAuth: false
         isDefault: false
