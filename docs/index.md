@@ -22,11 +22,12 @@ Install `k8spacket` using helm chart (https://github.com/k8spacket/k8spacket-hel
 
 ```bash
   helm repo add k8spacket https://k8spacket.github.io/k8spacket-helm-chart
+  helm repo update k8spacket
+  
   helm install k8spacket --namespace k8spacket k8spacket/k8spacket --create-namespace
 ```
 
-Add the `Node Graph API` plugin and datasource to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
-
+Add `Node Graph API` and `JSON API` plugins and datasources to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
 ```yaml
 grafana:
   env:

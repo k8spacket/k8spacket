@@ -4,8 +4,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 
 RUN mkdir /home/k8spacket/
 
-COPY ./k8s /home/k8spacket/k8s
-COPY ./metrics /home/k8spacket/metrics
+COPY ./broker /home/k8spacket/broker
+COPY ./plugins /home/k8spacket/plugins
 COPY ./tcp /home/k8spacket/tcp
 COPY ./tools /home/k8spacket/tools
 COPY *.go /home/k8spacket/
