@@ -40,8 +40,7 @@ data:
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "type": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -117,8 +116,7 @@ data:
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "PBFA97CFB590B2093"
+                "type": "prometheus"
               },
               "editorMode": "code",
               "exemplar": true,
@@ -145,8 +143,7 @@ data:
               "value": "$__all"
             },
             "datasource": {
-              "type": "prometheus",
-              "uid": "PBFA97CFB590B2093"
+              "type": "prometheus"
             },
             "definition": "label_values(k8s_packet_tls_record, domain)",
             "hide": 0,
@@ -171,8 +168,7 @@ data:
               "value": "$__all"
             },
             "datasource": {
-              "type": "prometheus",
-              "uid": "PBFA97CFB590B2093"
+              "type": "prometheus"
             },
             "definition": "label_values(k8s_packet_tls_record, tls_version)",
             "hide": 0,
@@ -197,8 +193,7 @@ data:
               "value": "$__all"
             },
             "datasource": {
-              "type": "prometheus",
-              "uid": "PBFA97CFB590B2093"
+              "type": "prometheus"
             },
             "definition": "label_values(k8s_packet_tls_record, cipher_suite)",
             "hide": 0,
@@ -225,7 +220,5 @@ data:
       "timepicker": {},
       "timezone": "",
       "title": "k8spacket - TLS metrics",
-      "uid": "MYwHo6H4z",
-      "version": 9,
       "weekStart": ""
     }
