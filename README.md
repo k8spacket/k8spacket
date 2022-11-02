@@ -1,7 +1,7 @@
 # k8spacket - packets traffic visualization for kubernetes
 
 ---
-##What's new in version 1.0.0
+## What's new in version 1.0.0
 
 - architecture of k8spacket changed to support `go plugins` (see available plugins here: https://github.com/k8spacket/plugins)
 - added plugin with metrics about the TLS handshake process inside and outside the cluster (TLS version and cipher suite used)
