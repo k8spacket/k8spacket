@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	github.com/google/gopacket v1.1.19
-	github.com/k8spacket/k8s-api v1.0.0
-	github.com/k8spacket/plugin-api v1.0.0
+	github.com/k8spacket/k8s-api v1.0.1
+	github.com/k8spacket/plugin-api v1.0.1
 	github.com/likexian/whois v1.14.2
 	github.com/oschwald/geoip2-golang v1.8.0
 	github.com/prometheus/client_golang v1.13.0
