@@ -35,31 +35,45 @@
 Install `k8spacket` using helm chart (https://github.com/k8spacket/k8spacket-helm-chart)
 
 ```bash
-  helm repo add k8spacket-alpha https://k8spacket.github.io/k8spacket-helm-chart/alpha
-  helm install k8spacket --namespace k8spacket k8spacket-alpha/k8spacket --version 1.0.0-alpha --create-namespace
+  helm repo add k8spacket https://k8spacket.github.io/k8spacket-helm-chart
+  helm install k8spacket --namespace k8spacket k8spacket/k8spacket --create-namespace
 ```
 
 Add the `Node Graph API` plugin and datasource to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
 ```yaml
 grafana:
   env:
-    GF_INSTALL_PLUGINS: hamedkarbasi93-nodegraphapi-datasource
+    GF_INSTALL_PLUGINS: hamedkarbasi93-nodegraphapi-datasource,marcusolsson-json-datasource
   datasources:
     nodegraphapi-plugin-datasource.yaml:
       apiVersion: 1
       datasources:
-      - name: "Node Graph API"
-        jsonData:
-          url: "http://k8spacket.k8spacket.svc.cluster.local:8080/nodegraph"
-        access: "proxy"
-        basicAuth: false
-        isDefault: false
-        readOnly: false
-        type: "hamedkarbasi93-nodegraphapi-datasource"
-        typeLogoUrl: "public/plugins/hamedkarbasi93-nodegraphapi-datasource/img/logo.svg"
-        typeName: "node-graph-plugin"
-        orgId: 1
-        version: 1
+        - name: "Node Graph API"
+          jsonData:
+            url: "http://k8spacket.k8spacket.svc.cluster.local:8080/nodegraph"
+          access: "proxy"
+          basicAuth: false
+          isDefault: false
+          readOnly: false
+          type: "hamedkarbasi93-nodegraphapi-datasource"
+          typeLogoUrl: "public/plugins/hamedkarbasi93-nodegraphapi-datasource/img/logo.svg"
+          typeName: "node-graph-plugin"
+          orgId: 1
+          version: 1
+    marcusolsson-json-datasource.yaml:
+      apiVersion: 1
+      datasources:
+        - name: "JSON API"
+          url: "http://k8spacket.k8spacket.svc.cluster.local:8080/tlsparser/api/data"
+          access: "proxy"
+          basicAuth: false
+          isDefault: false
+          readOnly: false
+          type: "marcusolsson-json-datasource"
+          typeLogoUrl: "public/plugins/marcusolsson-json-datasource/img/logo.svg"
+          typeName: "json-api-plugin"
+          orgId: 1
+          version: 1
 ```
 
 Add dashboards configmap to Grafana stack
