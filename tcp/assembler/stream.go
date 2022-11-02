@@ -4,25 +4,26 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/reassembly"
-	"github.com/k8spacket/metrics"
+	"github.com/k8spacket/k8spacket/broker"
+	"github.com/k8spacket/plugin-api"
+	"github.com/likexian/whois"
+	"github.com/oschwald/geoip2-golang"
+	"math/rand"
+	"net"
+	"os"
+	"regexp"
 	"time"
 )
 
-type TcpStreamFactory struct{}
-
-type tcpStream struct {
-	net, transport                                         gopacket.Flow
-	bytesSent, bytesReceived, packets, outOfOrder, skipped int64
-	start, end                                             time.Time
-	sawStart, sawEnd                                       bool
-}
-
 func (s *tcpStream) Accept(tcp *layers.TCP, ci gopacket.CaptureInfo, dir reassembly.TCPFlowDirection, nextSeq reassembly.Sequence, start *bool, ac reassembly.AssemblerContext) bool {
+	payload := plugin_api.TCPPacketPayload{StreamId: s.streamId, Payload: tcp.Payload}
+	broker.TCPPacketPayoutEvent(payload)
 	return true
 }
 
 func (factory *TcpStreamFactory) New(netFlow, tcpFlow gopacket.Flow, _ *layers.TCP, _ reassembly.AssemblerContext) reassembly.Stream {
 	return &tcpStream{
+		streamId:  rand.Uint32(),
 		net:       netFlow,
 		transport: tcpFlow,
 		start:     time.Now(),
@@ -57,7 +58,70 @@ func (s *tcpStream) ReassembledSG(sg reassembly.ScatterGather, ac reassembly.Ass
 
 func (s *tcpStream) ReassemblyComplete(ac reassembly.AssemblerContext) bool {
 	if s.sawStart {
-		metrics.PushK8sPacketMetric(s.net.Src().String(), s.transport.Src().String(), s.net.Dst().String(), s.transport.Dst().String(), s.sawEnd, float64(s.bytesSent), float64(s.bytesReceived), s.end.Sub(s.start).Seconds())
+		stream := plugin_api.ReassembledStream{
+			StreamId:      s.streamId,
+			Src:           s.net.Src().String(),
+			SrcPort:       s.transport.Src().String(),
+			Dst:           s.net.Dst().String(),
+			DstPort:       s.transport.Dst().String(),
+			Closed:        s.sawEnd,
+			BytesSent:     float64(s.bytesSent),
+			BytesReceived: float64(s.bytesReceived),
+			Duration:      s.end.Sub(s.start).Seconds()}
+		enrichStream(&stream)
+		broker.ReassembledStreamEvent(stream)
 	}
 	return true
+}
+
+func enrichStream(stream *plugin_api.ReassembledStream) {
+	stream.SrcName = K8sInfo[stream.Src].Name
+	if stream.SrcName == "" {
+		stream.SrcName = reverseLookup(stream.Src)
+	}
+
+	stream.DstName = K8sInfo[stream.Dst].Name
+	if stream.DstName == "" {
+		stream.DstName = reverseLookup(stream.Dst)
+	}
+	stream.SrcNamespace = K8sInfo[stream.Src].Namespace
+	stream.DstNamespace = K8sInfo[stream.Dst].Namespace
+}
+
+func reverseLookup(ip string) string {
+
+	if privateIPCheck(ip) {
+		return "N/A"
+	}
+
+	if _, ok := reverseLookupMap[ip]; !ok {
+
+		result, _ := whois.Whois(ip)
+
+		re := regexp.MustCompile(os.Getenv("K8S_PACKET_REVERSE_WHOIS_REGEXP"))
+		matches := re.FindStringSubmatch(result)
+
+		reverseLookup := ""
+
+		if len(matches) > 1 {
+			reverseLookup += matches[1]
+		}
+
+		db, err := geoip2.Open(os.Getenv("K8S_PACKET_REVERSE_GEOIP2_DB_PATH"))
+		if err == nil {
+			defer db.Close()
+
+			ipObj := net.ParseIP(ip)
+			record, _ := db.City(ipObj)
+			reverseLookup += "(" + record.Country.IsoCode + ", " + record.City.Names["en"] + ")"
+		}
+		reverseLookupMap[ip] = reverseLookup
+	}
+	return reverseLookupMap[ip]
+}
+
+// Check if an ip is private.
+func privateIPCheck(ip string) bool {
+	ipAddress := net.ParseIP(ip)
+	return ipAddress.IsPrivate()
 }

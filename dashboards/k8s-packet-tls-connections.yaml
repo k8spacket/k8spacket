@@ -1,0 +1,298 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8spacket-tls-connections-dashboard
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/name: grafana
+    dashboard-provider: default
+data:
+  k8spacket-tls-connections-dashboard.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "grafana",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 8,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "PD5070BC1AA9F8304"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Src IP"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 107
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Src name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 246
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Src ns"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 91
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Dst IP"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 131
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Dst name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 158
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Dst port"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 75
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Domain"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 192
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Used TLS version"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 141
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Client TLS versions"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 156
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Used cipher suite"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 355
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 24,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "9.2.2",
+          "targets": [
+            {
+              "cacheDurationSeconds": 300,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "PD5070BC1AA9F8304"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$[*].src",
+                  "name": "Src IP"
+                },
+                {
+                  "jsonPath": "$[*].srcName",
+                  "language": "jsonpath",
+                  "name": "Src name"
+                },
+                {
+                  "jsonPath": "$[*].srcNamespace",
+                  "language": "jsonpath",
+                  "name": "Src ns"
+                },
+                {
+                  "jsonPath": "$[*].dst",
+                  "language": "jsonpath",
+                  "name": "Dst IP"
+                },
+                {
+                  "jsonPath": "$[*].dstName",
+                  "language": "jsonpath",
+                  "name": "Dst name"
+                },
+                {
+                  "jsonPath": "$[*].dstPort",
+                  "language": "jsonpath",
+                  "name": "Dst port"
+                },
+                {
+                  "jsonPath": "$[*].tls.domain",
+                  "language": "jsonpath",
+                  "name": "Domain"
+                },
+                {
+                  "jsonPath": "$[*].tls.usedTLSVersion",
+                  "language": "jsonpath",
+                  "name": "Used TLS version"
+                },
+                {
+                  "jsonPath": "$[*].tls.usedCipherSuite",
+                  "language": "jsonpath",
+                  "name": "Used cipher suite"
+                },
+                {
+                  "jsonPath": "$[*].tls.clientTLSVersions",
+                  "language": "jsonpath",
+                  "name": "Client TLS versions"
+                },
+                {
+                  "jsonPath": "$[*].tls.clientCipherSuites",
+                  "language": "jsonpath",
+                  "name": "Client cipher suites"
+                }
+              ],
+              "key": "Q-77911692-5067-4639-8db0-2e785492029e-0",
+              "method": "GET",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": ""
+            }
+          ],
+          "title": "TLS connections",
+          "type": "table"
+        }
+      ],
+      "schemaVersion": 37,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "k8spacket - TLS connections",
+      "weekStart": ""
+    }

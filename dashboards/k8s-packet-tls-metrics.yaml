@@ -1,0 +1,224 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8spacket-tls-metrics-dashboard
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/name: grafana
+    dashboard-provider: default
+data:
+  k8spacket-tls-metrics-dashboard.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "grafana",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 4,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 24,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(k8s_packet_tls_record{domain=~\"$domain\", tls_version=~\"$tls_version\", cipher_suite=~\"$cipher_suite\"}) by (domain, dst_name, tls_version, cipher_suite)",
+              "key": "Q-fcd5d7c2-2d24-4c23-acf0-7265ceaec799-0",
+              "legendFormat": "{{domain}} {{dst_name}} - {{tls_version}}/{{cipher_suite}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "TLS connections",
+          "type": "timeseries"
+        }
+      ],
+      "schemaVersion": 37,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": {
+              "type": "prometheus"
+            },
+            "definition": "label_values(k8s_packet_tls_record, domain)",
+            "hide": 0,
+            "includeAll": true,
+            "multi": false,
+            "name": "domain",
+            "options": [],
+            "query": {
+              "query": "label_values(k8s_packet_tls_record, domain)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": {
+              "type": "prometheus"
+            },
+            "definition": "label_values(k8s_packet_tls_record, tls_version)",
+            "hide": 0,
+            "includeAll": true,
+            "multi": false,
+            "name": "tls_version",
+            "options": [],
+            "query": {
+              "query": "label_values(k8s_packet_tls_record, tls_version)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": {
+              "type": "prometheus"
+            },
+            "definition": "label_values(k8s_packet_tls_record, cipher_suite)",
+            "hide": 0,
+            "includeAll": true,
+            "multi": false,
+            "name": "cipher_suite",
+            "options": [],
+            "query": {
+              "query": "label_values(k8s_packet_tls_record, cipher_suite)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-30m",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "k8spacket - TLS metrics",
+      "weekStart": ""
+    }

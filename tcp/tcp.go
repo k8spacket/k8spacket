@@ -6,9 +6,9 @@ import (
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/reassembly"
-	"github.com/k8spacket/k8s"
-	"github.com/k8spacket/tcp/assembler"
-	"github.com/k8spacket/tools"
+	"github.com/k8spacket/k8s-api"
+	"github.com/k8spacket/k8spacket/tcp/assembler"
+	"github.com/k8spacket/k8spacket/tools"
 	"log"
 	"os"
 	"os/exec"
@@ -78,6 +78,7 @@ var interfaces []string
 
 func interfacesRefresher() {
 	var currentInterfaces []string
+	var refreshPeriod, _ = time.ParseDuration(os.Getenv("K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD"))
 	for {
 		log.Printf("Refreshing interfaces for capturing...")
 		interfaces = findInterfaces()
@@ -89,10 +90,9 @@ func interfacesRefresher() {
 			}
 		}
 		if refreshK8sInfo {
-			k8s.FetchK8SInfo()
+			assembler.K8sInfo = k8s.FetchK8SInfo()
 		}
 		currentInterfaces = interfaces
-		var refreshPeriod, _ = time.ParseDuration(os.Getenv("K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD"))
 		time.Sleep(refreshPeriod)
 	}
 }
