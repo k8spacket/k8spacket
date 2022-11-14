@@ -11,7 +11,7 @@
 - added the plugin with metrics about the TLS handshake process inside and outside the cluster (TLS version and cipher suite used)
 - added a dashboard with TLS metrics
 
-![../docs/tls.gif](../docs/tls.gif)
+![tls.gif](tls.gif)
 
 - added a dashboard about TLS connections
     - IP and name of TLS client
@@ -19,7 +19,7 @@
     - supported TLS versions and cipher suites by the client
     - chosen TLS version and cipher suite by the server
 
-![../docs/tls.png](../docs/tls.png)
+![tls.png](tls.png)
 
 ---
 
