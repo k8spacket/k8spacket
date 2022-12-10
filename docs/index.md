@@ -82,7 +82,7 @@ grafana:
           version: 1
 ```
 
-Fill additional scrape config to observe Prometheus metrics (https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config):
+Fill [additional scrape config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config) to observe Prometheus metrics:
 ```yaml
     - job_name: "k8spacket-metrics"
       metrics_path: /metrics
