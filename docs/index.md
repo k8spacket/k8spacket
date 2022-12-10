@@ -82,6 +82,15 @@ grafana:
           version: 1
 ```
 
+Fill additional scrape config to observe Prometheus metrics (https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config):
+```yaml
+    - job_name: "k8spacket-metrics"
+      metrics_path: /metrics
+      scrape_interval: 25s
+      static_configs:
+      - targets: [k8spacket.k8spacket.svc.cluster.local:8080]
+```
+
 Add dashboards configmap to Grafana stack
 
 ```bash
