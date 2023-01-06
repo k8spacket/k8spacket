@@ -1,12 +1,12 @@
 package tcp
 
 import (
-	"fmt"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/examples/util"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/reassembly"
+	"github.com/k8spacket/k8s-api"
 	"github.com/k8spacket/k8spacket/tcp/assembler"
 	"github.com/k8spacket/k8spacket/tools"
 	"log"
@@ -90,8 +90,7 @@ func interfacesRefresher() {
 			}
 		}
 		if refreshK8sInfo {
-			fmt.Println("aaa")
-			//assembler.K8sInfo = k8s.FetchK8SInfo()
+			assembler.K8sInfo = k8s.FetchK8SInfo()
 		}
 		currentInterfaces = interfaces
 		time.Sleep(refreshPeriod)

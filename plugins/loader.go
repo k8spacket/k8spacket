@@ -25,7 +25,7 @@ func find(root, ext string) []string {
 
 func InitPlugins(manager *Manager) {
 
-	for _, pluginPath := range find("../plugins", ".so") {
+	for _, pluginPath := range find("./plugins", ".so") {
 
 		println(pluginPath)
 
