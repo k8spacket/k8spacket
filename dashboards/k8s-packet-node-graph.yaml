@@ -10,36 +10,19 @@ data:
   k8spacket-node-graph-dashboard.json: |-
     {
       "annotations": {
-        "list": [
-          {
-            "builtIn": 1,
-            "datasource": "-- Grafana --",
-            "enable": true,
-            "hide": true,
-            "iconColor": "rgba(0, 211, 255, 1)",
-            "name": "Annotations & Alerts",
-            "target": {
-              "limit": 100,
-              "matchAny": false,
-              "tags": [],
-              "type": "dashboard"
-            },
-            "type": "dashboard"
-          }
-        ]
+        "list": []
       },
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
       "id": 3,
-      "iteration": 1654610569825,
       "links": [],
       "liveNow": false,
       "panels": [
         {
           "datasource": {
             "type": "hamedkarbasi93-nodegraphapi-datasource",
-            "uid": "PC93AC6A0E760905D"
+            "uid": "${datasource}"
           },
           "gridPos": {
             "h": 31,
@@ -52,7 +35,7 @@ data:
             {
               "datasource": {
                 "type": "hamedkarbasi93-nodegraphapi-datasource",
-                "uid": "PC93AC6A0E760905D"
+                "uid": "${datasource}"
               },
               "queryText": "namespace=$namespace&include=$include&exclude=$exclude&stats-type=$statstype",
               "refId": "A"
@@ -63,7 +46,7 @@ data:
         }
       ],
       "refresh": "",
-      "schemaVersion": 35,
+      "schemaVersion": 37,
       "style": "dark",
       "tags": [],
       "templating": {
@@ -161,6 +144,24 @@ data:
             "query": "",
             "skipUrlSync": false,
             "type": "textbox"
+          },
+          {
+            "current": {
+              "selected": true,
+              "text": "",
+              "value": ""
+            },
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "hamedkarbasi93-nodegraphapi-datasource",
+            "queryValue": "",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
           }
         ]
       },
@@ -171,5 +172,7 @@ data:
       "timepicker": {},
       "timezone": "",
       "title": "k8spacket - node graph",
+      "uid": "WxJmVV24k",
+      "version": 2,
       "weekStart": ""
     }

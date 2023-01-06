@@ -10,26 +10,7 @@ data:
   k8spacket-tls-connections-dashboard.json: |-
     {
       "annotations": {
-        "list": [
-          {
-            "builtIn": 1,
-            "datasource": {
-              "type": "grafana",
-              "uid": "-- Grafana --"
-            },
-            "enable": true,
-            "hide": true,
-            "iconColor": "rgba(0, 211, 255, 1)",
-            "name": "Annotations & Alerts",
-            "target": {
-              "limit": 100,
-              "matchAny": false,
-              "tags": [],
-              "type": "dashboard"
-            },
-            "type": "dashboard"
-          }
-        ]
+        "list": []
       },
       "editable": true,
       "fiscalYearStartMonth": 0,
@@ -41,7 +22,7 @@ data:
         {
           "datasource": {
             "type": "marcusolsson-json-datasource",
-            "uid": "PD5070BC1AA9F8304"
+            "uid": "${datasource}"
           },
           "fieldConfig": {
             "defaults": {
@@ -212,7 +193,7 @@ data:
               "cacheDurationSeconds": 300,
               "datasource": {
                 "type": "marcusolsson-json-datasource",
-                "uid": "PD5070BC1AA9F8304"
+                "uid": "${datasource}"
               },
               "fields": [
                 {
@@ -285,7 +266,25 @@ data:
       "style": "dark",
       "tags": [],
       "templating": {
-        "list": []
+        "list": [
+          {
+            "current": {
+              "selected": false,
+              "text": "",
+              "value": ""
+            },
+            "hide": 2,
+            "includeAll": false,
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "marcusolsson-json-datasource",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
+          }
+        ]
       },
       "time": {
         "from": "now-6h",
