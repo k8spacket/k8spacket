@@ -10,26 +10,7 @@ data:
   k8spacket-tls-metrics-dashboard.json: |-
     {
       "annotations": {
-        "list": [
-          {
-            "builtIn": 1,
-            "datasource": {
-              "type": "grafana",
-              "uid": "-- Grafana --"
-            },
-            "enable": true,
-            "hide": true,
-            "iconColor": "rgba(0, 211, 255, 1)",
-            "name": "Annotations & Alerts",
-            "target": {
-              "limit": 100,
-              "matchAny": false,
-              "tags": [],
-              "type": "dashboard"
-            },
-            "type": "dashboard"
-          }
-        ]
+        "list": []
       },
       "editable": true,
       "fiscalYearStartMonth": 0,
@@ -39,9 +20,7 @@ data:
       "liveNow": false,
       "panels": [
         {
-          "datasource": {
-            "type": "prometheus"
-          },
+          "datasource": "Prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -115,9 +94,7 @@ data:
           },
           "targets": [
             {
-              "datasource": {
-                "type": "prometheus"
-              },
+              "datasource": "Prometheus",
               "editorMode": "code",
               "exemplar": true,
               "expr": "sum(k8s_packet_tls_record{domain=~\"$domain\", tls_version=~\"$tls_version\", cipher_suite=~\"$cipher_suite\"}) by (domain, dst_name, tls_version, cipher_suite)",
@@ -142,9 +119,7 @@ data:
               "text": "All",
               "value": "$__all"
             },
-            "datasource": {
-              "type": "prometheus"
-            },
+            "datasource": "Prometheus",
             "definition": "label_values(k8s_packet_tls_record, domain)",
             "hide": 0,
             "includeAll": true,
@@ -167,9 +142,7 @@ data:
               "text": "All",
               "value": "$__all"
             },
-            "datasource": {
-              "type": "prometheus"
-            },
+            "datasource": "Prometheus",
             "definition": "label_values(k8s_packet_tls_record, tls_version)",
             "hide": 0,
             "includeAll": true,
@@ -192,9 +165,7 @@ data:
               "text": "All",
               "value": "$__all"
             },
-            "datasource": {
-              "type": "prometheus"
-            },
+            "datasource": "Prometheus",
             "definition": "label_values(k8s_packet_tls_record, cipher_suite)",
             "hide": 0,
             "includeAll": true,
