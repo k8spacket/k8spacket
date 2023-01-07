@@ -2,10 +2,6 @@ module github.com/k8spacket/k8spacket
 
 go 1.19
 
-replace github.com/k8spacket/plugin-api => ../plugin-api
-
-replace github.com/k8spacket/k8s-api => ../k8s-api
-
 require (
 	github.com/google/gopacket v1.1.19
 	github.com/k8spacket/k8s-api v1.0.1
