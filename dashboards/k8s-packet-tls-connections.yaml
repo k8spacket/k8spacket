@@ -39,7 +39,7 @@ data:
               "links": [
                 {
                   "title": "Show details",
-                  "url": "/d/_WjaqJt4k/dynamic-txt?var-id=${__data.fields[\"id\"]}"
+                  "url": "/d/_WjaqJt4k/k8spacket-tls-connections-and-certificates?var-id=${__data.fields[\"id\"]}"
                 }
               ],
               "mappings": [],

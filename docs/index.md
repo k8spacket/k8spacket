@@ -5,6 +5,13 @@
 
 # [k8spacket](https://github.com/k8spacket) - packets traffic visualization for kubernetes
 
+## What's new in version 1.1.0
+
+- `tls-parser` plugin can get information about the server certificate chain (TLS versions less than 1.3)
+- dashboard about TLS connections has changed to show server certificate chain details (depends on `marcusolsson-json-datasource` and `marcusolsson-dynamictext-panel` Grafana plugins)
+
+![tls_cert.gif](tls_cert.gif)
+
 ## What's new in version 1.0.0
 
 - architecture of k8spacket changed to use `go plugins` (see available plugins here: [https://github.com/k8spacket/plugins](https://github.com/k8spacket/plugins))
@@ -49,7 +56,7 @@ Add `Node Graph API` and `JSON API` plugins and datasources to your Grafana inst
 ```yaml
 grafana:
   env:
-    GF_INSTALL_PLUGINS: hamedkarbasi93-nodegraphapi-datasource,marcusolsson-json-datasource
+    GF_INSTALL_PLUGINS: hamedkarbasi93-nodegraphapi-datasource,marcusolsson-json-datasource,marcusolsson-dynamictext-panel
   datasources:
     nodegraphapi-plugin-datasource.yaml:
       apiVersion: 1
