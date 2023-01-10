@@ -15,9 +15,23 @@ import (
 	"time"
 )
 
-func (s *tcpStream) Accept(tcp *layers.TCP, ci gopacket.CaptureInfo, dir reassembly.TCPFlowDirection, nextSeq reassembly.Sequence, start *bool, ac reassembly.AssemblerContext) bool {
-	payload := plugin_api.TCPPacketPayload{StreamId: s.streamId, Payload: tcp.Payload}
-	broker.TCPPacketPayoutEvent(payload)
+func (s *tcpStream) Accept(tcp *layers.TCP, ci gopacket.CaptureInfo, _ reassembly.TCPFlowDirection, _ reassembly.Sequence, _ *bool, _ reassembly.AssemblerContext) bool {
+
+	if s.temporary.ack != tcp.Ack {
+		if len(s.temporary.bytes) > 0 && s.temporary.bytes[0] == TLSRecord {
+			payload := plugin_api.TCPPacketPayload{StreamId: s.streamId, Payload: s.temporary.bytes}
+			broker.TCPPacketPayoutEvent(payload)
+		}
+		s.temporary.bytes = []byte{}
+		if len(tcp.Payload) > 0 && tcp.Payload[0] == TLSRecord {
+			s.temporary.bytes = append(s.temporary.bytes, tcp.Payload...)
+			s.temporary.ack = tcp.Ack
+		} else {
+			s.temporary.ack = 0
+		}
+	} else if s.temporary.ack == tcp.Ack {
+		s.temporary.bytes = append(s.temporary.bytes, tcp.Payload...)
+	}
 	return true
 }
 

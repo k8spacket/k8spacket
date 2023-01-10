@@ -14,7 +14,15 @@ type tcpStream struct {
 	bytesSent, bytesReceived, packets, outOfOrder, skipped int64
 	start, end                                             time.Time
 	sawStart, sawEnd                                       bool
+	temporary                                              struct {
+		ack   uint32
+		bytes []byte
+	}
 }
+
+const (
+	TLSRecord byte = 0x16
+)
 
 var reverseLookupMap = make(map[string]string)
 
