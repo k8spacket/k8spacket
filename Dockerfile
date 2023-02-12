@@ -1,4 +1,4 @@
-FROM golang:1.19.1 AS build
+FROM golang:1.20.0 AS build
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y libpcap-dev
 
@@ -15,14 +15,11 @@ COPY ./go.sum /home/k8spacket/
 
 RUN cd /home/k8spacket/ && ./init.sh
 
-FROM golang:alpine
+FROM ubuntu:22.04
 
-RUN apk update && apk add libpcap-dev libcap net-tools iproute2 libc6-compat
+RUN apt-get update && apt-get install -y libcap2-bin libpcap0.8 iproute2
 
-RUN cd /usr/lib/ && ln -s libpcap.so libpcap.so.0.8 && cd -
-
-RUN addgroup -S k8spacket
-RUN adduser --disabled-password --gecos "" --home /home/k8spacket --ingroup k8spacket k8spacket
+RUN useradd --create-home k8spacket
 
 WORKDIR /home/k8spacket
 
