@@ -15,7 +15,6 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 6,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -31,7 +30,9 @@ data:
               },
               "custom": {
                 "align": "center",
-                "displayMode": "auto",
+                "cellOptions": {
+                  "type": "color-text"
+                },
                 "filterable": true,
                 "inspect": false,
                 "minWidth": 50
@@ -47,7 +48,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "#ffffff",
                     "value": null
                   },
                   {
@@ -80,7 +81,9 @@ data:
           },
           "id": 4,
           "options": {
+            "cellHeight": "sm",
             "footer": {
+              "countRows": false,
               "enablePagination": false,
               "fields": "",
               "reducer": [
@@ -96,7 +99,7 @@ data:
               }
             ]
           },
-          "pluginVersion": "9.2.2",
+          "pluginVersion": "9.5.2",
           "targets": [
             {
               "cacheDurationSeconds": 300,
@@ -169,6 +172,24 @@ data:
             "type": "marcusolsson-json-datasource",
             "uid": "${datasource}"
           },
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
           "gridPos": {
             "h": 25,
             "w": 24,
@@ -177,14 +198,21 @@ data:
           },
           "id": 2,
           "options": {
-            "content": "<div>Domain\n  <pre>{{domain}}</pre>\n</div>\n<div>Client TLS versions\n  <pre>{{clientTlsVersions}}</pre>\n</div>\n<div>Client cipher suites\n  <pre>{{clientCipherSuites}}</pre>\n</div>\n<div>Used TLS version\n  <pre>{{usedTLSVersion}}</pre>\n</div>\n<div>Used cipher suite\n  <pre>{{usedCipherSuite}}</pre>\n</div>\n<div>Server certificate chain\n  <pre>{{serverChain}}</pre>\n</div>",
+            "content": "<div>\n  <span>Domain\n    <samp>{{domain}}</samp>\n  </span>\n  <span>Client TLS versions\n    <samp>{{clientTlsVersions}}</samp>\n  </span>\n  <span>Client cipher suites\n    <samp>{{clientCipherSuites}}</samp>\n  </span>\n  <span>Used TLS version\n    <samp>{{usedTLSVersion}}</samp>\n  </span>\n  <span>Used cipher suite\n    <samp>{{usedCipherSuite}}</samp>\n  </span>\n  <span>Server certificate chain\n    <samp>{{serverChain}}</samp>\n  </span>\n  <div>",
             "defaultContent": "The query didn't return any results.",
             "editor": {
               "format": "auto",
               "height": 400,
               "language": "html"
             },
-            "everyRow": true
+            "editors": [
+              "styles"
+            ],
+            "everyRow": true,
+            "externalScripts": [],
+            "externalStyles": [],
+            "helpers": "",
+            "styles": "  div {\n    white-space: pre-wrap;\n  }\n\n  span {\n    font-weight: bold;\n    color:grey;\n  }\n\n  samp {\n    font-weight: normal;\n    color: white;\n  }"
           },
           "targets": [
             {
@@ -234,7 +262,8 @@ data:
           "type": "marcusolsson-dynamictext-panel"
         }
       ],
-      "schemaVersion": 37,
+      "refresh": "",
+      "schemaVersion": 38,
       "style": "dark",
       "tags": [],
       "templating": {
@@ -258,7 +287,6 @@ data:
           },
           {
             "current": {
-              "isNone": true,
               "selected": false,
               "text": "None",
               "value": ""
