@@ -1,4 +1,4 @@
-FROM golang:1.20.0 AS build
+FROM golang:1.21.5 AS build
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y libpcap-dev
 
