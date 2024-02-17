@@ -1,3 +1,6 @@
 name: ""
 title: null
-google_analytics: "UA-250510720-1"
+google_analytics: "G-6SWTZXYQ20"
+remote_theme: jekyll/minima
+plugins:
+  - jekyll-remote-theme
