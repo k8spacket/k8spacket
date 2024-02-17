@@ -1,6 +1,17 @@
 # k8spacket - packets traffic visualization for kubernetes
 
 ---
+## What's new in version 2.0.0
+
+`k8spacket` doesn't use the `gopacket` library nowadays and is fully based on ![docs/ebpf.png](docs/ebpf.png) now!
+
+It uses
+- `inet_sock_set_state` tracepoint to get information about TCP connections inside the cluster
+- traffic control and queueing discipline filters on ingress and egress to collect information about TLS handshake process 
+
+To use `k8spacket v2.x.x`, the minimum required kernel version is **5.8**
+
+---
 ## What's new in version 1.1.0
 
 - `tls-parser` plugin can get information about the server certificate chain (TLS versions less than 1.3)
@@ -44,7 +55,7 @@ Install `k8spacket` using helm chart (https://github.com/k8spacket/k8spacket-hel
 
 ```bash
   helm repo add k8spacket https://k8spacket.github.io/k8spacket-helm-chart
-  helm repo update k8spacket
+  helm repo update
   
   helm install k8spacket --namespace k8spacket k8spacket/k8spacket --create-namespace
 ```

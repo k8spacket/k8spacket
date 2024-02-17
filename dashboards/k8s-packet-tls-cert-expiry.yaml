@@ -1,0 +1,159 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8spacket-tls-certificate-expiration-dashboard
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/name: grafana
+    dashboard-provider: default
+data:
+  k8spacket-tls-certificate-expiration-dashboard.json: |-
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 46,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-RdYlGr"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "dateTimeFromNow"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 31,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": "Prometheus",
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sort(min(k8s_packet_tls_cert_expiry{domain!=\"\"} and rate(k8s_packet_tls_cert_expiry_count{domain!=\"\"}[$past_interval]) > 0) by (domain)\n    or\n    min(k8s_packet_tls_cert_expiry{domain=\"\"} and rate(k8s_packet_tls_cert_expiry_count{domain=\"\"}[$past_interval]) > 0) by (dst)\n)",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "TLS certificate expiration",
+          "type": "gauge"
+        }
+      ],
+      "refresh": "",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": [
+        "k8spacket"
+      ],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": true,
+              "text": "30m",
+              "value": "30m"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Past interval to analyze",
+            "multi": false,
+            "name": "past_interval",
+            "options": [
+              {
+                "selected": false,
+                "text": "1m",
+                "value": "1m"
+              },
+              {
+                "selected": false,
+                "text": "5m",
+                "value": "5m"
+              },
+              {
+                "selected": true,
+                "text": "30m",
+                "value": "30m"
+              },
+              {
+                "selected": false,
+                "text": "1h",
+                "value": "1h"
+              },
+              {
+                "selected": false,
+                "text": "12h",
+                "value": "12h"
+              },
+              {
+                "selected": false,
+                "text": "1d",
+                "value": "1d"
+              },
+              {
+                "selected": false,
+                "text": "10d",
+                "value": "10d"
+              },
+              {
+                "selected": false,
+                "text": "30d",
+                "value": "30d"
+              }
+            ],
+            "query": "1m, 5m, 30m, 1h, 12h, 1d, 10d, 30d",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "k8spacket - TLS certificate expiration",
+      "uid": "a730b0a6-b02e-4c48-957b-dd8174aef06e",
+      "version": 14,
+      "weekStart": ""
+    }

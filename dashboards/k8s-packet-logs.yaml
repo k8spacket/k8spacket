@@ -30,9 +30,8 @@ data:
       },
       "editable": true,
       "fiscalYearStartMonth": 0,
-      "gnetId": null,
       "graphTooltip": 0,
-      "id": 4,
+      "id": 24,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -68,9 +67,11 @@ data:
         }
       ],
       "refresh": "",
-      "schemaVersion": 31,
+      "schemaVersion": 38,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "k8spacket"
+      ],
       "templating": {
         "list": []
       },
@@ -80,5 +81,8 @@ data:
       },
       "timepicker": {},
       "timezone": "",
-      "title": "k8spacket - logs"
+      "title": "k8spacket - logs",
+      "uid": "e7ec11b4-6305-4339-b321-c8f1a982097b",
+      "version": 2,
+      "weekStart": ""
     }
