@@ -1,13 +1,29 @@
 package plugins
 
 import (
-	"fmt"
-	"github.com/k8spacket/plugin-api"
+	k8spacket_log "github.com/k8spacket/k8spacket/log"
+	"github.com/k8spacket/plugin-api/v2"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"plugin"
 )
+
+func InitPlugins(manager *Manager) {
+
+	for _, pluginPath := range find("./plugins", ".so") {
+
+		plug, err := plugin.Open(pluginPath)
+		if err != nil {
+			k8spacket_log.LOGGER.Printf("[plugins] Cannot open plugins path, %+v", err)
+			os.Exit(1)
+		}
+
+		initPlugin(plug, manager, "TCPConsumerPlugin")
+		initPlugin(plug, manager, "TLSConsumerPlugin")
+
+	}
+}
 
 func find(root, ext string) []string {
 	var a []string
@@ -23,31 +39,17 @@ func find(root, ext string) []string {
 	return a
 }
 
-func InitPlugins(manager *Manager) {
-
-	for _, pluginPath := range find("./plugins", ".so") {
-
-		println(pluginPath)
-
-		plug, err := plugin.Open(pluginPath)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		symStreamer, err := plug.Lookup("StreamPlugin")
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		var streamPlugin plugin_api.StreamPlugin
-		streamPlugin, ok := symStreamer.(plugin_api.StreamPlugin)
-		if !ok {
-			fmt.Println("unexpected type from module symbol")
-			os.Exit(1)
-		}
-
-		streamPlugin.InitPlugin(manager)
+func initPlugin(plug *plugin.Plugin, manager *Manager, symName string) {
+	found, err := plug.Lookup(symName)
+	if err != nil {
+		k8spacket_log.LOGGER.Printf("[plugins] Cannot find plugin %s, gave up. %+v", symName, err)
+		return
 	}
+	var consumerPlugin plugin_api.ConsumerPlugin
+	consumerPlugin, ok := found.(plugin_api.ConsumerPlugin)
+	if !ok {
+		k8spacket_log.LOGGER.Println("[plugins] Unexpected type from module symbol")
+		os.Exit(1)
+	}
+	consumerPlugin.InitPlugin(manager)
 }

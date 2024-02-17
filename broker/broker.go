@@ -2,30 +2,30 @@ package broker
 
 import (
 	"github.com/k8spacket/k8spacket/plugins"
-	"github.com/k8spacket/plugin-api"
+	"github.com/k8spacket/plugin-api/v2"
 )
 
-var reassembledStreamChannel = make(chan plugin_api.ReassembledStream)
-var tcpPacketPayoutChannel = make(chan plugin_api.TCPPacketPayload)
+var tcpEventChannel = make(chan plugin_api.TCPEvent)
+var tlsEventChannel = make(chan plugin_api.TLSEvent)
 
-func ReassembledStreamEvent(stream plugin_api.ReassembledStream) {
-	reassembledStreamChannel <- stream
+func TCPEvent(event plugin_api.TCPEvent) {
+	tcpEventChannel <- event
 }
 
-func TCPPacketPayoutEvent(payload plugin_api.TCPPacketPayload) {
-	tcpPacketPayoutChannel <- payload
+func TLSEvent(event plugin_api.TLSEvent) {
+	tlsEventChannel <- event
 }
 
-func DistributeMessages(manager *plugins.Manager) {
+func DistributeEvents(manager *plugins.Manager) {
 	for {
 		select {
-		case message := <-reassembledStreamChannel:
-			for _, plugin := range manager.GetStreamPlugins() {
-				plugin.DistributeReassembledStream(message)
+		case event := <-tcpEventChannel:
+			for _, plugin := range manager.GetTCPConsumerPlugins() {
+				plugin.DistributeTCPEvent(event)
 			}
-		case message := <-tcpPacketPayoutChannel:
-			for _, plugin := range manager.GetStreamPlugins() {
-				plugin.DistributeTCPPacketPayload(message)
+		case event := <-tlsEventChannel:
+			for _, plugin := range manager.GetTLSConsumerPlugins() {
+				plugin.DistributeTLSEvent(event)
 			}
 		}
 	}

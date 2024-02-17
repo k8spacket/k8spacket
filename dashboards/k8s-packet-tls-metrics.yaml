@@ -15,7 +15,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 4,
+      "id": 32,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -33,7 +33,7 @@ data:
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 20,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -41,7 +41,127 @@ data:
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 1,
+                "lineWidth": 3,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "dateTimeAsIso"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "current time"
+                },
+                "properties": [
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 30
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "dark-red",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 5
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 14,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": "Prometheus",
+              "editorMode": "code",
+              "expr": "(min(k8s_packet_tls_cert_expiry{domain=~\"$domain\"}) by (domain) or min(k8s_packet_tls_cert_expiry{domain=~\"$domain\"}) by (dst)) > 0",
+              "legendFormat": "{{domain}}{{dst}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": "Prometheus",
+              "editorMode": "code",
+              "expr": "time() * 1000",
+              "hide": false,
+              "legendFormat": "current time",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "TLS certificate expiration",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 3,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
@@ -74,10 +194,10 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 24,
+            "h": 16,
             "w": 24,
             "x": 0,
-            "y": 0
+            "y": 14
           },
           "id": 1,
           "options": {
@@ -108,9 +228,12 @@ data:
           "type": "timeseries"
         }
       ],
-      "schemaVersion": 37,
+      "refresh": "",
+      "schemaVersion": 38,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "k8spacket"
+      ],
       "templating": {
         "list": [
           {
@@ -185,11 +308,13 @@ data:
         ]
       },
       "time": {
-        "from": "now-30m",
+        "from": "now-3h",
         "to": "now"
       },
       "timepicker": {},
       "timezone": "",
       "title": "k8spacket - TLS metrics",
+      "uid": "c391c401-146e-4ee5-ad6b-a925da618bb6",
+      "version": 4,
       "weekStart": ""
     }

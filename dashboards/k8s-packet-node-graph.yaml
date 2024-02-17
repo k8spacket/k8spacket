@@ -15,7 +15,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 3,
+      "id": 4,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -41,14 +41,16 @@ data:
               "refId": "A"
             }
           ],
-          "title": "Panel Title",
+          "title": "Node graph",
           "type": "nodeGraph"
         }
       ],
       "refresh": "",
-      "schemaVersion": 37,
+      "schemaVersion": 38,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "k8spacket"
+      ],
       "templating": {
         "list": [
           {
@@ -147,9 +149,9 @@ data:
           },
           {
             "current": {
-              "selected": true,
-              "text": "",
-              "value": ""
+              "selected": false,
+              "text": "Node Graph API",
+              "value": "Node Graph API"
             },
             "hide": 2,
             "includeAll": false,
@@ -172,5 +174,7 @@ data:
       "timepicker": {},
       "timezone": "",
       "title": "k8spacket - node graph",
+      "uid": "fdad1ee1-a619-493d-b0ff-2ca2682fdc57",
+      "version": 2,
       "weekStart": ""
     }

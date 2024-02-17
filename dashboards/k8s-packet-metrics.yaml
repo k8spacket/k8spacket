@@ -10,31 +10,13 @@ data:
   k8spacket-metrics-dashboard.json: |-
     {
       "annotations": {
-        "list": [
-          {
-            "builtIn": 1,
-            "datasource": "-- Grafana --",
-            "enable": true,
-            "hide": true,
-            "iconColor": "rgba(0, 211, 255, 1)",
-            "name": "Annotations & Alerts",
-            "target": {
-              "limit": 100,
-              "matchAny": false,
-              "tags": [ ],
-              "type": "dashboard"
-            },
-            "type": "dashboard"
-          }
-        ]
+        "list": []
       },
       "editable": true,
       "fiscalYearStartMonth": 0,
-      "gnetId": null,
       "graphTooltip": 0,
-      "id": 5,
-      "iteration": 1639040257526,
-      "links": [ ],
+      "id": 16,
+      "links": [],
       "liveNow": false,
       "panels": [
         {
@@ -46,11 +28,13 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 20,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -58,7 +42,7 @@ data:
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 3,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
@@ -73,7 +57,7 @@ data:
                   "mode": "off"
                 }
               },
-              "mappings": [ ],
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -88,7 +72,7 @@ data:
                 ]
               }
             },
-            "overrides": [ ]
+            "overrides": []
           },
           "gridPos": {
             "h": 10,
@@ -99,16 +83,19 @@ data:
           "id": 4,
           "options": {
             "legend": {
-              "calcs": [ ],
+              "calcs": [],
               "displayMode": "list",
-              "placement": "bottom"
+              "placement": "bottom",
+              "showLegend": true
             },
             "tooltip": {
-              "mode": "single"
+              "mode": "single",
+              "sort": "none"
             }
           },
           "targets": [
             {
+              "datasource": "Prometheus",
               "exemplar": false,
               "expr": "sum(increase(k8s_packet_bytes_sent_sum{ns=~\"$ns\", src_name=~\"$workload\"}[1m])) by (src_name)/sum(increase(k8s_packet_bytes_sent_count{ns=~\"$ns\", src_name=~\"$workload\"}[1m])) by (src_name)",
               "format": "time_series",
@@ -131,11 +118,13 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 20,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -143,7 +132,7 @@ data:
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 3,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
@@ -158,7 +147,7 @@ data:
                   "mode": "off"
                 }
               },
-              "mappings": [ ],
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -173,7 +162,7 @@ data:
                 ]
               }
             },
-            "overrides": [ ]
+            "overrides": []
           },
           "gridPos": {
             "h": 10,
@@ -184,16 +173,19 @@ data:
           "id": 5,
           "options": {
             "legend": {
-              "calcs": [ ],
+              "calcs": [],
               "displayMode": "list",
-              "placement": "bottom"
+              "placement": "bottom",
+              "showLegend": true
             },
             "tooltip": {
-              "mode": "single"
+              "mode": "single",
+              "sort": "none"
             }
           },
           "targets": [
             {
+              "datasource": "Prometheus",
               "exemplar": false,
               "expr": "sum(increase(k8s_packet_bytes_received_sum{ns=~\"$ns\", src_name=~\"$workload\"}[1m])) by (src_name)/sum(increase(k8s_packet_bytes_received_count{ns=~\"$ns\", src_name=~\"$workload\"}[1m])) by (src_name)",
               "format": "time_series",
@@ -216,11 +208,13 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 20,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -228,7 +222,7 @@ data:
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 3,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
@@ -243,7 +237,7 @@ data:
                   "mode": "off"
                 }
               },
-              "mappings": [ ],
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -258,7 +252,7 @@ data:
                 ]
               }
             },
-            "overrides": [ ]
+            "overrides": []
           },
           "gridPos": {
             "h": 10,
@@ -269,16 +263,19 @@ data:
           "id": 6,
           "options": {
             "legend": {
-              "calcs": [ ],
+              "calcs": [],
               "displayMode": "list",
-              "placement": "bottom"
+              "placement": "bottom",
+              "showLegend": true
             },
             "tooltip": {
-              "mode": "single"
+              "mode": "single",
+              "sort": "none"
             }
           },
           "targets": [
             {
+              "datasource": "Prometheus",
               "exemplar": false,
               "expr": "sum(increase(k8s_packet_duration_seconds_sum{ns=~\"$ns\", src_name=~\"$workload\"}[1m])) by (src_name)/sum(increase(k8s_packet_duration_seconds_count{ns=~\"$ns\", src_name=~\"$workload\"}[1m])) by (src_name)",
               "format": "time_series",
@@ -294,32 +291,31 @@ data:
         }
       ],
       "refresh": "",
-      "schemaVersion": 31,
+      "schemaVersion": 38,
       "style": "dark",
-      "tags": [ ],
+      "tags": [
+        "k8spacket"
+      ],
       "templating": {
         "list": [
           {
-            "allValue": null,
             "current": {
               "selected": true,
               "text": [
-                  "All"
+                "All"
               ],
               "value": [
-                  "$__all"
+                "$__all"
               ]
             },
             "datasource": "Prometheus",
             "definition": "label_values(k8s_packet_bytes_sent_sum, ns)",
-            "description": null,
-            "error": null,
             "hide": 0,
             "includeAll": true,
             "label": "namespace",
             "multi": true,
             "name": "ns",
-            "options": [ ],
+            "options": [],
             "query": {
               "query": "label_values(k8s_packet_bytes_sent_sum, ns)",
               "refId": "StandardVariableQuery"
@@ -331,26 +327,22 @@ data:
             "type": "query"
           },
           {
-            "allValue": null,
             "current": {
               "selected": true,
               "text": [
-                  "All"
+                "All"
               ],
               "value": [
-                  "$__all"
+                "$__all"
               ]
             },
             "datasource": "Prometheus",
             "definition": "label_values(k8s_packet_bytes_sent_sum{ns=~\"$ns\"}, src_name)",
-            "description": null,
-            "error": null,
             "hide": 0,
             "includeAll": true,
-            "label": null,
             "multi": true,
             "name": "workload",
-            "options": [ ],
+            "options": [],
             "query": {
               "query": "label_values(k8s_packet_bytes_sent_sum{ns=~\"$ns\"}, src_name)",
               "refId": "StandardVariableQuery"
@@ -367,7 +359,10 @@ data:
         "from": "now-5m",
         "to": "now"
       },
-      "timepicker": { },
+      "timepicker": {},
       "timezone": "",
-      "title": "k8spacket - metrics"
+      "title": "k8spacket - metrics",
+      "uid": "bbe0a795-cdfb-4911-b806-4e406cc5526c",
+      "version": 3,
+      "weekStart": ""
     }

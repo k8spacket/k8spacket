@@ -1,32 +1,51 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"github.com/k8spacket/k8spacket/broker"
+	"github.com/k8spacket/k8spacket/ebpf"
+	k8spacket_log "github.com/k8spacket/k8spacket/log"
 	"github.com/k8spacket/k8spacket/plugins"
-	"github.com/k8spacket/k8spacket/tcp"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
+	k8spacket_log.BuildLogger()
+
 	pluginManager := plugins.NewPluginManager()
 	plugins.InitPlugins(pluginManager)
-	go broker.DistributeMessages(pluginManager)
-	tcp.StartListeners()
+	go broker.DistributeEvents(pluginManager)
+	ebpf.LoadEbpf()
 	handleEndpoints()
 }
 
 func handleEndpoints() {
 	listenerPort := os.Getenv("K8S_PACKET_TCP_LISTENER_PORT")
-	log.Printf("Serving requests on port %s", listenerPort)
-
+	k8spacket_log.LOGGER.Printf("[api] Serving requests on port %s", listenerPort)
 	prometheus.MustRegister(collectors.NewBuildInfoCollector())
-	http.Handle("/metrics", promhttp.Handler())
+	srv := &http.Server{Addr: fmt.Sprintf(":%s", listenerPort)}
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			k8spacket_log.LOGGER.Fatalf("[api] Cannot start ListenAndServe: %+v", err)
+		}
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", listenerPort), nil))
+	}()
+
+	// graceful shutdown
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	<-ctx.Done()
+	if err := srv.Shutdown(ctx); err != nil {
+		k8spacket_log.LOGGER.Fatalf("[graceful] Server shutdown failed:%+v", err)
+	}
+	k8spacket_log.LOGGER.Print("[graceful] Application closed gracefully")
 }
