@@ -37,7 +37,7 @@ data:
                 "type": "hamedkarbasi93-nodegraphapi-datasource",
                 "uid": "${datasource}"
               },
-              "queryText": "namespace=$namespace&include=$include&exclude=$exclude&stats-type=$statstype",
+              "queryText": "namespace=$namespace&include=$include&exclude=$exclude&stats-type=$statstype&from=${__from}&to=${__to}",
               "refId": "A"
             }
           ],
@@ -175,6 +175,6 @@ data:
       "timezone": "",
       "title": "k8spacket - node graph",
       "uid": "fdad1ee1-a619-493d-b0ff-2ca2682fdc57",
-      "version": 2,
+      "version": 3,
       "weekStart": ""
     }
