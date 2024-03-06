@@ -42,7 +42,7 @@ data:
               "links": [
                 {
                   "title": "Show details",
-                  "url": "/d/_WjaqJt4k/k8spacket-tls-connections-and-certificates?var-id=${__data.fields[\"id\"]}"
+                  "url": "/d/${__dashboard.uid}/k8spacket-tls-connections-and-certificates?from=${from:queryparam}&to=${to:queryparam}&var-id=${__data.fields[\"id\"]}"
                 }
               ],
               "mappings": [],
@@ -157,6 +157,16 @@ data:
                 }
               ],
               "method": "GET",
+              "params": [
+                [
+                  "from",
+                  "${__from}"
+                ],
+                [
+                  "to",
+                  "${__to}"
+                ]
+              ],
               "queryParams": "",
               "refId": "A",
               "urlPath": ""
@@ -350,6 +360,6 @@ data:
       "timezone": "",
       "title": "k8spacket - TLS connections & certificates",
       "uid": "_WjaqJt4k",
-      "version": 3,
+      "version": 7,
       "weekStart": ""
     }
