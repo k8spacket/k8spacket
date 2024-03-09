@@ -16,6 +16,17 @@ It uses
 
 To use `k8spacket v2.x.x`, the minimum required kernel version is **5.8**
 
+New features:
+- Dashboard `k8spacket - TLS certificate expiration` shows the remaining time until the certificates expire. By variable `Past interval to analyze`, you can narrow or expand the scope of data to analyze. Data sorted by expiring earliest first. It's easy to build alerts based on the certificate expiration date. See more raw metrics in the dashboard `k8spacket - TLS metrics`
+
+![expiration.gif](expiration.gif)
+- Two principal `k8spacket` dashboards (`k8spacket - node graph` and `k8spacket - TLS connections & certificates`) are sensitive to Grafana time range control now. You can show cluster TCP traffic or TLS connections, f.e., for the last 5 minutes
+
+![timerange1.gif](timerange1.gif)
+
+---
+![timerange2.gif](timerange2.gif)
+
 ---
 ## What's new in version 1.1.0
 
