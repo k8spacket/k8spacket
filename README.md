@@ -11,6 +11,17 @@ It uses
 
 To use `k8spacket v2.x.x`, the minimum required kernel version is **5.8**
 
+New features:
+- Dashboard `k8spacket - TLS certificate expiration` shows the remaining time until the certificates expire. By variable `Past interval to analyze`, you can narrow or expand the scope of data to analyze. Data sorted by expiring earliest first. It's easy to build alerts based on the certificate expiration date. See more raw metrics in the dashboard `k8spacket - TLS metrics`
+
+![docs/expiration.gif](docs/expiration.gif)
+- Two principal `k8spacket` dashboards (`k8spacket - node graph` and `k8spacket - TLS connections & certificates`) are sensitive to Grafana time range control now. You can show cluster TCP traffic or TLS connections, f.e., for the last 5 minutes
+
+![docs/timerange1.gif](docs/timerange1.gif)
+
+---
+![docs/timerange2.gif](docs/timerange2.gif)
+
 ---
 ## What's new in version 1.1.0
 
@@ -62,6 +73,7 @@ Install `k8spacket` using helm chart (https://github.com/k8spacket/k8spacket-hel
 
 Add `Node Graph API` and `JSON API` plugins and datasources to your Grafana instance. You can do it manually or change helm values for the Grafana chart, e.g.:
 ```yaml
+
 grafana:
   env:
     GF_INSTALL_PLUGINS: hamedkarbasi93-nodegraphapi-datasource,marcusolsson-json-datasource,marcusolsson-dynamictext-panel
