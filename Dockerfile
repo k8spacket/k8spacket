@@ -18,7 +18,7 @@ COPY ./libbpf.sh .
 RUN ./libbpf.sh
 
 
-FROM golang:1.21.6 AS build
+FROM golang:1.22.5 AS build
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y clang llvm
 
@@ -43,7 +43,7 @@ RUN cd /home/k8spacket/ebpf/tc && go generate -ldflags "-w -s"
 RUN cd /home/k8spacket/ && ./init.sh
 
 
-FROM alpine:3.19.1
+FROM alpine:3.20.1
 
 RUN apk add --no-cache iproute2 libc6-compat
 
