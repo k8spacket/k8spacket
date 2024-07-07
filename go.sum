@@ -42,10 +42,10 @@ github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8Hm
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
-github.com/k8spacket/k8s-api/v2 v2.0.2-alpha h1:htilqIKhHMSdRvorcUMeW4aRBhAm4TgdvBrPGBVZx7w=
-github.com/k8spacket/k8s-api/v2 v2.0.2-alpha/go.mod h1:t2bV57vAK/3FsmRPfdIrYhi4Y8FZAVR+QscUKQeujfo=
-github.com/k8spacket/plugin-api/v2 v2.0.2-alpha h1:KXi6yXaBp0pN1NKUecX3x1PuiTInJXKaKMtrNLKlGdo=
-github.com/k8spacket/plugin-api/v2 v2.0.2-alpha/go.mod h1:nxyUNqkbP+HkjD9XqCPRjf3siRODBGtrKpQPCILOUpA=
+github.com/k8spacket/k8s-api/v2 v2.0.4 h1:mcqsvm5JtvuDheDoVl53N4fWiVE34C+RqjfwPBFGDEU=
+github.com/k8spacket/k8s-api/v2 v2.0.4/go.mod h1:t2bV57vAK/3FsmRPfdIrYhi4Y8FZAVR+QscUKQeujfo=
+github.com/k8spacket/plugin-api/v2 v2.0.4 h1:zgUxGERtw25BAku0JuNaA6HcD4DXOVmXiW3qbAyYkQo=
+github.com/k8spacket/plugin-api/v2 v2.0.4/go.mod h1:nxyUNqkbP+HkjD9XqCPRjf3siRODBGtrKpQPCILOUpA=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
