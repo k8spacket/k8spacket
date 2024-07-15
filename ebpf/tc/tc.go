@@ -134,6 +134,22 @@ func addFilter(link netlink.Link, programFD int, parent uint32) {
 }
 
 func distribute(event tcTlsHandshakeEvent) {
+	
+	tlsVersionsLen := int(event.TlsVersionsLength)/2
+	if tlsVersionsLen > len(event.TlsVersions) {
+        	tlsVersionsLen = len(event.TlsVersions)
+    	}
+	
+	ciphersLen := int(event.CiphersLength)/2
+	if ciphersLen > len(event.Ciphers) {
+        	ciphersLen = len(event.Ciphers)
+    	}
+	
+	serverNameLen := int(event.ServerNameLength)
+	if serverNameLen > len(event.ServerName){
+		serverNameLen = len(event.ServerName)
+	}
+	
 	tlsEvent := plugin_api.TLSEvent{
 		Client: plugin_api.Address{
 			Addr: intToIP4(event.Saddr),
@@ -141,9 +157,9 @@ func distribute(event tcTlsHandshakeEvent) {
 		Server: plugin_api.Address{
 			Addr: intToIP4(event.Daddr),
 			Port: event.Dport},
-		TlsVersions:    event.TlsVersions[:int(event.TlsVersionsLength)/2],
-		Ciphers:        event.Ciphers[:int(event.CiphersLength)/2],
-		ServerName:     string(event.ServerName[:event.ServerNameLength]),
+		TlsVersions:    event.TlsVersions[:tlsVersionsLen],
+		Ciphers:        event.Ciphers[:ciphersLen],
+		ServerName:     string(event.ServerName[:serverNameLen]),
 		UsedTlsVersion: event.UsedTlsVersion,
 		UsedCipher:     event.UsedCipher}
 	ebpf_tools.EnrichAddress(&tlsEvent.Client)
