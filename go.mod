@@ -4,7 +4,7 @@ go 1.22.5
 
 require (
 	github.com/cilium/ebpf v0.15.0
-	github.com/k8spacket/k8s-api/v2 v2.0.4
+	github.com/k8spacket/k8s-api/v2 v2.0.5
 	github.com/k8spacket/plugin-api/v2 v2.0.4
 	github.com/likexian/whois v1.15.3
 	github.com/oschwald/geoip2-golang v1.11.0
