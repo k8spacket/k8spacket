@@ -5,9 +5,7 @@
 
 # [k8spacket](https://github.com/k8spacket) - packets traffic visualization for kubernetes
 
-<p align="center">
-<a href="https://killercoda.com/k8spacket/scenario/k8spacket" target=”_blank”><img alt="try on killercoda" src="try-on-killercoda.png"></a>
-</p>
+*[![try-on-killercoda.png](try-on-killercoda.png)](https://killercoda.com/k8spacket/scenario/k8spacket)*
 
 ---
 ## What's new in version 2.0.0
