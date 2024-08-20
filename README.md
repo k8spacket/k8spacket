@@ -1,6 +1,9 @@
-# k8spacket - packets traffic visualization for kubernetes
+# k8spacket - packets traffic visualization for kubernetes 
 
----
+<p style="text-align: center">
+<a href="https://killercoda.com/k8spacket/scenario/k8spacket"><img alt="try on killercoda" src="docs/try-on-killercoda.png"></a>
+</p>
+
 ## What's new in version 2.0.0
 
 `k8spacket` doesn't use the `gopacket` library nowadays and is fully based on ![docs/ebpf.png](docs/ebpf.png) now!\

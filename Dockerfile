@@ -52,7 +52,7 @@ WORKDIR /home/k8spacket
 
 COPY --from=build ./home/k8spacket/k8spacket /home/k8spacket/
 COPY ./fields.json /home/k8spacket/
-COPY ./GeoLite2-City.mmdb /home/k8spacket/
+#COPY ./GeoLite2-City.mmdb /home/k8spacket/
 
 # need to run as root regarding the use of kernel tracing info `/sys/kernel/tracing`
 CMD ["./k8spacket"]
