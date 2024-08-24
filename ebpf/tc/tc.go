@@ -9,7 +9,7 @@ import (
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
 	k8spacket_log "github.com/k8spacket/k8spacket/log"
-	plugin_api "github.com/k8spacket/plugin-api/v2"
+	"github.com/k8spacket/k8spacket/modules"
 	"github.com/vishvananda/netlink"
 	"golang.org/x/sys/unix"
 	"net"
@@ -134,27 +134,27 @@ func addFilter(link netlink.Link, programFD int, parent uint32) {
 }
 
 func distribute(event tcTlsHandshakeEvent) {
-	
-	tlsVersionsLen := int(event.TlsVersionsLength)/2
+
+	tlsVersionsLen := int(event.TlsVersionsLength) / 2
 	if tlsVersionsLen > len(event.TlsVersions) {
-        	tlsVersionsLen = len(event.TlsVersions)
-    	}
-	
-	ciphersLen := int(event.CiphersLength)/2
+		tlsVersionsLen = len(event.TlsVersions)
+	}
+
+	ciphersLen := int(event.CiphersLength) / 2
 	if ciphersLen > len(event.Ciphers) {
-        	ciphersLen = len(event.Ciphers)
-    	}
-	
+		ciphersLen = len(event.Ciphers)
+	}
+
 	serverNameLen := int(event.ServerNameLength)
-	if serverNameLen > len(event.ServerName){
+	if serverNameLen > len(event.ServerName) {
 		serverNameLen = len(event.ServerName)
 	}
-	
-	tlsEvent := plugin_api.TLSEvent{
-		Client: plugin_api.Address{
+
+	tlsEvent := modules.TLSEvent{
+		Client: modules.Address{
 			Addr: intToIP4(event.Saddr),
 			Port: event.Sport},
-		Server: plugin_api.Address{
+		Server: modules.Address{
 			Addr: intToIP4(event.Daddr),
 			Port: event.Dport},
 		TlsVersions:    event.TlsVersions[:tlsVersionsLen],

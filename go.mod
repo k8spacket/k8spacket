@@ -4,12 +4,15 @@ go 1.22.5
 
 require (
 	github.com/cilium/ebpf v0.15.0
+	github.com/grantae/certinfo v0.0.0-20170412194111-59d56a35515b
+	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
 	github.com/k8spacket/k8s-api/v2 v2.0.5
-	github.com/k8spacket/plugin-api/v2 v2.0.4
 	github.com/likexian/whois v1.15.3
 	github.com/oschwald/geoip2-golang v1.11.0
 	github.com/prometheus/client_golang v1.19.1
+	github.com/timshannon/bolthold v0.0.0-20240314194003-30aac6950928
 	github.com/vishvananda/netlink v1.1.0
+	go.etcd.io/bbolt v1.3.10
 	golang.org/x/sys v0.22.0
 )
 

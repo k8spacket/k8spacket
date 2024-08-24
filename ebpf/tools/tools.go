@@ -2,7 +2,7 @@ package ebpf_tools
 
 import (
 	"github.com/k8spacket/k8s-api/v2"
-	plugin_api "github.com/k8spacket/plugin-api/v2"
+	"github.com/k8spacket/k8spacket/modules"
 	"github.com/likexian/whois"
 	"github.com/oschwald/geoip2-golang"
 	"net"
@@ -14,7 +14,7 @@ var reverseLookupMap = make(map[string]string)
 
 var K8sInfo = make(map[string]k8s.IPResourceInfo)
 
-func EnrichAddress(addr *plugin_api.Address) {
+func EnrichAddress(addr *modules.Address) {
 	addr.Name = K8sInfo[addr.Addr].Name
 	if addr.Name == "" {
 		addr.Name = reverseLookup(addr.Addr)

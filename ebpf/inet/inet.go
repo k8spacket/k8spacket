@@ -11,7 +11,7 @@ import (
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
 	k8spacket_log "github.com/k8spacket/k8spacket/log"
-	plugin_api "github.com/k8spacket/plugin-api/v2"
+	"github.com/k8spacket/k8spacket/modules"
 	"net"
 	"os"
 	"os/signal"
@@ -94,11 +94,11 @@ func Init() {
 }
 
 func distribute(event bpfEvent) {
-	tcpEvent := plugin_api.TCPEvent{
-		Client: plugin_api.Address{
+	tcpEvent := modules.TCPEvent{
+		Client: modules.Address{
 			Addr: intToIP4(event.Saddr),
 			Port: event.Sport},
-		Server: plugin_api.Address{
+		Server: modules.Address{
 			Addr: intToIP4(event.Daddr),
 			Port: event.Dport},
 		TxB:     event.TxB,

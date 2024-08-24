@@ -1,32 +1,29 @@
 package broker
 
 import (
-	"github.com/k8spacket/k8spacket/plugins"
-	"github.com/k8spacket/plugin-api/v2"
+	"github.com/k8spacket/k8spacket/modules"
+	tcp_metrics "github.com/k8spacket/k8spacket/modules/nodegraph/metrics"
+	tls_metrics "github.com/k8spacket/k8spacket/modules/tls-parser/metrics"
 )
 
-var tcpEventChannel = make(chan plugin_api.TCPEvent)
-var tlsEventChannel = make(chan plugin_api.TLSEvent)
+var tcpEventChannel = make(chan modules.TCPEvent)
+var tlsEventChannel = make(chan modules.TLSEvent)
 
-func TCPEvent(event plugin_api.TCPEvent) {
+func TCPEvent(event modules.TCPEvent) {
 	tcpEventChannel <- event
 }
 
-func TLSEvent(event plugin_api.TLSEvent) {
+func TLSEvent(event modules.TLSEvent) {
 	tlsEventChannel <- event
 }
 
-func DistributeEvents(manager *plugins.Manager) {
+func DistributeEvents() {
 	for {
 		select {
 		case event := <-tcpEventChannel:
-			for _, plugin := range manager.GetTCPConsumerPlugins() {
-				plugin.DistributeTCPEvent(event)
-			}
+			tcp_metrics.StoreNodegraphMetric(event)
 		case event := <-tlsEventChannel:
-			for _, plugin := range manager.GetTLSConsumerPlugins() {
-				plugin.DistributeTLSEvent(event)
-			}
+			tls_metrics.StoreTLSMetrics(event)
 		}
 	}
 }

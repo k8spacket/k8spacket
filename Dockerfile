@@ -27,7 +27,7 @@ RUN mkdir /home/k8spacket/
 COPY ./broker /home/k8spacket/broker
 COPY ./ebpf /home/k8spacket/ebpf
 COPY ./log /home/k8spacket/log
-COPY ./plugins /home/k8spacket/plugins
+COPY ./modules /home/k8spacket/modules
 COPY ./go.mod /home/k8spacket/
 COPY ./go.sum /home/k8spacket/
 COPY ./init.sh /home/k8spacket/
@@ -52,7 +52,7 @@ WORKDIR /home/k8spacket
 
 COPY --from=build ./home/k8spacket/k8spacket /home/k8spacket/
 COPY ./fields.json /home/k8spacket/
-COPY ./GeoLite2-City.mmdb /home/k8spacket/
+#COPY ./GeoLite2-City.mmdb /home/k8spacket/
 
 # need to run as root regarding the use of kernel tracing info `/sys/kernel/tracing`
 CMD ["./k8spacket"]

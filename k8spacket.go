@@ -7,7 +7,6 @@ import (
 	"github.com/k8spacket/k8spacket/broker"
 	"github.com/k8spacket/k8spacket/ebpf"
 	k8spacket_log "github.com/k8spacket/k8spacket/log"
-	"github.com/k8spacket/k8spacket/plugins"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -20,9 +19,7 @@ import (
 func main() {
 	k8spacket_log.BuildLogger()
 
-	pluginManager := plugins.NewPluginManager()
-	plugins.InitPlugins(pluginManager)
-	go broker.DistributeEvents(pluginManager)
+	go broker.DistributeEvents()
 	ebpf.LoadEbpf()
 	handleEndpoints()
 }
