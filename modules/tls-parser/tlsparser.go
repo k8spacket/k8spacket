@@ -1,4 +1,4 @@
-package main
+package tlsparser
 
 import (
 	"github.com/k8spacket/k8spacket/modules/tls-parser/log"

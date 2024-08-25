@@ -7,6 +7,8 @@ import (
 	"github.com/k8spacket/k8spacket/broker"
 	"github.com/k8spacket/k8spacket/ebpf"
 	k8spacket_log "github.com/k8spacket/k8spacket/log"
+	_ "github.com/k8spacket/k8spacket/modules/nodegraph"
+	_ "github.com/k8spacket/k8spacket/modules/tls-parser"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
