@@ -2,7 +2,9 @@ package ebpf_inet
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
+	"errors"
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/perf"
 	"github.com/cilium/ebpf/rlimit"

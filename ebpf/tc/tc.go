@@ -2,13 +2,16 @@ package ebpf_tc
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
+	"errors"
 	"github.com/cilium/ebpf/ringbuf"
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
 	k8spacket_log "github.com/k8spacket/k8spacket/log"
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/vishvananda/netlink"
+	"golang.org/x/sys/unix"
 	"net"
 	"os"
 	"os/signal"
