@@ -111,7 +111,7 @@ func distribute(event bpfEvent, inet *InetEbpf) {
 	ebpf_tools.EnrichAddress(&tcpEvent.Client)
 	ebpf_tools.EnrichAddress(&tcpEvent.Server)
 
-	inet.Broker.TCPEvent(event)
+	inet.Broker.TCPEvent(tcpEvent)
 }
 
 func intToIP4(ipNum uint32) string {
