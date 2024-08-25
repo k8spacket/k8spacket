@@ -2,28 +2,31 @@ package broker
 
 import (
 	"github.com/k8spacket/k8spacket/modules"
-	tcp_metrics "github.com/k8spacket/k8spacket/modules/nodegraph/metrics"
-	tls_metrics "github.com/k8spacket/k8spacket/modules/tls-parser/metrics"
 )
+
+type Broker struct {
+	NodegraphListener modules.IListener[modules.TCPEvent]
+	TlsParserListener modules.IListener[modules.TLSEvent]
+}
 
 var tcpEventChannel = make(chan modules.TCPEvent)
 var tlsEventChannel = make(chan modules.TLSEvent)
 
-func TCPEvent(event modules.TCPEvent) {
+func (broker *Broker) TCPEvent(event modules.TCPEvent) {
 	tcpEventChannel <- event
 }
 
-func TLSEvent(event modules.TLSEvent) {
+func (broker *Broker) TLSEvent(event modules.TLSEvent) {
 	tlsEventChannel <- event
 }
 
-func DistributeEvents() {
+func (broker *Broker) DistributeEvents() {
 	for {
 		select {
 		case event := <-tcpEventChannel:
-			tcp_metrics.StoreNodegraphMetric(event)
+			broker.NodegraphListener.Listen(event)
 		case event := <-tlsEventChannel:
-			tls_metrics.StoreTLSMetrics(event)
+			broker.TlsParserListener.Listen(event)
 		}
 	}
 }

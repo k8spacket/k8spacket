@@ -2,16 +2,13 @@ package ebpf_tc
 
 import (
 	"bytes"
-	"context"
 	"encoding/binary"
-	"errors"
 	"github.com/cilium/ebpf/ringbuf"
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
 	k8spacket_log "github.com/k8spacket/k8spacket/log"
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/vishvananda/netlink"
-	"golang.org/x/sys/unix"
 	"net"
 	"os"
 	"os/signal"
@@ -20,7 +17,11 @@ import (
 
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go tc ./bpf/tc.bpf.c
 
-func Init(iface string) {
+type TcEbpf struct {
+	Broker broker.IBroker
+}
+
+func (tcEbpf *TcEbpf) Init(iface string) {
 
 	// Load pre-compiled programs and maps into the kernel.
 	objs := tcObjects{}
@@ -94,7 +95,7 @@ func Init(iface string) {
 				continue
 			}
 
-			distribute(event)
+			distribute(event, tcEbpf)
 		}
 	}()
 
@@ -133,7 +134,7 @@ func addFilter(link netlink.Link, programFD int, parent uint32) {
 	}
 }
 
-func distribute(event tcTlsHandshakeEvent) {
+func distribute(event tcTlsHandshakeEvent, tc *TcEbpf) {
 
 	tlsVersionsLen := int(event.TlsVersionsLength) / 2
 	if tlsVersionsLen > len(event.TlsVersions) {
@@ -164,7 +165,7 @@ func distribute(event tcTlsHandshakeEvent) {
 		UsedCipher:     event.UsedCipher}
 	ebpf_tools.EnrichAddress(&tlsEvent.Client)
 	ebpf_tools.EnrichAddress(&tlsEvent.Server)
-	broker.TLSEvent(tlsEvent)
+	tc.Broker.TLSEvent(tlsEvent)
 }
 
 func intToIP4(ipNum uint32) string {

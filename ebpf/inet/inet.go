@@ -2,9 +2,7 @@ package ebpf_inet
 
 import (
 	"bytes"
-	"context"
 	"encoding/binary"
-	"errors"
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/perf"
 	"github.com/cilium/ebpf/rlimit"
@@ -29,7 +27,11 @@ bpf - identity name of generating program
 */
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target native -type event bpf ./bpf/inet.bpf.c
 
-func Init() {
+type InetEbpf struct {
+	Broker broker.IBroker
+}
+
+func (inetEbpf *InetEbpf) Init() {
 
 	k8spacket_log.LOGGER.Printf("INIT inet")
 	// Allow the current process to lock more memory than the default for eBPF resources. Default value is 64KB
@@ -80,7 +82,7 @@ func Init() {
 				continue
 			}
 
-			distribute(event)
+			distribute(event, inetEbpf)
 		}
 	}()
 
@@ -93,7 +95,7 @@ func Init() {
 	k8spacket_log.LOGGER.Println("[inet] Closed gracefully")
 }
 
-func distribute(event bpfEvent) {
+func distribute(event bpfEvent, inet *InetEbpf) {
 	tcpEvent := modules.TCPEvent{
 		Client: modules.Address{
 			Addr: intToIP4(event.Saddr),
@@ -107,7 +109,7 @@ func distribute(event bpfEvent) {
 	ebpf_tools.EnrichAddress(&tcpEvent.Client)
 	ebpf_tools.EnrichAddress(&tcpEvent.Server)
 
-	broker.TCPEvent(tcpEvent)
+	inet.Broker.TCPEvent(event)
 }
 
 func intToIP4(ipNum uint32) string {

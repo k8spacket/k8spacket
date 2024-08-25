@@ -7,8 +7,10 @@ import (
 	"github.com/k8spacket/k8spacket/broker"
 	"github.com/k8spacket/k8spacket/ebpf"
 	k8spacket_log "github.com/k8spacket/k8spacket/log"
+	"github.com/k8spacket/k8spacket/modules/nodegraph"
 	_ "github.com/k8spacket/k8spacket/modules/nodegraph"
 	_ "github.com/k8spacket/k8spacket/modules/tls-parser"
+	tls_parser "github.com/k8spacket/k8spacket/modules/tls-parser"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -21,8 +23,12 @@ import (
 func main() {
 	k8spacket_log.BuildLogger()
 
-	go broker.DistributeEvents()
-	ebpf.LoadEbpf()
+	nodegraphListener := nodegraph.Init()
+	tlsParserListener := tls_parser.Init()
+	b := &broker.Broker{NodegraphListener: nodegraphListener, TlsParserListener: tlsParserListener}
+
+	go b.DistributeEvents()
+	ebpf.LoadEbpf(b)
 	handleEndpoints()
 }
 

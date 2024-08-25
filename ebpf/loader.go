@@ -3,6 +3,7 @@ package ebpf
 import (
 	"context"
 	"github.com/k8spacket/k8s-api/v2"
+	"github.com/k8spacket/k8spacket/broker"
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
@@ -15,13 +16,15 @@ import (
 	"time"
 )
 
-func LoadEbpf() {
+func LoadEbpf(broker broker.IBroker) {
 	// load inet_sock_set_state ebpf program
-	go ebpf_inet.Init()
-	go interfacesRefresher()
+	inetEbpf := ebpf_inet.InetEbpf{Broker: broker}
+	tcEbpf := ebpf_tc.TcEbpf{Broker: broker}
+	go inetEbpf.Init()
+	go interfacesRefresher(tcEbpf)
 }
 
-func interfacesRefresher() {
+func interfacesRefresher(tc ebpf_tc.TcEbpf) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -40,7 +43,7 @@ func interfacesRefresher() {
 			for _, el := range interfaces {
 				if (strings.TrimSpace(el) != "") && (!ebpf_tools.SliceContains(currentInterfaces, el)) {
 					// load traffic control ebpf program (qdisc filter)
-					go ebpf_tc.Init(el)
+					go tc.Init(el)
 					refreshK8sInfo = true
 				}
 			}
