@@ -67,5 +67,5 @@ func filterConnections(controller *Controller, query url.Values) []model.Connect
 		patternEx = regexp.MustCompile(exclude[0])
 	}
 
-	return controller.service.GetConnections(rangeFrom, rangeTo, patternNs, patternIn, patternEx)
+	return controller.service.getConnections(rangeFrom, rangeTo, patternNs, patternIn, patternEx)
 }

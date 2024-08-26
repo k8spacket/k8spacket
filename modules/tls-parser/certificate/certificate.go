@@ -14,7 +14,10 @@ import (
 	"time"
 )
 
-func UpdateCertificateInfo(newValue *model.TLSDetails, oldValue *model.TLSDetails) {
+type Certificate struct {
+}
+
+func (certificate *Certificate) UpdateCertificateInfo(newValue *model.TLSDetails, oldValue *model.TLSDetails) {
 	duration, _ := time.ParseDuration(os.Getenv("K8S_PACKET_TLS_CERTIFICATE_CACHE_TTL"))
 	// do update when it is the first time or time to live is exceeded
 	if !oldValue.Certificate.LastScrape.IsZero() && oldValue.Certificate.LastScrape.Add(duration).After(time.Now()) {

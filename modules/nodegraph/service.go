@@ -11,7 +11,6 @@ import (
 	"github.com/k8spacket/k8spacket/modules/nodegraph/stats"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"regexp"
 	"strconv"
@@ -21,12 +20,13 @@ import (
 )
 
 type Service struct {
-	repo repository.IRepository[model.ConnectionItem]
+	repo    repository.IRepository[model.ConnectionItem]
+	factory stats.IFactory
 }
 
 var connectionItemsMutex = sync.RWMutex{}
 
-func (service *Service) Update(src string, srcName string, srcNamespace string, dst string, dstName string, dstNamespace string, persistent bool, bytesSent float64, bytesReceived float64, duration float64) {
+func (service *Service) update(src string, srcName string, srcNamespace string, dst string, dstName string, dstNamespace string, persistent bool, bytesSent float64, bytesReceived float64, duration float64) {
 	connectionItemsMutex.Lock()
 	//TODO: here can be problem with HashId() because is not override in IRepository
 	var id = strconv.Itoa(int(db.HashId(fmt.Sprintf("%s-%s", src, dst))))
@@ -53,14 +53,14 @@ func (service *Service) Update(src string, srcName string, srcNamespace string, 
 	connectionItemsMutex.Unlock()
 }
 
-func (service *Service) GetConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
+func (service *Service) getConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
 
 	nodegraph_log.LOGGER.Printf("[api:params] patternNs: %s, patternIn: %s, patternEx: %s, from: %s, to: %s", patternNs, patternIn, patternEx, from, to)
 
 	return service.repo.Query(from, to, patternNs, patternIn, patternEx)
 }
 
-func (service *Service) BuildO11yResponse(r *http.Request) (model.NodeGraph, error) {
+func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, error) {
 	var k8spacketIps = k8s.GetPodIPsBySelectors(os.Getenv("K8S_PACKET_API_FIELD_SELECTOR"), os.Getenv("K8S_PACKET_API_LABEL_SELECTOR"))
 
 	var in []model.ConnectionItem
@@ -91,25 +91,26 @@ func (service *Service) BuildO11yResponse(r *http.Request) (model.NodeGraph, err
 		}
 	}
 
+	var selectedStats = ""
+	if len(r.URL.Query()["stats-type"]) > 0 {
+		selectedStats = r.URL.Query()["stats-type"][0]
+	}
+	statsImpl := service.factory.GetStats(selectedStats)
+
 	var connectionEndpoints = make(map[string]model.ConnectionEndpoint)
 	prepareConnections(connectionItems, connectionEndpoints)
-	return buildApiResponse(connectionItems, connectionEndpoints, r.URL.Query()), nil
+	return buildApiResponse(connectionItems, connectionEndpoints, statsImpl), nil
 
 }
 
-func (service *Service) GetO11yStatsConfig(r *http.Request) (string, error) {
+func (service *Service) getO11yStatsConfig(statsType string) (string, error) {
 	jsonFile, err := os.ReadFile("fields.json")
 	if err != nil {
 		nodegraph_log.LOGGER.Print(err.Error())
 		return "", err
 	}
 
-	var selectedStats = ""
-	if len(r.URL.Query()["stats-type"]) > 0 {
-		selectedStats = r.URL.Query()["stats-type"][0]
-	}
-
-	config := stats.GetConfig(selectedStats)
+	config := service.factory.GetStats(statsType).GetConfig()
 
 	response := string(jsonFile)
 	response = strings.ReplaceAll(response, "{{mainStatDisplayName}}", config.MainStat.DisplayName)
@@ -149,42 +150,38 @@ func prepareConnections(connectionItems map[string]model.ConnectionItem, connect
 	}
 }
 
-func buildApiResponse(connectionItems map[string]model.ConnectionItem, connectionEndpoints map[string]model.ConnectionEndpoint, query url.Values) model.NodeGraph {
-
-	var selectedStats = ""
-	if len(query["stats-type"]) > 0 {
-		selectedStats = query["stats-type"][0]
-	}
+func buildApiResponse(connectionItems map[string]model.ConnectionItem, connectionEndpoints map[string]model.ConnectionEndpoint, statsImpl stats.IStats) model.NodeGraph {
 
 	var nodeArray []model.Node
 	var edgeArray []model.Edge
+
 	for _, conn := range connectionItems {
-		nodeArray = fillNodesArray(conn.Src, nodeArray, connectionEndpoints, selectedStats)
-		nodeArray = fillNodesArray(conn.Dst, nodeArray, connectionEndpoints, selectedStats)
-		edgeArray = fillEdgesArray(conn.Src+"-"+conn.Dst, edgeArray, connectionItems, selectedStats)
+		nodeArray = fillNodesArray(conn.Src, nodeArray, connectionEndpoints, statsImpl)
+		nodeArray = fillNodesArray(conn.Dst, nodeArray, connectionEndpoints, statsImpl)
+		edgeArray = fillEdgesArray(conn.Src+"-"+conn.Dst, edgeArray, connectionItems, statsImpl)
 	}
 
 	return model.NodeGraph{Nodes: nodeArray, Edges: edgeArray}
 }
 
-func fillNodesArray(id string, nodeArray []model.Node, connectionEndpoints map[string]model.ConnectionEndpoint, statsType string) []model.Node {
+func fillNodesArray(id string, nodeArray []model.Node, connectionEndpoints map[string]model.ConnectionEndpoint, statsImpl stats.IStats) []model.Node {
 	var connEndpoint = connectionEndpoints[id]
 	var node = model.Node{}
 	node.Id = id
 	node.Title = connEndpoint.Name
 	node.SubTitle = connEndpoint.Ip
-	stats.FillNodeStats(statsType, &node, connEndpoint)
+	statsImpl.FillNodeStats(&node, connEndpoint)
 	nodeArray = append(nodeArray, node)
 	return nodeArray
 }
 
-func fillEdgesArray(id string, edgeArray []model.Edge, connectionItems map[string]model.ConnectionItem, statsType string) []model.Edge {
+func fillEdgesArray(id string, edgeArray []model.Edge, connectionItems map[string]model.ConnectionItem, statsImpl stats.IStats) []model.Edge {
 	var connItem = connectionItems[id]
 	var edge = model.Edge{}
 	edge.Id = id
 	edge.Source = connItem.Src
 	edge.Target = connItem.Dst
-	stats.FillEdgeStats(statsType, &edge, connItem)
+	statsImpl.FillEdgeStats(&edge, connItem)
 	edgeArray = append(edgeArray, edge)
 	return edgeArray
 }

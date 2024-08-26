@@ -30,7 +30,7 @@ var (
 	)
 )
 
-func init() {
+func Init() {
 	sendTCPMetrics, _ := strconv.ParseBool(os.Getenv("K8S_PACKET_TCP_METRICS_ENABLED"))
 	if sendTCPMetrics {
 		prometheus.MustRegister(K8sPacketBytesSentMetric)

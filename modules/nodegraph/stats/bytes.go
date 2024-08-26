@@ -1,4 +1,4 @@
-package bytes
+package stats
 
 import (
 	"fmt"
@@ -6,14 +6,18 @@ import (
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 )
 
-func GetConfig() model.Config {
+type Bytes struct {
+	IStats
+}
+
+func (bytes *Bytes) GetConfig() model.Config {
 	return model.Config{Arc1: model.DisplayConfig{DisplayName: "Bytes received", Color: "blue"},
 		Arc2:          model.DisplayConfig{DisplayName: "Bytes responded", Color: "yellow"},
 		MainStat:      model.DisplayConfig{DisplayName: "Bytes received "},
 		SecondaryStat: model.DisplayConfig{DisplayName: "Bytes responded "}}
 }
 
-func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
+func (bytes *Bytes) FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
 	if connEndpoint.BytesSent > 0 && connEndpoint.BytesReceived > 0 && connEndpoint.Duration > 0 {
 		var sps = bytesize.New(connEndpoint.BytesSent / connEndpoint.Duration)
 		var rps = bytesize.New(connEndpoint.BytesReceived / connEndpoint.Duration)
@@ -27,7 +31,7 @@ func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
 	}
 }
 
-func FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {
+func (bytes *Bytes) FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {
 	if connItem.BytesSent > 0 && connItem.BytesReceived > 0 && connItem.Duration > 0 {
 		var sps = bytesize.New(connItem.BytesSent / connItem.Duration)
 		var rps = bytesize.New(connItem.BytesReceived / connItem.Duration)

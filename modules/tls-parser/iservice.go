@@ -6,7 +6,7 @@ import (
 )
 
 type IService interface {
-	StoreInDatabase(tlsConnection *model.TLSConnection, tlsDetails *model.TLSDetails)
+	storeInDatabase(tlsConnection *model.TLSConnection, tlsDetails *model.TLSDetails)
 
 	getConnection(id string) model.TLSDetails
 

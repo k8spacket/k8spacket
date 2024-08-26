@@ -43,7 +43,7 @@ func (listener *Listener) Listen(tlsEvent modules.TLSEvent) {
 		tlsDetails.ClientCipherSuites = append(tlsDetails.ClientCipherSuites, dict.ParseCipherSuite(cipher))
 	}
 
-	listener.service.StoreInDatabase(&tlsConnection, &tlsDetails)
+	listener.service.storeInDatabase(&tlsConnection, &tlsDetails)
 
 	sendPrometheusMetrics(tlsConnection, tlsDetails)
 

@@ -15,7 +15,11 @@ func (o11yController *O11yController) Health(w http.ResponseWriter, _ *http.Requ
 }
 
 func (o11yController *O11yController) NodeGraphFieldsHandler(w http.ResponseWriter, r *http.Request) {
-	response, err := o11yController.service.GetO11yStatsConfig(r)
+	var selectedStats = ""
+	if len(r.URL.Query()["stats-type"]) > 0 {
+		selectedStats = r.URL.Query()["stats-type"][0]
+	}
+	response, err := o11yController.service.getO11yStatsConfig(selectedStats)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -26,7 +30,7 @@ func (o11yController *O11yController) NodeGraphFieldsHandler(w http.ResponseWrit
 }
 
 func (o11yController *O11yController) NodeGraphDataHandler(w http.ResponseWriter, r *http.Request) {
-	nodegraph, err := o11yController.service.BuildO11yResponse(r)
+	nodegraph, err := o11yController.service.buildO11yResponse(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

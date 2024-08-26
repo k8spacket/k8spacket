@@ -23,7 +23,7 @@ func (listener *Listener) Listen(event modules.TCPEvent) {
 
 	sendPrometheusMetrics(event, persistent)
 
-	listener.service.Update(event.Client.Addr, event.Client.Name, event.Client.Namespace, event.Server.Addr, event.Server.Name, event.Server.Namespace, persistent, float64(event.TxB), float64(event.RxB), float64(event.DeltaUs))
+	listener.service.update(event.Client.Addr, event.Client.Name, event.Client.Namespace, event.Server.Addr, event.Server.Name, event.Server.Namespace, persistent, float64(event.TxB), float64(event.RxB), float64(event.DeltaUs))
 
 	nodegraph_log.LOGGER.Printf("Connection: src=%v srcName=%v srcPort=%v srcNS=%v dst=%v dstName=%v dstPort=%v dstNS=%v persistent=%v bytesSent=%v bytesReceived=%v duration=%v",
 		event.Client.Addr,

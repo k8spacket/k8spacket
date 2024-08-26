@@ -19,15 +19,16 @@ import (
 )
 
 type Service struct {
-	repo repository.IRepository
+	repo        repository.IRepository
+	certificate certificate.ICertificate
 }
 
-func (service *Service) StoreInDatabase(tlsConnection *model.TLSConnection, tlsDetails *model.TLSDetails) {
+func (service *Service) storeInDatabase(tlsConnection *model.TLSConnection, tlsDetails *model.TLSDetails) {
 	var id = strconv.Itoa(int(db.HashId(fmt.Sprintf("%s-%s", tlsConnection.Src, tlsConnection.Dst))))
 	tlsConnection.Id = id
 	service.repo.UpsertConnection(id, tlsConnection)
 	tlsDetails.Id = id
-	service.repo.UpsertDetails(id, tlsDetails, certificate.UpdateCertificateInfo)
+	service.repo.UpsertDetails(id, tlsDetails, service.certificate.UpdateCertificateInfo)
 }
 
 func (service *Service) getConnection(id string) model.TLSDetails {

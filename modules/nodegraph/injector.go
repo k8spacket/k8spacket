@@ -5,17 +5,21 @@ import (
 	"github.com/k8spacket/k8spacket/modules/db"
 	nodegraph_log "github.com/k8spacket/k8spacket/modules/nodegraph/log"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
+	"github.com/k8spacket/k8spacket/modules/nodegraph/prometheus"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/repository"
+	"github.com/k8spacket/k8spacket/modules/nodegraph/stats"
 	"net/http"
 )
 
 func Init() modules.IListener[modules.TCPEvent] {
 
 	nodegraph_log.BuildLogger()
+	prometheus.Init()
 
 	handler, _ := db.New[model.ConnectionItem]("tcp_connections")
 	repo := &repository.Repository{DbHandler: handler}
-	service := &Service{repo}
+	factory := &stats.Factory{}
+	service := &Service{repo, factory}
 	controller := &Controller{service}
 	o11yController := &O11yController{service}
 

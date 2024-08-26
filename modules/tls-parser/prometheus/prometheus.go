@@ -31,7 +31,7 @@ var (
 	)
 )
 
-func init() {
+func Init() {
 	sendTLSMetrics, _ := strconv.ParseBool(os.Getenv("K8S_PACKET_TLS_METRICS_ENABLED"))
 	if sendTLSMetrics {
 		prometheus.MustRegister(K8sPacketTLSRecordMetric)

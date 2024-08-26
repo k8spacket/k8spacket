@@ -1,18 +1,22 @@
-package connection
+package stats
 
 import (
 	"fmt"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 )
 
-func GetConfig() model.Config {
+type Connection struct {
+	IStats
+}
+
+func (connection *Connection) GetConfig() model.Config {
 	return model.Config{Arc1: model.DisplayConfig{DisplayName: "Persistent connections", Color: "green"},
 		Arc2:          model.DisplayConfig{DisplayName: "Short-lived connections", Color: "red"},
 		MainStat:      model.DisplayConfig{DisplayName: "All connections "},
 		SecondaryStat: model.DisplayConfig{DisplayName: "Persistent connections "}}
 }
 
-func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
+func (connection *Connection) FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
 	if connEndpoint.ConnCount > 0 {
 		node.MainStat = fmt.Sprintf("all: %d", connEndpoint.ConnCount)
 		node.SecondaryStat = fmt.Sprintf("persistent: %d", connEndpoint.ConnPersistent)
@@ -24,7 +28,7 @@ func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
 	}
 }
 
-func FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {
+func (connection *Connection) FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {
 	edge.MainStat = fmt.Sprintf("all: %d", connItem.ConnCount)
 	edge.SecondaryStat = fmt.Sprintf("persistent: %d", connItem.ConnPersistent)
 }

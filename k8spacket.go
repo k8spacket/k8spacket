@@ -29,13 +29,16 @@ func main() {
 
 	go b.DistributeEvents()
 	ebpf.LoadEbpf(b)
-	handleEndpoints()
+
+	prometheus.MustRegister(collectors.NewBuildInfoCollector())
+
+	startHttpServer()
 }
 
-func handleEndpoints() {
+func startHttpServer() {
 	listenerPort := os.Getenv("K8S_PACKET_TCP_LISTENER_PORT")
 	k8spacket_log.LOGGER.Printf("[api] Serving requests on port %s", listenerPort)
-	prometheus.MustRegister(collectors.NewBuildInfoCollector())
+
 	srv := &http.Server{Addr: fmt.Sprintf(":%s", listenerPort)}
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())

@@ -1,4 +1,4 @@
-package duration
+package stats
 
 import (
 	"fmt"
@@ -6,14 +6,18 @@ import (
 	"time"
 )
 
-func GetConfig() model.Config {
+type Duration struct {
+	IStats
+}
+
+func (duration *Duration) GetConfig() model.Config {
 	return model.Config{Arc1: model.DisplayConfig{DisplayName: "Average duration", Color: "purple"},
 		Arc2:          model.DisplayConfig{DisplayName: "Max duration", Color: "white"},
 		MainStat:      model.DisplayConfig{DisplayName: "Average duration "},
 		SecondaryStat: model.DisplayConfig{DisplayName: "Max duration "}}
 }
 
-func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
+func (duration *Duration) FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
 	if connEndpoint.Duration > 0 || connEndpoint.MaxDuration > 0 {
 		var cd = connEndpoint.Duration / float64(connEndpoint.ConnCount)
 		if cd >= 0.001 {
@@ -34,7 +38,7 @@ func FillNodeStats(node *model.Node, connEndpoint model.ConnectionEndpoint) {
 	}
 }
 
-func FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {
+func (duration *Duration) FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {
 	if connItem.Duration > 0 || connItem.MaxDuration > 0 {
 		var cd = connItem.Duration / float64(connItem.ConnCount)
 		if cd >= 0.001 {
