@@ -2,13 +2,14 @@ package nodegraph
 
 import (
 	"encoding/json"
-	nodegraph_log "github.com/k8spacket/k8spacket/modules/nodegraph/log"
-	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 )
 
 type Controller struct {
@@ -23,7 +24,7 @@ func (controller *Controller) ConnectionHandler(w http.ResponseWriter, r *http.R
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
-		nodegraph_log.LOGGER.Printf("[api] Cannot prepare connections response: %+v", err)
+		slog.Info("[api] Cannot prepare connections response", "Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -34,7 +35,7 @@ func filterConnections(controller *Controller, query url.Values) []model.Connect
 	if len(from) > 0 {
 		i, err := strconv.ParseInt(from[0], 10, 64)
 		if err != nil {
-			nodegraph_log.LOGGER.Printf("[api] parse: %+v", err)
+			slog.Info("[api] parse", "Error", err)
 		}
 		rangeFrom = time.UnixMilli(i)
 	}
@@ -44,7 +45,7 @@ func filterConnections(controller *Controller, query url.Values) []model.Connect
 	if len(to) > 0 {
 		i, err := strconv.ParseInt(to[0], 10, 64)
 		if err != nil {
-			nodegraph_log.LOGGER.Printf("[api] parse: %+v", err)
+			slog.Info("[api] parse", "Error", err)
 		}
 		rangeTo = time.UnixMilli(i)
 	}

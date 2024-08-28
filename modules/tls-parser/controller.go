@@ -2,11 +2,12 @@ package tlsparser
 
 import (
 	"encoding/json"
-	tls_parser_log "github.com/k8spacket/k8spacket/modules/tls-parser/log"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
+	"log/slog"
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 )
 
 type Controller struct {
@@ -21,7 +22,7 @@ func (controller *Controller) TLSConnectionHandler(w http.ResponseWriter, req *h
 		if !reflect.DeepEqual(details, model.TLSDetails{}) {
 			err := json.NewEncoder(w).Encode(details)
 			if err != nil {
-				tls_parser_log.LOGGER.Printf("[api] Cannot prepare connection details response: %+v", err)
+				slog.Info("[api] Cannot prepare connection details response", "Error", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		} else {
@@ -32,7 +33,7 @@ func (controller *Controller) TLSConnectionHandler(w http.ResponseWriter, req *h
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(controller.service.filterConnections(req.URL.Query()))
 		if err != nil {
-			tls_parser_log.LOGGER.Printf("[api] Cannot prepare connections response: %+v", err)
+			slog.Info("[api] Cannot prepare connections response", "Error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}

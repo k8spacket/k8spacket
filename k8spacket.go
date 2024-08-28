@@ -4,6 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/k8spacket/k8spacket/broker"
 	"github.com/k8spacket/k8spacket/ebpf"
 	k8spacket_log "github.com/k8spacket/k8spacket/log"
@@ -14,10 +19,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func main() {
@@ -43,7 +44,7 @@ func startHttpServer() {
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
 		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			k8spacket_log.LOGGER.Fatalf("[api] Cannot start ListenAndServe: %+v", err)
+			k8spacket_log.LOGGER.Fatalf("[api] Cannot start ListenAndServe", "Error", err)
 		}
 
 	}()

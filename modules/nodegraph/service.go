@@ -3,13 +3,8 @@ package nodegraph
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/k8spacket/k8s-api/v2"
-	"github.com/k8spacket/k8spacket/modules/db"
-	nodegraph_log "github.com/k8spacket/k8spacket/modules/nodegraph/log"
-	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
-	"github.com/k8spacket/k8spacket/modules/nodegraph/repository"
-	"github.com/k8spacket/k8spacket/modules/nodegraph/stats"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"regexp"
@@ -17,6 +12,12 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/k8spacket/k8s-api/v2"
+	"github.com/k8spacket/k8spacket/modules/db"
+	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
+	"github.com/k8spacket/k8spacket/modules/nodegraph/repository"
+	"github.com/k8spacket/k8spacket/modules/nodegraph/stats"
 )
 
 type Service struct {
@@ -55,7 +56,12 @@ func (service *Service) update(src string, srcName string, srcNamespace string, 
 
 func (service *Service) getConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
 
-	nodegraph_log.LOGGER.Printf("[api:params] patternNs: %s, patternIn: %s, patternEx: %s, from: %s, to: %s", patternNs, patternIn, patternEx, from, to)
+	slog.Info("[api:params]", 
+	"patternNs", patternNs,
+	"patternIn", patternIn,
+	"patternEx", patternEx, 
+	"from", from,
+	"to", to)
 
 	return service.repo.Query(from, to, patternNs, patternIn, patternEx)
 }
@@ -70,19 +76,19 @@ func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, err
 		resp, err := http.Get(fmt.Sprintf("http://%s:%s/nodegraph/connections?%s", ip, os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), r.URL.Query().Encode()))
 
 		if err != nil {
-			nodegraph_log.LOGGER.Printf("[api] Cannot get stats: %+v", err)
+			slog.Info("[api] Cannot get stats", "Error", err)
 			return model.NodeGraph{}, err
 		}
 
 		responseData, err := io.ReadAll(resp.Body)
 		if err != nil {
-			nodegraph_log.LOGGER.Printf("[api] Cannot read stats response: %+v", err)
+			slog.Info("[api] Cannot read stats response", "Error", err)
 			return model.NodeGraph{}, err
 		}
 
 		err = json.Unmarshal(responseData, &in)
 		if err != nil {
-			nodegraph_log.LOGGER.Printf("[api] Cannot parse stats response: %+v", err)
+			slog.Info("[api] Cannot parse stats response", "Error", err)
 			return model.NodeGraph{}, err
 		}
 
@@ -106,7 +112,7 @@ func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, err
 func (service *Service) getO11yStatsConfig(statsType string) (string, error) {
 	jsonFile, err := os.ReadFile("fields.json")
 	if err != nil {
-		nodegraph_log.LOGGER.Print(err.Error())
+		slog.Error(err.Error())
 		return "", err
 	}
 

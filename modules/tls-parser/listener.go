@@ -2,13 +2,14 @@ package tlsparser
 
 import (
 	"encoding/json"
-	"github.com/k8spacket/k8spacket/modules"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/dict"
-	tls_parser_log "github.com/k8spacket/k8spacket/modules/tls-parser/log"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/prometheus"
+	"log/slog"
 	"strconv"
 	"time"
+
+	"github.com/k8spacket/k8spacket/modules"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/dict"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/prometheus"
 )
 
 type Listener struct {
@@ -48,7 +49,7 @@ func (listener *Listener) Listen(tlsEvent modules.TLSEvent) {
 	sendPrometheusMetrics(tlsConnection, tlsDetails)
 
 	var j, _ = json.Marshal(tlsConnection)
-	tls_parser_log.LOGGER.Println("TLS Record:", string(j))
+	slog.Info("TLS", "Record", string(j))
 }
 
 func sendPrometheusMetrics(tlsConnection model.TLSConnection, tlsDetails model.TLSDetails) {

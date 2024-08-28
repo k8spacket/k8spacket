@@ -1,11 +1,12 @@
 package repository
 
 import (
-	"github.com/k8spacket/k8spacket/modules/db"
-	nodegraph_log "github.com/k8spacket/k8spacket/modules/nodegraph/log"
-	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
+	"log/slog"
 	"regexp"
 	"time"
+
+	"github.com/k8spacket/k8spacket/modules/db"
+	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 )
 
 type Repository struct {
@@ -58,15 +59,15 @@ func (repository *Repository) Query(from time.Time, to time.Time, patternNs *reg
 
 	result, err := repository.DbHandler.Query(&query)
 	if err != nil {
-		nodegraph_log.LOGGER.Printf("[db:tcp_connections:Query] Error: %+v", err)
+		slog.Error("[db:tcp_connections:Query]", "Error", err)
 		return []model.ConnectionItem{}
 	}
 	return result
 }
 
 func (repository *Repository) Set(key string, value *model.ConnectionItem) {
-	err := repository.DbHandler.Upsert(key, *value)
+	err := repository.DbHandler.Upsert(key, value)
 	if err != nil {
-		nodegraph_log.LOGGER.Printf("[db:tcp_connections:Upsert] Error: %+v", err)
+		slog.Error("[db:tcp_connections:Upsert]", "Error", err)
 	}
 }

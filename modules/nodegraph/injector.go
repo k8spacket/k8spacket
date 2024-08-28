@@ -3,7 +3,6 @@ package nodegraph
 import (
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/k8spacket/k8spacket/modules/db"
-	nodegraph_log "github.com/k8spacket/k8spacket/modules/nodegraph/log"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/prometheus"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/repository"
@@ -13,7 +12,6 @@ import (
 
 func Init() modules.IListener[modules.TCPEvent] {
 
-	nodegraph_log.BuildLogger()
 	prometheus.Init()
 
 	handler, _ := db.New[model.ConnectionItem]("tcp_connections")

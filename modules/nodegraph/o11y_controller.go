@@ -2,7 +2,7 @@ package nodegraph
 
 import (
 	"encoding/json"
-	nodegraph_log "github.com/k8spacket/k8spacket/modules/nodegraph/log"
+	"log/slog"
 	"net/http"
 )
 
@@ -40,7 +40,7 @@ func (o11yController *O11yController) NodeGraphDataHandler(w http.ResponseWriter
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err = json.NewEncoder(w).Encode(nodegraph)
 	if err != nil {
-		nodegraph_log.LOGGER.Printf("[api] Cannot prepare stats response: %+v", err)
+		slog.Info("[api] Cannot prepare stats response", "Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

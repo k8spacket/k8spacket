@@ -2,18 +2,19 @@ package ebpf
 
 import (
 	"context"
-	"github.com/k8spacket/k8s-api/v2"
-	"github.com/k8spacket/k8spacket/broker"
-	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
-	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
-	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
-	k8spacket_log "github.com/k8spacket/k8spacket/log"
 	"os"
 	"os/exec"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/k8spacket/k8s-api/v2"
+	"github.com/k8spacket/k8spacket/broker"
+	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
+	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
+	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
+	k8spacket_log "github.com/k8spacket/k8spacket/log"
 )
 
 func LoadEbpf(broker broker.IBroker) {
@@ -63,7 +64,7 @@ func findInterfaces() []string {
 	out, err := cmd.Output()
 
 	if err != nil {
-		k8spacket_log.LOGGER.Printf("[tc-loop] Cannot find interfaces to listen: %+v", err)
+		k8spacket_log.LOGGER.Printf("[tc-loop] Cannot find interfaces to listen", "Error", err)
 		return nil
 	}
 	return strings.Split(string(out), ",")

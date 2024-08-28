@@ -3,15 +3,16 @@ package certificate
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/grantae/certinfo"
-	tls_parser_log "github.com/k8spacket/k8spacket/modules/tls-parser/log"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/prometheus"
+	"log/slog"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/grantae/certinfo"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/prometheus"
 )
 
 type Certificate struct {
@@ -39,7 +40,11 @@ func scrapeCertificate(tlsDetails *model.TLSDetails) {
 	dst := tlsDetails.Dst
 	port := tlsDetails.Port
 	if port <= 0 {
-		tls_parser_log.LOGGER.Printf("[certificate scraping] dstPort is empty, domain: %s, dst: %s, port %d. Gave up", domain, dst, port)
+		slog.Info("[certificate scraping] dstPort is empty",
+			"domain", domain,
+			"dst", dst,
+			"port", port,
+			"Gave up")
 		tlsDetails.Certificate.ServerChain = "UNAVAILABLE"
 		tlsDetails.Certificate.LastScrape = time.Now()
 		return
@@ -60,11 +65,17 @@ func scrapeCertificate(tlsDetails *model.TLSDetails) {
 
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: 500 * time.Millisecond}, "tcp", fmt.Sprintf("%s:%d", domain, port), conf)
 	if err != nil {
-		tls_parser_log.LOGGER.Printf("[certificate scraping] Error in Dial, domain: %s, port %d. Trying with the default port...", domain, port)
+		slog.Info("[certificate scraping] Error in Dial",
+			"domain", domain,
+			"port", port,
+			"Trying with the default port...")
 		port = 443
 		conn, err = tls.DialWithDialer(&net.Dialer{Timeout: 500 * time.Millisecond}, "tcp", fmt.Sprintf("%s:%d", domain, port), conf)
 		if err != nil {
-			tls_parser_log.LOGGER.Printf("[certificate scraping] Error in Dial, domain: %s, port %d. Gave up", domain, port)
+			slog.Info("[certificate scraping] Error in Dial",
+				"domain", domain,
+				"port", port,
+				"Gave up")
 			tlsDetails.Certificate.ServerChain = "UNAVAILABLE"
 			tlsDetails.Certificate.LastScrape = time.Now()
 			return
@@ -84,5 +95,7 @@ func scrapeCertificate(tlsDetails *model.TLSDetails) {
 		chain += strings.Replace(certString, "\n\n", "\n", -1)
 	}
 	tlsDetails.Certificate.ServerChain = chain
-	tls_parser_log.LOGGER.Printf("[certificate scraping] TLS certificate scraped, domain: %s, port %d", domain, port)
+	slog.Info("[certificate scraping] TLS certificate scraped",
+		"domain", domain,
+		"port", port)
 }

@@ -3,11 +3,12 @@ package tlsparser
 import (
 	"encoding/json"
 	"fmt"
-	tls_parser_log "github.com/k8spacket/k8spacket/modules/tls-parser/log"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 )
 
 const connectionDetailsUri = "/tlsparser/api/data/"
@@ -43,7 +44,7 @@ func prepareResponse[T model.TLSDetails | []model.TLSConnection](w http.Response
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(out)
 	if err != nil {
-		tls_parser_log.LOGGER.Printf("[api] Cannot prepare stats response: %+v", err)
+		slog.Info("[api] Cannot prepare stats response", "Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

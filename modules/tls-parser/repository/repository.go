@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"github.com/k8spacket/k8spacket/modules/db"
-	tls_parser_log "github.com/k8spacket/k8spacket/modules/tls-parser/log"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
+	"log/slog"
 	"time"
+
+	"github.com/k8spacket/k8spacket/modules/db"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 )
 
 type Repository struct {
@@ -30,23 +31,23 @@ func (repository *Repository) Query(from time.Time, to time.Time) []model.TLSCon
 
 	result, err := repository.DbConnectionHandler.Query(&query)
 	if err != nil {
-		tls_parser_log.LOGGER.Printf("[db:tls_connections:Query] Error: %+v", err)
+		slog.Info("[db:tls_connections:Query] Error", "Error", err)
 		return []model.TLSConnection{}
 	}
 	return result
 }
 
 func (repository *Repository) UpsertConnection(key string, value *model.TLSConnection) {
-	err := repository.DbConnectionHandler.Upsert(key, *value)
+	err := repository.DbConnectionHandler.Upsert(key, value)
 	if err != nil {
-		tls_parser_log.LOGGER.Printf("[db:tls_connections:Upsert] Error: %+v", err)
+		slog.Info("[db:tls_connections:Upsert] Error", "Error", err)
 	}
 }
 
 func (repository *Repository) Read(key string) model.TLSDetails {
 	result, err := repository.DbDetailsHandler.Read(key)
 	if err != nil {
-		tls_parser_log.LOGGER.Printf("[db:tls_details:Read] Warn: %+v", err)
+		slog.Info("[db:tls_details:Read] Warn", "Error", err)
 		//can happen, silent
 		return model.TLSDetails{}
 	}
@@ -58,8 +59,8 @@ type fn func(newValue *model.TLSDetails, oldValue *model.TLSDetails)
 func (repository *Repository) UpsertDetails(key string, value *model.TLSDetails, fn fn) {
 	old := repository.Read(key)
 	fn(value, &old)
-	err := repository.DbDetailsHandler.Upsert(key, *value)
+	err := repository.DbDetailsHandler.Upsert(key, value)
 	if err != nil {
-		tls_parser_log.LOGGER.Printf("[db:tls_details:Upsert] Error: %+v", err)
+		slog.Info("[db:tls_details:Upsert] Error", "Error", err)
 	}
 }

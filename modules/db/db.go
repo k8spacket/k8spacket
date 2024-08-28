@@ -55,7 +55,7 @@ func (k *BoltDbHandler[T]) QueryMatchFunc(field string, matchFunc func(*T) (bool
 	})
 }
 
-func (k *BoltDbHandler[T]) Upsert(key string, value T) error {
+func (k *BoltDbHandler[T]) Upsert(key string, value *T) error {
 	return k.store.Bolt().Update(
 		func(tx *bbolt.Tx) error {
 			return k.store.TxUpsert(tx, key, value)

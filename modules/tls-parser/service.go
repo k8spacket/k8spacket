@@ -3,19 +3,20 @@ package tlsparser
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/k8spacket/k8s-api/v2"
-	"github.com/k8spacket/k8spacket/modules/db"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/certificate"
-	tls_parser_log "github.com/k8spacket/k8spacket/modules/tls-parser/log"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/repository"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/k8spacket/k8s-api/v2"
+	"github.com/k8spacket/k8spacket/modules/db"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/certificate"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
+	"github.com/k8spacket/k8spacket/modules/tls-parser/repository"
 )
 
 type Service struct {
@@ -41,7 +42,7 @@ func (service *Service) filterConnections(query url.Values) []model.TLSConnectio
 	if len(from) > 0 {
 		i, err := strconv.ParseInt(from[0], 10, 64)
 		if err != nil {
-			tls_parser_log.LOGGER.Printf("[api] parse: %+v", err)
+			slog.Info("[api] parse", "Error", err)
 		}
 		rangeFrom = time.UnixMilli(i)
 	}
@@ -51,12 +52,12 @@ func (service *Service) filterConnections(query url.Values) []model.TLSConnectio
 	if len(to) > 0 {
 		i, err := strconv.ParseInt(to[0], 10, 64)
 		if err != nil {
-			tls_parser_log.LOGGER.Printf("[api] parse: %+v", err)
+			slog.Info("[api] parse", "Error", err)
 		}
 		rangeTo = time.UnixMilli(i)
 	}
 
-	tls_parser_log.LOGGER.Printf("[api:params] from: %s, to: %s", rangeFrom, rangeTo)
+	slog.Info("[api:params]", "from", rangeFrom, "to", rangeTo)
 	return service.repo.Query(rangeFrom, rangeTo)
 }
 
@@ -88,19 +89,19 @@ func buildResponse[T model.TLSDetails | []model.TLSConnection](url string, t T, 
 		resp, err := http.Get(fmt.Sprintf(url, ip))
 
 		if err != nil {
-			tls_parser_log.LOGGER.Printf("[api] Cannot get stats: %+v", err)
+			slog.Info("[api] Cannot get stats", "Error", err)
 			return out, err
 		}
 
 		responseData, err := io.ReadAll(resp.Body)
 		if err != nil {
-			tls_parser_log.LOGGER.Printf("[api] Cannot read stats response: %+v", err)
+			slog.Info("[api] Cannot read stats response", "Error", err)
 			return out, err
 		}
 
 		_ = json.Unmarshal(responseData, &in)
 		if err != nil {
-			tls_parser_log.LOGGER.Printf("[api] Cannot parse stats response: %+v", err)
+			slog.Info("[api] Cannot parse stats response", "Error", err)
 			return out, err
 		}
 

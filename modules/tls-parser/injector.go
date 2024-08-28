@@ -4,7 +4,6 @@ import (
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/certificate"
-	tls_parser_log "github.com/k8spacket/k8spacket/modules/tls-parser/log"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/prometheus"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/repository"
@@ -13,7 +12,6 @@ import (
 
 func Init() modules.IListener[modules.TLSEvent] {
 
-	tls_parser_log.BuildLogger()
 	prometheus.Init()
 
 	handlerConnections, _ := db.New[model.TLSConnection]("tls_connections")

@@ -10,6 +10,6 @@ type IDBHandler[T tls_model.TLSDetails | tls_model.TLSConnection | tcp_model.Con
 	Query(query *bolthold.Query) ([]T, error)
 	QueryMatchFunc(field string, matchFunc func(*T) (bool, error)) bolthold.Query
 	Read(key string) (T, error)
-	Upsert(key string, value T) error
+	Upsert(key string, value *T) error
 	Close() error
 }
