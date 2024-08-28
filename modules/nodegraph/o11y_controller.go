@@ -40,7 +40,7 @@ func (o11yController *O11yController) NodeGraphDataHandler(w http.ResponseWriter
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	err = json.NewEncoder(w).Encode(nodegraph)
 	if err != nil {
-		slog.Info("[api] Cannot prepare stats response", "Error", err)
+		slog.Error("[api] Cannot prepare stats response", "Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

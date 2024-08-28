@@ -5,17 +5,18 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
-	"github.com/cilium/ebpf/ringbuf"
-	"github.com/k8spacket/k8spacket/broker"
-	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
-	k8spacket_log "github.com/k8spacket/k8spacket/log"
-	"github.com/k8spacket/k8spacket/modules"
-	"github.com/vishvananda/netlink"
-	"golang.org/x/sys/unix"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/cilium/ebpf/ringbuf"
+	"github.com/k8spacket/k8spacket/broker"
+	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
+	"github.com/k8spacket/k8spacket/modules"
+	"github.com/vishvananda/netlink"
+	"golang.org/x/sys/unix"
 )
 
 //go:generate go run github.com/cilium/ebpf/cmd/bpf2go tc ./bpf/tc.bpf.c
@@ -29,7 +30,7 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 	// Load pre-compiled programs and maps into the kernel.
 	objs := tcObjects{}
 	if err := loadTcObjects(&objs, nil); err != nil {
-		k8spacket_log.LOGGER.Fatalf("[tc] Loading objects: %v", err)
+		slog.Error("[tc] Loading objects", "Error", err)
 	}
 	defer objs.Close()
 
@@ -39,7 +40,7 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 	// get link device by name (network interface name)
 	link, err := netlink.LinkByName(iface)
 	if err != nil {
-		k8spacket_log.LOGGER.Fatalf("[tc] Cannot find %s: %v", iface, err)
+		slog.Error("[tc] Cannot find network intefrace", "interface", iface, "Error", err)
 	}
 
 	// qdisc clsact - queueing discipline (qdisc) parent of ingress and egress filters
@@ -56,13 +57,13 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 
 	// try to delete previous added clsact qdisc on specific network interface, equivalent `tc qdisc del dev {{iface}} clsact`
 	if err := netlink.QdiscDel(qdisc); err != nil {
-		k8spacket_log.LOGGER.Printf("[tc] Cannot del clsact qdisc: %v", err)
+		slog.Error("[tc] Cannot del clsact qdisc", "Error", err)
 	}
 
 	// add clsact qdisc on specific network interface, equivalent `tc qdisc add dev {{iface}} clsact`
 	// check `qdisc show dev {{iface}}`
 	if err := netlink.QdiscAdd(qdisc); err != nil {
-		k8spacket_log.LOGGER.Fatalf("[tc] Cannot add clsact qdisc: %v", err)
+		slog.Error("[tc] Cannot add clsact qdisc", "Error", err)
 	}
 
 	// add ingress filter
@@ -74,7 +75,7 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 	// create new reader for ringbuf events
 	rd, err := ringbuf.NewReader(objs.OutputEvents)
 	if err != nil {
-		k8spacket_log.LOGGER.Fatalf("[tc] Creating perf event reader: %s", err)
+		slog.Error("[tc] Creating perf event reader", "Error", err)
 	}
 	defer rd.Close()
 
@@ -85,16 +86,16 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 			record, err := rd.Read()
 			if err != nil {
 				if errors.Is(err, ringbuf.ErrClosed) {
-					k8spacket_log.LOGGER.Println("[tc] Received signal, exiting..")
+					slog.Info("[tc] Received signal, exiting..")
 					return
 				}
-				k8spacket_log.LOGGER.Printf("[tc] Reading from reader: %s", err)
+				slog.Error("[tc] Reading from reader", "Error", err)
 				continue
 			}
 
 			// Parse the ringbuf event into a tcTlsHandshakeEvent structure.
 			if err := binary.Read(bytes.NewBuffer(record.RawSample), binary.BigEndian, &event); err != nil {
-				k8spacket_log.LOGGER.Printf("[tc] Parsing ringbuf event: %s", err)
+				slog.Error("[tc] Parsing ringbuf event", "Error", err)
 				continue
 			}
 
@@ -108,7 +109,7 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 
 	<-ctx.Done()
 
-	k8spacket_log.LOGGER.Println("[tc] Closed gracefully")
+	slog.Info("[tc] Closed gracefully")
 }
 
 func addFilter(link netlink.Link, programFD int, parent uint32) {
@@ -133,7 +134,7 @@ func addFilter(link netlink.Link, programFD int, parent uint32) {
 	// add ingress/egress filter, equivalent `tc filter add dev {{iface}} [ingress|egress]`
 	// check `tc filter show dev {{iface}} [ingress|egress]`
 	if err := netlink.FilterAdd(filter); err != nil {
-		k8spacket_log.LOGGER.Fatalf("[tc] Cannot attach bpf object to filter: %v", err)
+		slog.Error("[tc] Cannot attach bpf object to filter", "Error", err)
 	}
 }
 

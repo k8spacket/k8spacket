@@ -42,7 +42,7 @@ func (service *Service) filterConnections(query url.Values) []model.TLSConnectio
 	if len(from) > 0 {
 		i, err := strconv.ParseInt(from[0], 10, 64)
 		if err != nil {
-			slog.Info("[api] parse", "Error", err)
+			slog.Error("[api] parse", "Error", err)
 		}
 		rangeFrom = time.UnixMilli(i)
 	}
@@ -52,7 +52,7 @@ func (service *Service) filterConnections(query url.Values) []model.TLSConnectio
 	if len(to) > 0 {
 		i, err := strconv.ParseInt(to[0], 10, 64)
 		if err != nil {
-			slog.Info("[api] parse", "Error", err)
+			slog.Error("[api] parse", "Error", err)
 		}
 		rangeTo = time.UnixMilli(i)
 	}
@@ -89,19 +89,19 @@ func buildResponse[T model.TLSDetails | []model.TLSConnection](url string, t T, 
 		resp, err := http.Get(fmt.Sprintf(url, ip))
 
 		if err != nil {
-			slog.Info("[api] Cannot get stats", "Error", err)
+			slog.Error("[api] Cannot get stats", "Error", err)
 			return out, err
 		}
 
 		responseData, err := io.ReadAll(resp.Body)
 		if err != nil {
-			slog.Info("[api] Cannot read stats response", "Error", err)
+			slog.Error("[api] Cannot read stats response", "Error", err)
 			return out, err
 		}
 
 		_ = json.Unmarshal(responseData, &in)
 		if err != nil {
-			slog.Info("[api] Cannot parse stats response", "Error", err)
+			slog.Error("[api] Cannot parse stats response", "Error", err)
 			return out, err
 		}
 

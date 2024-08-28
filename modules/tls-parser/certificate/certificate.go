@@ -44,7 +44,7 @@ func scrapeCertificate(tlsDetails *model.TLSDetails) {
 			"domain", domain,
 			"dst", dst,
 			"port", port,
-			"Gave up")
+			"Gave up", "")
 		tlsDetails.Certificate.ServerChain = "UNAVAILABLE"
 		tlsDetails.Certificate.LastScrape = time.Now()
 		return
@@ -65,17 +65,17 @@ func scrapeCertificate(tlsDetails *model.TLSDetails) {
 
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: 500 * time.Millisecond}, "tcp", fmt.Sprintf("%s:%d", domain, port), conf)
 	if err != nil {
-		slog.Info("[certificate scraping] Error in Dial",
+		slog.Error("[certificate scraping] Error in Dial",
 			"domain", domain,
 			"port", port,
-			"Trying with the default port...")
+			"Trying with the default port...", "")
 		port = 443
 		conn, err = tls.DialWithDialer(&net.Dialer{Timeout: 500 * time.Millisecond}, "tcp", fmt.Sprintf("%s:%d", domain, port), conf)
 		if err != nil {
-			slog.Info("[certificate scraping] Error in Dial",
+			slog.Error("[certificate scraping] Error in Dial",
 				"domain", domain,
 				"port", port,
-				"Gave up")
+				"Gave up", "")
 			tlsDetails.Certificate.ServerChain = "UNAVAILABLE"
 			tlsDetails.Certificate.LastScrape = time.Now()
 			return

@@ -56,12 +56,12 @@ func (service *Service) update(src string, srcName string, srcNamespace string, 
 
 func (service *Service) getConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
 
-	slog.Info("[api:params]", 
-	"patternNs", patternNs,
-	"patternIn", patternIn,
-	"patternEx", patternEx, 
-	"from", from,
-	"to", to)
+	slog.Info("[api:params]",
+		"patternNs", patternNs,
+		"patternIn", patternIn,
+		"patternEx", patternEx,
+		"from", from,
+		"to", to)
 
 	return service.repo.Query(from, to, patternNs, patternIn, patternEx)
 }
@@ -76,19 +76,19 @@ func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, err
 		resp, err := http.Get(fmt.Sprintf("http://%s:%s/nodegraph/connections?%s", ip, os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), r.URL.Query().Encode()))
 
 		if err != nil {
-			slog.Info("[api] Cannot get stats", "Error", err)
+			slog.Error("[api] Cannot get stats", "Error", err)
 			return model.NodeGraph{}, err
 		}
 
 		responseData, err := io.ReadAll(resp.Body)
 		if err != nil {
-			slog.Info("[api] Cannot read stats response", "Error", err)
+			slog.Error("[api] Cannot read stats response", "Error", err)
 			return model.NodeGraph{}, err
 		}
 
 		err = json.Unmarshal(responseData, &in)
 		if err != nil {
-			slog.Info("[api] Cannot parse stats response", "Error", err)
+			slog.Error("[api] Cannot parse stats response", "Error", err)
 			return model.NodeGraph{}, err
 		}
 

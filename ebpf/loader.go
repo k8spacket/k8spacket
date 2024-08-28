@@ -2,6 +2,7 @@ package ebpf
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -14,7 +15,6 @@ import (
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
-	k8spacket_log "github.com/k8spacket/k8spacket/log"
 )
 
 func LoadEbpf(broker broker.IBroker) {
@@ -35,10 +35,10 @@ func interfacesRefresher(tc ebpf_tc.TcEbpf) {
 	for {
 		select {
 		case <-ctx.Done():
-			k8spacket_log.LOGGER.Println("[tc-loop] Receive signal, exiting...")
+			slog.Info("[tc-loop] Receive signal, exiting...")
 			return
 		case <-time.After(refreshPeriod):
-			k8spacket_log.LOGGER.Println("[tc-loop] Refreshing interfaces for capturing...")
+			slog.Info("[tc-loop] Refreshing interfaces for capturing...")
 			interfaces = findInterfaces()
 			var refreshK8sInfo = false
 			for _, el := range interfaces {
@@ -64,7 +64,7 @@ func findInterfaces() []string {
 	out, err := cmd.Output()
 
 	if err != nil {
-		k8spacket_log.LOGGER.Printf("[tc-loop] Cannot find interfaces to listen", "Error", err)
+		slog.Error("[tc-loop] Cannot find interfaces to listen", "Error", err)
 		return nil
 	}
 	return strings.Split(string(out), ",")

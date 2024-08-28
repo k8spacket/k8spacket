@@ -24,7 +24,7 @@ func (controller *Controller) ConnectionHandler(w http.ResponseWriter, r *http.R
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
-		slog.Info("[api] Cannot prepare connections response", "Error", err)
+		slog.Error("[api] Cannot prepare connections response", "Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -35,7 +35,7 @@ func filterConnections(controller *Controller, query url.Values) []model.Connect
 	if len(from) > 0 {
 		i, err := strconv.ParseInt(from[0], 10, 64)
 		if err != nil {
-			slog.Info("[api] parse", "Error", err)
+			slog.Error("[api] parse", "Error", err)
 		}
 		rangeFrom = time.UnixMilli(i)
 	}
@@ -45,7 +45,7 @@ func filterConnections(controller *Controller, query url.Values) []model.Connect
 	if len(to) > 0 {
 		i, err := strconv.ParseInt(to[0], 10, 64)
 		if err != nil {
-			slog.Info("[api] parse", "Error", err)
+			slog.Error("[api] parse", "Error", err)
 		}
 		rangeTo = time.UnixMilli(i)
 	}

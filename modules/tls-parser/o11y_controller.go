@@ -44,7 +44,7 @@ func prepareResponse[T model.TLSDetails | []model.TLSConnection](w http.Response
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(out)
 	if err != nil {
-		slog.Info("[api] Cannot prepare stats response", "Error", err)
+		slog.Error("[api] Cannot prepare stats response", "Error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

@@ -22,7 +22,7 @@ func (controller *Controller) TLSConnectionHandler(w http.ResponseWriter, req *h
 		if !reflect.DeepEqual(details, model.TLSDetails{}) {
 			err := json.NewEncoder(w).Encode(details)
 			if err != nil {
-				slog.Info("[api] Cannot prepare connection details response", "Error", err)
+				slog.Error("[api] Cannot prepare connection details response", "Error", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		} else {
@@ -33,7 +33,7 @@ func (controller *Controller) TLSConnectionHandler(w http.ResponseWriter, req *h
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(controller.service.filterConnections(req.URL.Query()))
 		if err != nil {
-			slog.Info("[api] Cannot prepare connections response", "Error", err)
+			slog.Error("[api] Cannot prepare connections response", "Error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}

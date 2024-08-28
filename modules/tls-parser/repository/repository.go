@@ -31,7 +31,7 @@ func (repository *Repository) Query(from time.Time, to time.Time) []model.TLSCon
 
 	result, err := repository.DbConnectionHandler.Query(&query)
 	if err != nil {
-		slog.Info("[db:tls_connections:Query] Error", "Error", err)
+		slog.Error("[db:tls_connections:Query] Error", "Error", err)
 		return []model.TLSConnection{}
 	}
 	return result
@@ -40,14 +40,14 @@ func (repository *Repository) Query(from time.Time, to time.Time) []model.TLSCon
 func (repository *Repository) UpsertConnection(key string, value *model.TLSConnection) {
 	err := repository.DbConnectionHandler.Upsert(key, value)
 	if err != nil {
-		slog.Info("[db:tls_connections:Upsert] Error", "Error", err)
+		slog.Error("[db:tls_connections:Upsert] Error", "Error", err)
 	}
 }
 
 func (repository *Repository) Read(key string) model.TLSDetails {
 	result, err := repository.DbDetailsHandler.Read(key)
 	if err != nil {
-		slog.Info("[db:tls_details:Read] Warn", "Error", err)
+		slog.Error("[db:tls_details:Read] Warn", "Error", err)
 		//can happen, silent
 		return model.TLSDetails{}
 	}
@@ -61,6 +61,6 @@ func (repository *Repository) UpsertDetails(key string, value *model.TLSDetails,
 	fn(value, &old)
 	err := repository.DbDetailsHandler.Upsert(key, value)
 	if err != nil {
-		slog.Info("[db:tls_details:Upsert] Error", "Error", err)
+		slog.Error("[db:tls_details:Upsert] Error", "Error", err)
 	}
 }

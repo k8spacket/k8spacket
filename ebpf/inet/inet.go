@@ -5,17 +5,18 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
+	"log/slog"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/cilium/ebpf/link"
 	"github.com/cilium/ebpf/perf"
 	"github.com/cilium/ebpf/rlimit"
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
-	k8spacket_log "github.com/k8spacket/k8spacket/log"
 	"github.com/k8spacket/k8spacket/modules"
-	"net"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 /*
@@ -35,32 +36,32 @@ type InetEbpf struct {
 
 func (inetEbpf *InetEbpf) Init() {
 
-	k8spacket_log.LOGGER.Printf("INIT inet")
+	slog.Info("INIT inet")
 	// Allow the current process to lock more memory than the default for eBPF resources. Default value is 64KB
 	// https://prototype-kernel.readthedocs.io/en/latest/bpf/troubleshooting.html#memory-ulimits
 	// requires on kernels < 5.11 to remove memlock (error: failed to set memlock rlimit: operation not permitted)
 	if err := rlimit.RemoveMemlock(); err != nil {
-		k8spacket_log.LOGGER.Printf("[inet] Remove memlock: %v", err)
+		slog.Error("[inet] Remove memlock", "Error", err)
 	}
 
 	// Load pre-compiled programs and maps into the kernel.
 	objs := bpfObjects{}
 	if err := loadBpfObjects(&objs, nil); err != nil {
-		k8spacket_log.LOGGER.Printf("[inet] Loading objects: %v", err)
+		slog.Error("[inet] Loading objects", "Error", err)
 	}
 	defer objs.Close()
 
 	// attach the eBPF program to the tracepoint sock/inet_sock_set_state
 	ln, err := link.Tracepoint("sock", "inet_sock_set_state", objs.bpfPrograms.InetSockSetState, nil)
 	if err != nil {
-		k8spacket_log.LOGGER.Printf("[inet] Cannot attach tracepoint: %v", err)
+		slog.Error("[inet] Cannot attach tracepoint", "Error", err)
 	}
 	defer ln.Close()
 
 	// create new reader for perf events
 	rd, err := perf.NewReader(objs.bpfMaps.Events, os.Getpagesize())
 	if err != nil {
-		k8spacket_log.LOGGER.Printf("[inet] Creating perf event reader: %s", err)
+		slog.Error("[inet] Creating perf event reader", "Error", err)
 	}
 	defer rd.Close()
 
@@ -71,16 +72,16 @@ func (inetEbpf *InetEbpf) Init() {
 			record, err := rd.Read()
 			if err != nil {
 				if errors.Is(err, perf.ErrClosed) {
-					k8spacket_log.LOGGER.Println("[inet] Received signal, exiting..")
+					slog.Info("[inet] Received signal, exiting..")
 					return
 				}
-				k8spacket_log.LOGGER.Printf("[inet] Reading from reader: %s", err)
+				slog.Error("[inet] Reading from reader", "Error", err)
 				continue
 			}
 
 			// Parse the perf event into a go bpfEvent structure.
 			if err := binary.Read(bytes.NewBuffer(record.RawSample), binary.LittleEndian, &event); err != nil {
-				k8spacket_log.LOGGER.Printf("[inet] Parsing perf event: %s", err)
+				slog.Error("[inet] Parsing perf event", "Error", err)
 				continue
 			}
 
@@ -94,7 +95,7 @@ func (inetEbpf *InetEbpf) Init() {
 
 	<-ctx.Done()
 
-	k8spacket_log.LOGGER.Println("[inet] Closed gracefully")
+	slog.Info("[inet] Closed gracefully")
 }
 
 func distribute(event bpfEvent, inet *InetEbpf) {

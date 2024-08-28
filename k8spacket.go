@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/k8spacket/k8spacket/broker"
 	"github.com/k8spacket/k8spacket/ebpf"
-	k8spacket_log "github.com/k8spacket/k8spacket/log"
 	"github.com/k8spacket/k8spacket/modules/nodegraph"
 	_ "github.com/k8spacket/k8spacket/modules/nodegraph"
 	_ "github.com/k8spacket/k8spacket/modules/tls-parser"
@@ -22,7 +22,6 @@ import (
 )
 
 func main() {
-	k8spacket_log.BuildLogger()
 
 	nodegraphListener := nodegraph.Init()
 	tlsParserListener := tls_parser.Init()
@@ -38,13 +37,13 @@ func main() {
 
 func startHttpServer() {
 	listenerPort := os.Getenv("K8S_PACKET_TCP_LISTENER_PORT")
-	k8spacket_log.LOGGER.Printf("[api] Serving requests on port %s", listenerPort)
+	slog.Info("[api] Serving requests", "Port", listenerPort)
 
 	srv := &http.Server{Addr: fmt.Sprintf(":%s", listenerPort)}
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
 		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			k8spacket_log.LOGGER.Fatalf("[api] Cannot start ListenAndServe", "Error", err)
+			slog.Error("[api] Cannot start ListenAndServe", "Error", err)
 		}
 
 	}()
@@ -54,7 +53,7 @@ func startHttpServer() {
 	defer stop()
 	<-ctx.Done()
 	if err := srv.Shutdown(ctx); err != nil {
-		k8spacket_log.LOGGER.Fatalf("[graceful] Server shutdown failed:%+v", err)
+		slog.Error("[graceful] Server shutdown failed", "Error", err)
 	}
-	k8spacket_log.LOGGER.Print("[graceful] Application closed gracefully")
+	slog.Info("[graceful] Application closed gracefully")
 }
