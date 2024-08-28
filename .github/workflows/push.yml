@@ -12,5 +12,6 @@ jobs:
           fail_ci_if_error: true # optional (default = false)
           flags: unittests # optional
           verbose: true # optional (default = false)
+        run: make test
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
