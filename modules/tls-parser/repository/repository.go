@@ -4,7 +4,6 @@ import (
 	"github.com/k8spacket/k8spacket/modules/db"
 	tls_parser_log "github.com/k8spacket/k8spacket/modules/tls-parser/log"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
-	"github.com/timshannon/bolthold"
 	"time"
 )
 
@@ -15,8 +14,7 @@ type Repository struct {
 
 func (repository *Repository) Query(from time.Time, to time.Time) []model.TLSConnection {
 
-	query := *bolthold.Where("Src").MatchFunc(func(ra *bolthold.RecordAccess) (bool, error) {
-		record := ra.Record().(*model.TLSConnection)
+	query := repository.DbConnectionHandler.QueryMatchFunc("Src", func(record *model.TLSConnection) (bool, error) {
 		valid := true
 		if !from.IsZero() {
 			valid = record.LastSeen.After(from) &&

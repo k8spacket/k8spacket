@@ -4,7 +4,6 @@ import (
 	"github.com/k8spacket/k8spacket/modules/db"
 	nodegraph_log "github.com/k8spacket/k8spacket/modules/nodegraph/log"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
-	"github.com/timshannon/bolthold"
 	"regexp"
 	"time"
 )
@@ -24,8 +23,7 @@ func (repository *Repository) Read(key string) model.ConnectionItem {
 
 func (repository *Repository) Query(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
 
-	query := *bolthold.Where("Src").MatchFunc(func(ra *bolthold.RecordAccess) (bool, error) {
-		record := ra.Record().(*model.ConnectionItem)
+	query := repository.DbHandler.QueryMatchFunc("Src", func(record *model.ConnectionItem) (bool, error) {
 		valid := true
 		if !from.IsZero() {
 			valid = record.LastSeen.After(from) &&

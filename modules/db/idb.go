@@ -7,8 +7,9 @@ import (
 )
 
 type IDBHandler[T tls_model.TLSDetails | tls_model.TLSConnection | tcp_model.ConnectionItem] interface {
-	Close() error
-	Read(key string) (T, error)
 	Query(query *bolthold.Query) ([]T, error)
+	QueryMatchFunc(field string, matchFunc func(*T) (bool, error)) bolthold.Query
+	Read(key string) (T, error)
 	Upsert(key string, value T) error
+	Close() error
 }

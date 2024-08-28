@@ -10,6 +10,7 @@ require (
 	github.com/likexian/whois v1.15.4
 	github.com/oschwald/geoip2-golang v1.11.0
 	github.com/prometheus/client_golang v1.20.2
+	github.com/stretchr/testify v1.9.0
 	github.com/timshannon/bolthold v0.0.0-20240314194003-30aac6950928
 	github.com/vishvananda/netlink v1.3.0
 	go.etcd.io/bbolt v1.3.11
@@ -40,6 +41,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oschwald/maxminddb-golang v1.13.1 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
