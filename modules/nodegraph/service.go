@@ -74,8 +74,6 @@ func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, err
 	var in []model.ConnectionItem
 	var connectionItems = make(map[string]model.ConnectionItem)
 
-	fmt.Println(k8spacketIps)
-
 	for _, ip := range k8spacketIps {
 		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s:%s/nodegraph/connections?%s", ip, os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), r.URL.Query().Encode()), nil)
 		resp, err := service.httpClient.Do(req)
