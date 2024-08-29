@@ -23,10 +23,9 @@ var dbState = []model.ConnectionItem {
 	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour * 1000)},
 }
 
-var queryResult []model.ConnectionItem
-
 type mockDBHandler struct {
 	DBHandler db.IDBHandler[model.ConnectionItem]
+	queryResult []model.ConnectionItem
 }
 
 func (mock *mockDBHandler) Read(key string) (model.ConnectionItem, error) {
@@ -42,18 +41,18 @@ func (mock *mockDBHandler) Close() error {
 
 
 func (mock *mockDBHandler) Query(query *bolthold.Query) ([]model.ConnectionItem, error) {
-	if queryResult[0].LastSeen.After(time.Now().Add(time.Hour * 999)) {
+	if mock.queryResult[0].LastSeen.After(time.Now().Add(time.Hour * 999)) {
 		return []model.ConnectionItem{}, errors.New("error")
 	}
-	return queryResult, nil
+	return mock.queryResult, nil
 }
 
 func (mock *mockDBHandler) QueryMatchFunc(field string, matchFunc func(*model.ConnectionItem) (bool, error)) bolthold.Query {
-	queryResult = []model.ConnectionItem{}
+	mock.queryResult = []model.ConnectionItem{}
 	for _, item := range dbState {
 		matched, _ := matchFunc(&item)
 		if matched {
-			queryResult = append(queryResult, item)
+			mock.queryResult = append(mock.queryResult, item)
 		}
 	}
 
@@ -121,7 +120,7 @@ func TestQuery(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {
-
+			
 			result := repository.Query(test.from, test.to, test.patternNs, test.patternIn, test.patternEx)
 
 			assert.EqualValues(t, test.want, result)
