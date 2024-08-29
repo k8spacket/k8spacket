@@ -11,7 +11,7 @@ build:
 	go build .
 
 test:
-	go test -v ./... -coverprofile=coverage.out
+	K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v ./... -coverprofile=coverage.out
 
 run:
 	go run k8spacket.go

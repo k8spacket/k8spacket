@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/k8spacket/k8s-api/v2"
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
+	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 )
 
 func LoadEbpf(broker broker.IBroker) {
@@ -50,7 +50,7 @@ func interfacesRefresher(tc ebpf_tc.TcEbpf) {
 			}
 			if refreshK8sInfo {
 				// there are some new workloads in the cluster and need to update info about k8s resources
-				ebpf_tools.K8sInfo = k8s.FetchK8SInfo()
+				ebpf_tools.K8sInfo = k8sclient.FetchK8SInfo()
 			}
 			currentInterfaces = interfaces
 		}

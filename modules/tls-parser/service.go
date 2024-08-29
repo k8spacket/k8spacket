@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/k8spacket/k8s-api/v2"
+	"github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/certificate"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
@@ -22,6 +22,7 @@ import (
 type Service struct {
 	repo        repository.IRepository
 	certificate certificate.ICertificate
+	k8sClient   k8sclient.IK8SClient
 }
 
 func (service *Service) storeInDatabase(tlsConnection *model.TLSConnection, tlsDetails *model.TLSDetails) {
@@ -65,7 +66,7 @@ func (service *Service) buildConnectionsResponse(url string) ([]model.TLSConnect
 	resultFunc := func(destination, source []model.TLSConnection) []model.TLSConnection {
 		return append(destination, source...)
 	}
-	return buildResponse(url, []model.TLSConnection{}, resultFunc)
+	return buildResponse(service, url, []model.TLSConnection{}, resultFunc)
 }
 
 func (service *Service) buildDetailsResponse(url string) (model.TLSDetails, error) {
@@ -76,11 +77,11 @@ func (service *Service) buildDetailsResponse(url string) (model.TLSDetails, erro
 			return destination
 		}
 	}
-	return buildResponse(url, model.TLSDetails{}, resultFunc)
+	return buildResponse(service, url, model.TLSDetails{}, resultFunc)
 }
 
-func buildResponse[T model.TLSDetails | []model.TLSConnection](url string, t T, resultFunc func(d T, s T) T) (T, error) {
-	var k8spacketIps = k8s.GetPodIPsBySelectors(os.Getenv("K8S_PACKET_API_FIELD_SELECTOR"), os.Getenv("K8S_PACKET_API_LABEL_SELECTOR"))
+func buildResponse[T model.TLSDetails | []model.TLSConnection](service *Service, url string, t T, resultFunc func(d T, s T) T) (T, error) {
+	var k8spacketIps = service.k8sClient.GetPodIPsBySelectors(os.Getenv("K8S_PACKET_API_FIELD_SELECTOR"), os.Getenv("K8S_PACKET_API_LABEL_SELECTOR"))
 
 	var in T
 	out := t

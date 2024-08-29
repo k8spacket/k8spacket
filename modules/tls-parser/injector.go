@@ -1,13 +1,15 @@
 package tlsparser
 
 import (
+	"net/http"
+
+	"github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/certificate"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/prometheus"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/repository"
-	"net/http"
 )
 
 func Init() modules.IListener[modules.TLSEvent] {
@@ -18,7 +20,7 @@ func Init() modules.IListener[modules.TLSEvent] {
 	handlerDetails, _ := db.New[model.TLSDetails]("tls_details")
 	repo := &repository.Repository{DbConnectionHandler: handlerConnections, DbDetailsHandler: handlerDetails}
 	cert := &certificate.Certificate{}
-	service := &Service{repo, cert}
+	service := &Service{repo, cert, &k8sclient.K8SClient{}}
 	controller := &Controller{service}
 	o11yController := &O11yController{service}
 

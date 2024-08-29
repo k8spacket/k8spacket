@@ -1,13 +1,16 @@
 package nodegraph
 
 import (
+	"net/http"
+
+	httpclient "github.com/k8spacket/k8spacket/external/http"
+	"github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/prometheus"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/repository"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/stats"
-	"net/http"
 )
 
 func Init() modules.IListener[modules.TCPEvent] {
@@ -17,7 +20,7 @@ func Init() modules.IListener[modules.TCPEvent] {
 	handler, _ := db.New[model.ConnectionItem]("tcp_connections")
 	repo := &repository.Repository{DbHandler: handler}
 	factory := &stats.Factory{}
-	service := &Service{repo, factory}
+	service := &Service{repo, factory, &httpclient.HttpClient{}, &k8sclient.K8SClient{}}
 	controller := &Controller{service}
 	o11yController := &O11yController{service}
 

@@ -6,7 +6,6 @@ require (
 	github.com/cilium/ebpf v0.16.0
 	github.com/grantae/certinfo v0.0.0-20170412194111-59d56a35515b
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf
-	github.com/k8spacket/k8s-api/v2 v2.0.5
 	github.com/likexian/whois v1.15.4
 	github.com/oschwald/geoip2-golang v1.11.0
 	github.com/prometheus/client_golang v1.20.2
@@ -15,6 +14,9 @@ require (
 	github.com/vishvananda/netlink v1.3.0
 	go.etcd.io/bbolt v1.3.11
 	golang.org/x/sys v0.24.0
+	k8s.io/api v0.31.0
+	k8s.io/apimachinery v0.31.0
+	k8s.io/client-go v0.31.0
 )
 
 require (
@@ -57,9 +59,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.31.0 // indirect
-	k8s.io/apimachinery v0.31.0 // indirect
-	k8s.io/client-go v0.31.0 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240826222958-65a50c78dec5 // indirect
 	k8s.io/utils v0.0.0-20240821151609-f90d01438635 // indirect

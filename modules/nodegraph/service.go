@@ -13,7 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/k8spacket/k8s-api/v2"
+	httpclient "github.com/k8spacket/k8spacket/external/http"
+	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/repository"
@@ -23,13 +24,14 @@ import (
 type Service struct {
 	repo    repository.IRepository[model.ConnectionItem]
 	factory stats.IFactory
+	httpClient  httpclient.IHttpClient
+	k8sClient k8sclient.IK8SClient  
 }
 
 var connectionItemsMutex = sync.RWMutex{}
 
 func (service *Service) update(src string, srcName string, srcNamespace string, dst string, dstName string, dstNamespace string, persistent bool, bytesSent float64, bytesReceived float64, duration float64) {
 	connectionItemsMutex.Lock()
-	//TODO: here can be problem with HashId() because is not override in IRepository
 	var id = strconv.Itoa(int(db.HashId(fmt.Sprintf("%s-%s", src, dst))))
 	var connection = service.repo.Read(id)
 	if (model.ConnectionItem{} == connection) {
@@ -60,20 +62,23 @@ func (service *Service) getConnections(from time.Time, to time.Time, patternNs *
 		"patternNs", patternNs,
 		"patternIn", patternIn,
 		"patternEx", patternEx,
-		"from", from,
-		"to", to)
+		"from", from.Format(time.DateTime),
+		"to", to.Format(time.DateTime))
 
 	return service.repo.Query(from, to, patternNs, patternIn, patternEx)
 }
 
 func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, error) {
-	var k8spacketIps = k8s.GetPodIPsBySelectors(os.Getenv("K8S_PACKET_API_FIELD_SELECTOR"), os.Getenv("K8S_PACKET_API_LABEL_SELECTOR"))
+	var k8spacketIps = service.k8sClient.GetPodIPsBySelectors(os.Getenv("K8S_PACKET_API_FIELD_SELECTOR"), os.Getenv("K8S_PACKET_API_LABEL_SELECTOR"))
 
 	var in []model.ConnectionItem
 	var connectionItems = make(map[string]model.ConnectionItem)
 
+	fmt.Println(k8spacketIps)
+
 	for _, ip := range k8spacketIps {
-		resp, err := http.Get(fmt.Sprintf("http://%s:%s/nodegraph/connections?%s", ip, os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), r.URL.Query().Encode()))
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s:%s/nodegraph/connections?%s", ip, os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), r.URL.Query().Encode()), nil)
+		resp, err := service.httpClient.Do(req)
 
 		if err != nil {
 			slog.Error("[api] Cannot get stats", "Error", err)
