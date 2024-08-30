@@ -3,7 +3,8 @@ package nodegraph
 import (
 	"net/http"
 
-	httpclient "github.com/k8spacket/k8spacket/external/http"
+	"github.com/k8spacket/k8spacket/external/handlerio"
+	"github.com/k8spacket/k8spacket/external/http"
 	"github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/k8spacket/k8spacket/modules/db"
@@ -20,7 +21,7 @@ func Init() modules.IListener[modules.TCPEvent] {
 	handler, _ := db.New[model.ConnectionItem]("tcp_connections")
 	repo := &repository.Repository{DbHandler: handler}
 	factory := &stats.Factory{}
-	service := &Service{repo, factory, &httpclient.HttpClient{}, &k8sclient.K8SClient{}}
+	service := &Service{repo, factory, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &handlerio.HandlerIO{}}
 	controller := &Controller{service}
 	o11yController := &O11yController{service}
 

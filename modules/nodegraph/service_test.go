@@ -8,10 +8,12 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"regexp"
 	"testing"
 	"time"
 
+	"github.com/k8spacket/k8spacket/external/handlerio"
 	httpclient "github.com/k8spacket/k8spacket/external/http"
 	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
@@ -21,9 +23,9 @@ import (
 )
 
 var dbState = []model.ConnectionItem {
-	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour * -1), Src: "test"},
-	model.ConnectionItem{LastSeen: time.Now(), SrcNamespace: "test", SrcName: "test"},
-	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour), DstNamespace: "test", Dst: "test"},
+	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour * -1), Src: "test", ConnCount: 10, ConnPersistent: 3},
+	model.ConnectionItem{LastSeen: time.Now(), SrcNamespace: "test", SrcName: "test", ConnCount: 4, ConnPersistent: 0},
+	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour), DstNamespace: "test", Dst: "test", ConnCount: 101, ConnPersistent: 77},
 }
 
 type mockRepository struct {
@@ -96,6 +98,26 @@ func (br *BrokenReader) Close() error {
     return fmt.Errorf("failed closing")
 }
 
+type mockHandlerIO struct {
+	handlerio.IHandlerIO
+}
+
+func (mockHandlerIO *mockHandlerIO) ReadFile(name string) ([]byte, error) {
+	return os.ReadFile("../../fields.json")
+}
+
+type Field struct {
+	FieldName string `json:"field_name"`
+	Type string `json:"type"`
+	Color string `json:"color"`
+	DisplayName string `json:"displayName"`
+}
+
+type Fields struct {
+	EdgesFields []Field `json:"edges_fields"`
+	NodesFields []Field `json:"nodes_fields"`
+}
+
 
 func TestGetConnections(t *testing.T) {
 
@@ -106,8 +128,7 @@ func TestGetConnections(t *testing.T) {
 	slog.SetDefault(logger)
 
 	mockRepository := &mockRepository{}
-	factory := &stats.Factory{}
-	service := &Service{mockRepository, factory, &httpclient.HttpClient{}, &k8sclient.K8SClient{}}
+	service := &Service{mockRepository, &stats.Factory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &handlerio.HandlerIO{}}
 
 	from := time.Now().Add(time.Hour * -1)
 	to := time.Now().Add(time.Hour)
@@ -138,8 +159,7 @@ func TestUpdate(t *testing.T) {
 		t.Run(test.item.Src, func(t *testing.T) {
 
 		mockRepository := &mockRepository{result: test.item}
-		factory := &stats.Factory{}
-		service := &Service{mockRepository, factory, &httpclient.HttpClient{}, &k8sclient.K8SClient{}}
+		service := &Service{mockRepository, &stats.Factory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &handlerio.HandlerIO{}}
 
 		service.update("src", "srcName", "srcNs", "dst", "dstName", "dstNs", true, 100, 200, 1)
 
@@ -167,24 +187,23 @@ func TestBuildO11yResponse(t *testing.T) {
 
 	{"ok", &model.NodeGraph{
 		Nodes:[]model.Node{
-			model.Node{Id:"", Title:"test", SubTitle:"", MainStat:"all: N/A", SecondaryStat:"persistent: N/A", Arc1:0, Arc2:0, Arc3:0}, 
-			model.Node{Id:"test", Title:"", SubTitle:"test", MainStat:"all: N/A", SecondaryStat:"persistent: N/A", Arc1:0, Arc2:0, Arc3:0}, 
-			model.Node{Id:"test", Title:"", SubTitle:"test", MainStat:"all: N/A", SecondaryStat:"persistent: N/A", Arc1:0, Arc2:0, Arc3:0}, 
-			model.Node{Id:"", Title:"test", SubTitle:"", MainStat:"all: N/A", SecondaryStat:"persistent: N/A", Arc1:0, Arc2:0, Arc3:0}, 
-			model.Node{Id:"", Title:"test", SubTitle:"", MainStat:"all: N/A", SecondaryStat:"persistent: N/A", Arc1:0, Arc2:0, Arc3:0}, 
-			model.Node{Id:"", Title:"test", SubTitle:"", MainStat:"all: N/A", SecondaryStat:"persistent: N/A", Arc1:0, Arc2:0, Arc3:0}}, 
+			model.Node{Id:"test", Title:"", SubTitle:"test", MainStat:"all: 101", SecondaryStat:"persistent: 77", Arc1:0.7623762376237624, Arc2:0.2376237623762376, Arc3:0}, 
+			model.Node{Id:"", Title:"", SubTitle:"", MainStat:"all: 14", SecondaryStat:"persistent: 3", Arc1:0.21428571428571427, Arc2:0.7857142857142857, Arc3:0}, 
+			model.Node{Id:"", Title:"", SubTitle:"", MainStat:"all: 14", SecondaryStat:"persistent: 3", Arc1:0.21428571428571427, Arc2:0.7857142857142857, Arc3:0}, 
+			model.Node{Id:"", Title:"", SubTitle:"", MainStat:"all: 14", SecondaryStat:"persistent: 3", Arc1:0.21428571428571427, Arc2:0.7857142857142857, Arc3:0}, 
+			model.Node{Id:"", Title:"", SubTitle:"", MainStat:"all: 14", SecondaryStat:"persistent: 3", Arc1:0.21428571428571427, Arc2:0.7857142857142857, Arc3:0}, 
+			model.Node{Id:"test", Title:"", SubTitle:"test", MainStat:"all: 101", SecondaryStat:"persistent: 77", Arc1:0.7623762376237624, Arc2:0.2376237623762376, Arc3:0}}, 
 		Edges:[]model.Edge{
-			model.Edge{Id:"-test", Source:"", Target:"test", MainStat:"all: 0", SecondaryStat:"persistent: 0"}, 
-			model.Edge{Id:"test-", Source:"test", Target:"", MainStat:"all: 0", SecondaryStat:"persistent: 0"}, 
-			model.Edge{Id:"-", Source:"", Target:"", MainStat:"all: 0", SecondaryStat:"persistent: 0"}}}, ""},
+			model.Edge{Id:"test-", Source:"test", Target:"", MainStat:"all: 10", SecondaryStat:"persistent: 3"}, 
+			model.Edge{Id:"-", Source:"", Target:"", MainStat:"all: 4", SecondaryStat:"persistent: 0"}, 
+			model.Edge{Id:"-test", Source:"", Target:"test", MainStat:"all: 101", SecondaryStat:"persistent: 77"}}}, ""},
 			{"error", &model.NodeGraph{}, "[api] Cannot get stats"},
 			{"read", &model.NodeGraph{}, "[api] Cannot read stats response"},
 			{"parse", &model.NodeGraph{}, "[api] Cannot parse stats response"},
 	}
 
 	mockRepository := &mockRepository{}
-	factory := &stats.Factory{}
-	service := &Service{mockRepository, factory, &mockHttpClient{}, &mockK8SClient{}}
+	service := &Service{mockRepository, &stats.Factory{}, &mockHttpClient{}, &mockK8SClient{}, &handlerio.HandlerIO{}}
 
 	
 	for _, test := range tests {
@@ -198,11 +217,82 @@ func TestBuildO11yResponse(t *testing.T) {
 			r.URL.RawQuery = q.Encode()
 
 			result, _ := service.buildO11yResponse(r)
-
+			
 			assert.ElementsMatch(t, test.want.Nodes, result.Nodes)
 			assert.ElementsMatch(t, test.want.Edges, result.Edges)
 
 			assert.Contains(t, str.String(), test.err)
 		})
 	}
+}
+
+func TestGetO11yStatsConfig(t *testing.T) {
+
+	var tests = []struct {
+		statsType string
+		want     Fields
+	}{
+		{"connection", Fields{
+			EdgesFields:[]Field{
+				Field{FieldName:"id", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"source", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"target", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:""}}, 
+			NodesFields:[]Field{
+				Field{FieldName:"id", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"title", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"subTitle", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:"All connections "}, 
+				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:"Persistent connections "}, 
+				Field{FieldName:"arc__1", Type:"number", Color:"green", DisplayName:"Persistent connections"}, 
+				Field{FieldName:"arc__2", Type:"number", Color:"red", DisplayName:"Short-lived connections"}}}},
+		{"bytes", Fields{
+			EdgesFields:[]Field{
+				Field{FieldName:"id", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"source", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"target", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:""}}, 
+			NodesFields:[]Field{
+				Field{FieldName:"id", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"title", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"subTitle", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:"Bytes received "}, 
+				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:"Bytes responded "}, 
+				Field{FieldName:"arc__1", Type:"number", Color:"blue", DisplayName:"Bytes received"}, 
+				Field{FieldName:"arc__2", Type:"number", Color:"yellow", DisplayName:"Bytes responded"}}}},
+		{"duration", Fields{
+			EdgesFields:[]Field{
+				Field{FieldName:"id", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"source", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"target", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:""}}, 
+			NodesFields:[]Field{
+				Field{FieldName:"id", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"title", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"subTitle", Type:"string", Color:"", DisplayName:""}, 
+				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:"Average duration "}, 
+				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:"Max duration "}, 
+				Field{FieldName:"arc__1", Type:"number", Color:"purple", DisplayName:"Average duration"}, 
+				Field{FieldName:"arc__2", Type:"number", Color:"white", DisplayName:"Max duration"}}}},
+	}
+
+	for _, test := range tests {
+		t.Run(test.statsType, func(t *testing.T) {
+	
+		mockRepository := &mockRepository{}
+		mockHandlerIO := &mockHandlerIO{}
+		service := &Service{mockRepository, &stats.Factory{}, &mockHttpClient{}, &mockK8SClient{}, mockHandlerIO}
+
+		result, _ := service.getO11yStatsConfig(test.statsType)
+
+		resultStr := Fields{}
+		json.Unmarshal([]byte(result), &resultStr)
+
+		assert.EqualValues(t, test.want, resultStr)
+		})
+	}
+
 }

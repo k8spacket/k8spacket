@@ -13,8 +13,9 @@ import (
 	"sync"
 	"time"
 
-	httpclient "github.com/k8spacket/k8spacket/external/http"
-	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
+	"github.com/k8spacket/k8spacket/external/handlerio"
+	"github.com/k8spacket/k8spacket/external/http"
+	"github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/repository"
@@ -25,7 +26,8 @@ type Service struct {
 	repo    repository.IRepository[model.ConnectionItem]
 	factory stats.IFactory
 	httpClient  httpclient.IHttpClient
-	k8sClient k8sclient.IK8SClient  
+	k8sClient k8sclient.IK8SClient
+	handlerIO handlerio.IHandlerIO
 }
 
 var connectionItemsMutex = sync.RWMutex{}
@@ -113,7 +115,7 @@ func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, err
 }
 
 func (service *Service) getO11yStatsConfig(statsType string) (string, error) {
-	jsonFile, err := os.ReadFile("fields.json")
+	jsonFile, err := service.handlerIO.ReadFile("fields.json")
 	if err != nil {
 		slog.Error(err.Error())
 		return "", err
