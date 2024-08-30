@@ -23,7 +23,7 @@ import (
 )
 
 var dbState = []model.ConnectionItem {
-	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour * -1), Src: "test", ConnCount: 10, ConnPersistent: 3},
+	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour * -1), Src: "test", ConnCount: 10, ConnPersistent: 3, MaxDuration: 1},
 	model.ConnectionItem{LastSeen: time.Now(), SrcNamespace: "test", SrcName: "test", ConnCount: 4, ConnPersistent: 0},
 	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour), DstNamespace: "test", Dst: "test", ConnCount: 101, ConnPersistent: 77},
 }
@@ -99,10 +99,14 @@ func (br *BrokenReader) Close() error {
 }
 
 type mockHandlerIO struct {
+	scenario string
 	handlerio.IHandlerIO
 }
 
 func (mockHandlerIO *mockHandlerIO) ReadFile(name string) ([]byte, error) {
+	if(mockHandlerIO.scenario == "error") {
+		return []byte{}, errors.New("error")
+	}	
 	return os.ReadFile("../../fields.json")
 }
 
@@ -228,9 +232,16 @@ func TestBuildO11yResponse(t *testing.T) {
 
 func TestGetO11yStatsConfig(t *testing.T) {
 
+	var str bytes.Buffer
+
+	logger := slog.New(slog.NewTextHandler(&str, nil))
+
+	slog.SetDefault(logger)
+
 	var tests = []struct {
-		statsType string
+		scenario string
 		want     Fields
+		err      string
 	}{
 		{"connection", Fields{
 			EdgesFields:[]Field{
@@ -246,7 +257,7 @@ func TestGetO11yStatsConfig(t *testing.T) {
 				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:"All connections "}, 
 				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:"Persistent connections "}, 
 				Field{FieldName:"arc__1", Type:"number", Color:"green", DisplayName:"Persistent connections"}, 
-				Field{FieldName:"arc__2", Type:"number", Color:"red", DisplayName:"Short-lived connections"}}}},
+				Field{FieldName:"arc__2", Type:"number", Color:"red", DisplayName:"Short-lived connections"}}}, ""},
 		{"bytes", Fields{
 			EdgesFields:[]Field{
 				Field{FieldName:"id", Type:"string", Color:"", DisplayName:""}, 
@@ -261,7 +272,7 @@ func TestGetO11yStatsConfig(t *testing.T) {
 				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:"Bytes received "}, 
 				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:"Bytes responded "}, 
 				Field{FieldName:"arc__1", Type:"number", Color:"blue", DisplayName:"Bytes received"}, 
-				Field{FieldName:"arc__2", Type:"number", Color:"yellow", DisplayName:"Bytes responded"}}}},
+				Field{FieldName:"arc__2", Type:"number", Color:"yellow", DisplayName:"Bytes responded"}}}, ""},
 		{"duration", Fields{
 			EdgesFields:[]Field{
 				Field{FieldName:"id", Type:"string", Color:"", DisplayName:""}, 
@@ -276,22 +287,25 @@ func TestGetO11yStatsConfig(t *testing.T) {
 				Field{FieldName:"mainStat", Type:"string", Color:"", DisplayName:"Average duration "}, 
 				Field{FieldName:"secondaryStat", Type:"string", Color:"", DisplayName:"Max duration "}, 
 				Field{FieldName:"arc__1", Type:"number", Color:"purple", DisplayName:"Average duration"}, 
-				Field{FieldName:"arc__2", Type:"number", Color:"white", DisplayName:"Max duration"}}}},
+				Field{FieldName:"arc__2", Type:"number", Color:"white", DisplayName:"Max duration"}}}, ""},
+		{"error", Fields{}, "\"Cannot read file\" Error=error"},
 	}
 
 	for _, test := range tests {
-		t.Run(test.statsType, func(t *testing.T) {
+		t.Run(test.scenario, func(t *testing.T) {
 	
 		mockRepository := &mockRepository{}
-		mockHandlerIO := &mockHandlerIO{}
+		mockHandlerIO := &mockHandlerIO{scenario: test.scenario}
 		service := &Service{mockRepository, &stats.Factory{}, &mockHttpClient{}, &mockK8SClient{}, mockHandlerIO}
 
-		result, _ := service.getO11yStatsConfig(test.statsType)
+		result, _ := service.getO11yStatsConfig(test.scenario)
 
 		resultStr := Fields{}
 		json.Unmarshal([]byte(result), &resultStr)
 
 		assert.EqualValues(t, test.want, resultStr)
+
+		assert.Contains(t, str.String(), test.err)
 		})
 	}
 

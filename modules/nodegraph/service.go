@@ -117,7 +117,7 @@ func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, err
 func (service *Service) getO11yStatsConfig(statsType string) (string, error) {
 	jsonFile, err := service.handlerIO.ReadFile("fields.json")
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error("Cannot read file", "Error", err.Error())
 		return "", err
 	}
 
@@ -139,7 +139,7 @@ func prepareConnections(connectionItems map[string]model.ConnectionItem, connect
 	for _, conn := range connectionItems {
 		var connEndpointSrc = connectionEndpoints[conn.Src]
 		if (model.ConnectionEndpoint{} == connEndpointSrc) {
-			connEndpointSrc = *&model.ConnectionEndpoint{conn.Src, conn.SrcName, conn.SrcNamespace, 0, 0, 0, 0, 0, 0}
+			connEndpointSrc = *&model.ConnectionEndpoint{Ip: conn.Src, Name: conn.SrcName, Namespace: conn.SrcNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
 		}
 		connEndpointSrc.BytesSent += conn.BytesSent
 		connEndpointSrc.BytesReceived += conn.BytesReceived
@@ -147,7 +147,7 @@ func prepareConnections(connectionItems map[string]model.ConnectionItem, connect
 
 		var connEndpointDst = connectionEndpoints[conn.Dst]
 		if (model.ConnectionEndpoint{} == connEndpointDst) {
-			connEndpointDst = *&model.ConnectionEndpoint{conn.Dst, conn.DstName, conn.DstNamespace, 0, 0, 0, 0, 0, 0}
+			connEndpointDst = *&model.ConnectionEndpoint{Ip: conn.Dst, Name: conn.DstName, Namespace: conn.DstNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
 		}
 		connEndpointDst.ConnCount += conn.ConnCount
 		connEndpointDst.ConnPersistent += conn.ConnPersistent
