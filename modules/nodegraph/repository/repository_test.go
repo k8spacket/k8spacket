@@ -14,7 +14,7 @@ import (
 	"github.com/timshannon/bolthold"
 )
 
-var dbState = []model.ConnectionItem {
+var dbState = []model.ConnectionItem{
 	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour * -1), Src: "test"},
 	model.ConnectionItem{LastSeen: time.Now(), SrcNamespace: "test", SrcName: "test"},
 	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour), DstNamespace: "test", Dst: "test"},
@@ -24,12 +24,12 @@ var dbState = []model.ConnectionItem {
 }
 
 type mockDBHandler struct {
-	DBHandler db.IDBHandler[model.ConnectionItem]
+	DBHandler   db.IDBHandler[model.ConnectionItem]
 	queryResult []model.ConnectionItem
 }
 
 func (mock *mockDBHandler) Read(key string) (model.ConnectionItem, error) {
-	if(key == "error") {
+	if key == "error" {
 		return model.ConnectionItem{}, errors.New("cannot read db")
 	}
 	return model.ConnectionItem{BytesSent: 300, BytesReceived: 100, Duration: 0.5}, nil
@@ -38,7 +38,6 @@ func (mock *mockDBHandler) Read(key string) (model.ConnectionItem, error) {
 func (mock *mockDBHandler) Close() error {
 	return nil
 }
-
 
 func (mock *mockDBHandler) Query(query *bolthold.Query) ([]model.ConnectionItem, error) {
 	if mock.queryResult[0].LastSeen.After(time.Now().Add(time.Hour * 999)) {
@@ -70,9 +69,9 @@ func (mock *mockDBHandler) Upsert(key string, value *model.ConnectionItem) error
 func TestRead(t *testing.T) {
 
 	var tests = []struct {
-		key string;
+		key  string
 		want model.ConnectionItem
-	} {
+	}{
 		{"key", model.ConnectionItem{BytesSent: 300, BytesReceived: 100, Duration: 0.5}},
 		{"error", model.ConnectionItem{}},
 	}
@@ -101,12 +100,12 @@ func TestQuery(t *testing.T) {
 	slog.SetDefault(logger)
 
 	var tests = []struct {
-		msg string;
-		from, to time.Time;
-		patternNs, patternIn, patternEx *regexp.Regexp;
-		want []model.ConnectionItem;
-		error string;
-	} {
+		msg                             string
+		from, to                        time.Time
+		patternNs, patternIn, patternEx *regexp.Regexp
+		want                            []model.ConnectionItem
+		error                           string
+	}{
 		{"from / to filter", time.Now().Add(time.Minute * -1), time.Now().Add(time.Minute), regexp.MustCompile(""), regexp.MustCompile(""), regexp.MustCompile(""), dbState[1:2], ""},
 		{"namespace filter", time.Now().Add(time.Hour * -3), time.Now().Add(time.Hour * 3), regexp.MustCompile("^test$"), regexp.MustCompile(""), regexp.MustCompile(""), dbState[1:3], ""},
 		{"include filter", time.Now().Add(time.Hour * -3), time.Now().Add(time.Hour * 3), regexp.MustCompile(""), regexp.MustCompile("test"), regexp.MustCompile(""), dbState[0:4], ""},
@@ -120,7 +119,7 @@ func TestQuery(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {
-			
+
 			result := repository.Query(test.from, test.to, test.patternNs, test.patternIn, test.patternEx)
 
 			assert.EqualValues(t, test.want, result)
@@ -137,12 +136,12 @@ func TestSet(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(&str, nil))
 
 	slog.SetDefault(logger)
-	
+
 	var tests = []struct {
-		key string;
-		item, want model.ConnectionItem;
-		error string;
-	} {
+		key        string
+		item, want model.ConnectionItem
+		error      string
+	}{
 		{"key", model.ConnectionItem{BytesReceived: 100}, model.ConnectionItem{BytesReceived: 101}, ""},
 		{"error", model.ConnectionItem{BytesReceived: 666}, model.ConnectionItem{BytesReceived: 666}, "[db:tcp_connections:Upsert] Error=error"},
 	}

@@ -11,7 +11,7 @@ func TestGetStats(t *testing.T) {
 	t.Parallel()
 	var tests = []struct {
 		statsType string
-		want  IStats
+		want      IStats
 	}{
 		{"bytes", &Bytes{}},
 		{"duration", &Duration{}},

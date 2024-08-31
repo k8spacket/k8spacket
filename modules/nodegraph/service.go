@@ -23,11 +23,11 @@ import (
 )
 
 type Service struct {
-	repo    repository.IRepository[model.ConnectionItem]
-	factory stats.IFactory
-	httpClient  httpclient.IHttpClient
-	k8sClient k8sclient.IK8SClient
-	handlerIO handlerio.IHandlerIO
+	repo       repository.IRepository[model.ConnectionItem]
+	factory    stats.IFactory
+	httpClient httpclient.IHttpClient
+	k8sClient  k8sclient.IK8SClient
+	handlerIO  handlerio.IHandlerIO
 }
 
 var connectionItemsMutex = sync.RWMutex{}

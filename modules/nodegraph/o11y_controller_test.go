@@ -54,12 +54,12 @@ func TestNodeGraphFieldsHandler(t *testing.T) {
 	var tests = []struct {
 		scenario string
 		want     string
-		status	 int
-		err		 string
+		status   int
+		err      string
 	}{
-		{"connection", "connection selected", http.StatusOK,""},
-		{"bytes", "bytes selected", http.StatusOK,""},
-		{"duration", "duration selected", http.StatusOK,""},
+		{"connection", "connection selected", http.StatusOK, ""},
+		{"bytes", "bytes selected", http.StatusOK, ""},
+		{"duration", "duration selected", http.StatusOK, ""},
 		{"error", "error", http.StatusInternalServerError, "error"},
 	}
 
@@ -94,11 +94,11 @@ func TestNodeGraphDataHandler(t *testing.T) {
 		want     model.NodeGraph
 		status   int
 		err      string
-	} {
+	}{
 		{"ok", response, http.StatusOK, ""},
 		{"error", model.NodeGraph{}, http.StatusInternalServerError, "error"},
 	}
-	
+
 	service := &mockService{}
 	o11yController := &O11yController{service: service}
 

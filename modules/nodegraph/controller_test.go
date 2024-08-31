@@ -20,9 +20,9 @@ var repo = []model.ConnectionItem{
 
 type mockService struct {
 	IService
-	from, to time.Time
+	from, to                        time.Time
 	patternNs, patternIn, patternEx string
-	client, server string
+	client, server                  string
 }
 
 func (mockService *mockService) getConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
@@ -35,14 +35,14 @@ func (mockService *mockService) getConnections(from time.Time, to time.Time, pat
 }
 
 func TestConnectionHandler(t *testing.T) {
-	
+
 	service := &mockService{}
 	controller := &Controller{service: service}
-	
+
 	req, err := http.NewRequest("GET", "/nodegraph/connections", nil)
-    if err != nil {
-        t.Fatal(err)
-    }
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	from := int64(1609506000000)
 	fromTime := time.Unix(from/1000, 0)
@@ -51,24 +51,24 @@ func TestConnectionHandler(t *testing.T) {
 	toTime := time.Unix(to/1000, 0)
 
 	q := req.URL.Query()
-    q.Add("from", strconv.FormatInt(from, 10))
+	q.Add("from", strconv.FormatInt(from, 10))
 	q.Add("to", strconv.FormatInt(to, 10))
 	q.Add("namespace", "ns")
 	q.Add("include", "in")
 	q.Add("exclude", "ex")
-    req.URL.RawQuery = q.Encode()
+	req.URL.RawQuery = q.Encode()
 
-    rr := httptest.NewRecorder()
-    handler := http.HandlerFunc(controller.ConnectionHandler)
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(controller.ConnectionHandler)
 
-    handler.ServeHTTP(rr, req)
+	handler.ServeHTTP(rr, req)
 
-    assert.EqualValues(t, rr.Code, http.StatusOK)
+	assert.EqualValues(t, rr.Code, http.StatusOK)
 
 	var response []model.ConnectionItem
 	json.Unmarshal([]byte(rr.Body.String()), &response)
 
-    assert.EqualValues(t, repo, response)
+	assert.EqualValues(t, repo, response)
 
 	assert.EqualValues(t, fromTime, service.from)
 	assert.EqualValues(t, toTime, service.to)

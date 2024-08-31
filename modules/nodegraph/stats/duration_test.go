@@ -9,9 +9,9 @@ import (
 
 func TestDurationGetConfig(t *testing.T) {
 	want := model.Config{Arc1: model.DisplayConfig{DisplayName: "Average duration", Color: "purple"},
-	Arc2:          model.DisplayConfig{DisplayName: "Max duration", Color: "white"},
-	MainStat:      model.DisplayConfig{DisplayName: "Average duration "},
-	SecondaryStat: model.DisplayConfig{DisplayName: "Max duration "}}
+		Arc2:          model.DisplayConfig{DisplayName: "Max duration", Color: "white"},
+		MainStat:      model.DisplayConfig{DisplayName: "Average duration "},
+		SecondaryStat: model.DisplayConfig{DisplayName: "Max duration "}}
 
 	duration := &Duration{}
 
