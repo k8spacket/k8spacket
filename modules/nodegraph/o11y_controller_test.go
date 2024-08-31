@@ -27,6 +27,9 @@ func (mockService *mockService) getO11yStatsConfig(statsType string) (string, er
 }
 
 func (mockService *mockService) buildO11yResponse(r *http.Request) (model.NodeGraph, error) {
+	if r.Header.Get("scenario") == "error" {
+		return model.NodeGraph{}, errors.New("error")
+	}
 	return response, nil
 }
 
@@ -85,22 +88,40 @@ func TestNodeGraphFieldsHandler(t *testing.T) {
 }
 
 func TestNodeGraphDataHandler(t *testing.T) {
+
+	var tests = []struct {
+		scenario string
+		want     model.NodeGraph
+		status   int
+		err      string
+	} {
+		{"ok", response, http.StatusOK, ""},
+		{"error", model.NodeGraph{}, http.StatusInternalServerError, "error"},
+	}
 	
 	service := &mockService{}
 	o11yController := &O11yController{service: service}
 
-	req, err := http.NewRequest("GET", "/nodegraph/api/graph/data", nil)
-	if err != nil {
-		t.Fatal(err)
+	for _, test := range tests {
+		t.Run(test.scenario, func(t *testing.T) {
+			t.Parallel()
+
+			req, err := http.NewRequest("GET", "/nodegraph/api/graph/data", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Set("scenario", test.scenario)
+
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(o11yController.NodeGraphDataHandler)
+			handler.ServeHTTP(rr, req)
+
+			assert.EqualValues(t, rr.Code, test.status)
+
+			var resultGraph model.NodeGraph
+			json.Unmarshal([]byte(rr.Body.String()), &resultGraph)
+
+			assert.EqualValues(t, test.want, resultGraph)
+		})
 	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(o11yController.NodeGraphDataHandler)
-	handler.ServeHTTP(rr, req)
-
-	assert.EqualValues(t, rr.Code, http.StatusOK)
-
-	var resultGraph model.NodeGraph
-	json.Unmarshal([]byte(rr.Body.String()), &resultGraph)
-
-	assert.EqualValues(t, response, resultGraph)
 }
