@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/k8spacket/k8spacket/external/k8s"
+	"github.com/k8spacket/k8spacket/external/network"
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/certificate"
@@ -19,7 +20,7 @@ func Init() modules.IListener[modules.TLSEvent] {
 	handlerConnections, _ := db.New[model.TLSConnection]("tls_connections")
 	handlerDetails, _ := db.New[model.TLSDetails]("tls_details")
 	repo := &repository.Repository{DbConnectionHandler: handlerConnections, DbDetailsHandler: handlerDetails}
-	cert := &certificate.Certificate{}
+	cert := &certificate.Certificate{Network: &network.Network{}}
 	service := &Service{repo, cert, &k8sclient.K8SClient{}}
 	controller := &Controller{service}
 	o11yController := &O11yController{service}

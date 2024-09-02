@@ -1,21 +1,20 @@
 package certificate
 
 import (
-	"crypto/tls"
-	"fmt"
 	"log/slog"
-	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/grantae/certinfo"
+	"github.com/k8spacket/k8spacket/external/network"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/prometheus"
 )
 
 type Certificate struct {
+	Network network.INetwork
 }
 
 func (certificate *Certificate) UpdateCertificateInfo(newValue *model.TLSDetails, oldValue *model.TLSDetails) {
@@ -25,7 +24,7 @@ func (certificate *Certificate) UpdateCertificateInfo(newValue *model.TLSDetails
 		newValue.Certificate = oldValue.Certificate
 		return
 	}
-	scrapeCertificate(newValue)
+	scrapeCertificate(certificate ,newValue)
 
 	if !newValue.Certificate.NotAfter.IsZero() {
 		prometheus.K8sPacketTLSCertificateExpirationMetric.WithLabelValues(
@@ -35,7 +34,7 @@ func (certificate *Certificate) UpdateCertificateInfo(newValue *model.TLSDetails
 	}
 }
 
-func scrapeCertificate(tlsDetails *model.TLSDetails) {
+func scrapeCertificate(certificate *Certificate, tlsDetails *model.TLSDetails) {
 	domain := tlsDetails.Domain
 	dst := tlsDetails.Dst
 	port := tlsDetails.Port
@@ -49,28 +48,19 @@ func scrapeCertificate(tlsDetails *model.TLSDetails) {
 		tlsDetails.Certificate.LastScrape = time.Now()
 		return
 	}
-	// check if domain is valid, if not use destination IP
-	if len(domain) > 0 {
-		_, err := net.LookupIP(domain)
-		if err != nil {
-			domain = dst
-		}
-	} else {
+	// check if domain is valid, if not - use destination IP
+	if len(domain) <= 0 || !certificate.Network.IsDomainReachable(domain) {
 		domain = dst
 	}
 
-	conf := &tls.Config{
-		InsecureSkipVerify: true,
-	}
-
-	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: 500 * time.Millisecond}, "tcp", fmt.Sprintf("%s:%d", domain, port), conf)
+	certs, err := certificate.Network.GetPeerCertificates(domain, port)
 	if err != nil {
 		slog.Error("[certificate scraping] Error in Dial",
 			"domain", domain,
 			"port", port,
 			"Trying with the default port...", "")
 		port = 443
-		conn, err = tls.DialWithDialer(&net.Dialer{Timeout: 500 * time.Millisecond}, "tcp", fmt.Sprintf("%s:%d", domain, port), conf)
+		certs, err = certificate.Network.GetPeerCertificates(domain, port)
 		if err != nil {
 			slog.Error("[certificate scraping] Error in Dial",
 				"domain", domain,
@@ -81,8 +71,7 @@ func scrapeCertificate(tlsDetails *model.TLSDetails) {
 			return
 		}
 	}
-	defer conn.Close()
-	certs := conn.ConnectionState().PeerCertificates
+
 	chain := ""
 	for _, cert := range certs {
 		if cert == certs[0] {
