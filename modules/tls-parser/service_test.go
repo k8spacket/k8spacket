@@ -172,9 +172,9 @@ func TestFilterConnections(t *testing.T) {
 		wantFrom, wantTo time.Time
 		error 	string
 	}{
-		{"correct", "1640998861000", "1675303322000", time.Time(time.Date(2022, time.January, 1, 2, 1, 1, 0, time.Local)), time.Time(time.Date(2023, time.February, 2, 3, 2, 2, 0, time.Local)), ""},
-		{"wrong from", "wrong from", "1675303322000", time.Time{}, time.Time(time.Date(2023, time.February, 2, 3, 2, 2, 0, time.Local)), "[api] cannot parse value"},
-		{"wrong to", "1640998861000", "wrong to", time.Time(time.Date(2022, time.January, 1, 2, 1, 1, 0, time.Local)), time.Time{}, "[api] cannot parse value"},
+		{"correct", "1640998861000", "1675303322000", time.Time(time.Date(2022, time.January, 1, 1, 1, 1, 0, time.UTC)), time.Time(time.Date(2023, time.February, 2, 2, 2, 2, 0, time.UTC)), ""},
+		{"wrong from", "wrong from", "1675303322000", time.Time{}, time.Time(time.Date(2023, time.February, 2, 2, 2, 2, 0, time.UTC)), "[api] cannot parse value"},
+		{"wrong to", "1640998861000", "wrong to", time.Time(time.Date(2022, time.January, 1, 1, 1, 1, 0, time.UTC)), time.Time{}, "[api] cannot parse value"},
 	}
 
 

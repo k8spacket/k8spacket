@@ -47,7 +47,7 @@ func (service *Service) filterConnections(query url.Values) []model.TLSConnectio
 		if err != nil {
 			slog.Error("[api] cannot parse value", "Error", err)
 		} else {
-			rangeFrom = time.UnixMilli(i)
+			rangeFrom = time.UnixMilli(i).UTC()
 		}
 	}
 
@@ -58,7 +58,7 @@ func (service *Service) filterConnections(query url.Values) []model.TLSConnectio
 		if err != nil {
 			slog.Error("[api] cannot parse value", "Error", err)
 		} else {
-			rangeTo = time.UnixMilli(i)
+			rangeTo = time.UnixMilli(i).UTC()
 		}
 	}
 
