@@ -3,11 +3,11 @@ package tlsparser
 import (
 	"net/http"
 
+	"github.com/k8spacket/k8spacket/external/db"
 	httpclient "github.com/k8spacket/k8spacket/external/http"
 	"github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/external/network"
 	"github.com/k8spacket/k8spacket/modules"
-	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/certificate"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/prometheus"

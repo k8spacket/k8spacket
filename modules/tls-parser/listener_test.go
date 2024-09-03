@@ -12,13 +12,13 @@ import (
 
 type mockService struct {
 	IService
-	client, server string
+	client, server     string
 	domain, usedCipher string
-	clientTLSVersions []string
+	clientTLSVersions  []string
 }
 
 func (mockService *mockService) storeInDatabase(tlsConnection *model.TLSConnection, tlsDetails *model.TLSDetails) {
-	
+
 	mockService.client = tlsConnection.Src
 	mockService.server = tlsConnection.Dst
 	mockService.domain = tlsConnection.Domain
@@ -37,10 +37,10 @@ func TestListen(t *testing.T) {
 	service := &mockService{}
 	listener := &Listener{service}
 
-	event := modules.TLSEvent{Client: modules.Address{Addr: "client"}, 
-		Server: modules.Address{Addr: "server"}, 
-		ServerName: "k8spacket.io", 
-		TlsVersions: []uint16{0x0303, 0x0302}, UsedTlsVersion: 0x0303, 
+	event := modules.TLSEvent{Client: modules.Address{Addr: "client"},
+		Server:      modules.Address{Addr: "server"},
+		ServerName:  "k8spacket.io",
+		TlsVersions: []uint16{0x0303, 0x0302}, UsedTlsVersion: 0x0303,
 		Ciphers: []uint16{0x0024, 0x0009, 0x000C}, UsedCipher: 0x0024}
 	listener.Listen(event)
 

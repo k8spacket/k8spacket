@@ -28,10 +28,10 @@ var dbState = []model.TLSConnection{
 var dbDetails = model.TLSDetails{Id: "id1", UsedTLSVersion: "TLS 1.2"}
 
 type mockRepository struct {
-	repo	repository.IRepository
+	repo             repository.IRepository
 	resultConnection model.TLSConnection
-	resultDetails model.TLSDetails
-	from, to time.Time
+	resultDetails    model.TLSDetails
+	from, to         time.Time
 }
 
 func (mockRepository *mockRepository) Query(from time.Time, to time.Time) []model.TLSConnection {
@@ -126,9 +126,8 @@ func (k8sClient *mockK8SClient) GetPodIPsBySelectors(fieldSelector string, label
 	return []string{"127.0.0.1"}
 }
 
-
 func TestStoreInDatabase(t *testing.T) {
-	
+
 	mockRepository := &mockRepository{}
 	mockCertificate := &mockCertificate{}
 
@@ -167,33 +166,31 @@ func TestFilterConnections(t *testing.T) {
 	slog.SetDefault(logger)
 
 	var tests = []struct {
-		
-		scenario, from, to   string
-		wantFrom, wantTo time.Time
-		error 	string
+		scenario, from, to string
+		wantFrom, wantTo   time.Time
+		error              string
 	}{
 		{"correct", "1640998861000", "1675303322000", time.Time(time.Date(2022, time.January, 1, 1, 1, 1, 0, time.UTC)), time.Time(time.Date(2023, time.February, 2, 2, 2, 2, 0, time.UTC)), ""},
 		{"wrong from", "wrong from", "1675303322000", time.Time{}, time.Time(time.Date(2023, time.February, 2, 2, 2, 2, 0, time.UTC)), "[api] cannot parse value"},
 		{"wrong to", "1640998861000", "wrong to", time.Time(time.Date(2022, time.January, 1, 1, 1, 1, 0, time.UTC)), time.Time{}, "[api] cannot parse value"},
 	}
 
-
-	mockRepository := &mockRepository{} 
+	mockRepository := &mockRepository{}
 
 	service := Service{mockRepository, &certificate.Certificate{}, &mockHttpClient{}, &k8sclient.K8SClient{}}
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
 
-		query := url.Values{}
-		query.Add("from", test.from)
-		query.Add("to", test.to)
+			query := url.Values{}
+			query.Add("from", test.from)
+			query.Add("to", test.to)
 
-		service.filterConnections(query)
+			service.filterConnections(query)
 
-		assert.EqualValues(t, test.wantFrom, mockRepository.from)
-		assert.EqualValues(t, test.wantTo, mockRepository.to)
-		assert.Contains(t, str.String(), test.error)
+			assert.EqualValues(t, test.wantFrom, mockRepository.from)
+			assert.EqualValues(t, test.wantTo, mockRepository.to)
+			assert.Contains(t, str.String(), test.error)
 
 		})
 	}
@@ -208,15 +205,14 @@ func TestBuildConnectionsResponse(t *testing.T) {
 	slog.SetDefault(logger)
 
 	var tests = []struct {
-		
 		scenario string
-		want []model.TLSConnection
-		error 	string
+		want     []model.TLSConnection
+		error    string
 	}{
 		{"ok", dbState, ""},
 		{"error", []model.TLSConnection{}, "[api] Cannot get stats"},
 		{"read", []model.TLSConnection{}, "[api] Cannot read stats response"},
-		{"parse", []model.TLSConnection{}, "[api] Cannot parse stats response"},	
+		{"parse", []model.TLSConnection{}, "[api] Cannot parse stats response"},
 	}
 
 	mockHttpClient := &mockHttpClient{}
@@ -227,12 +223,12 @@ func TestBuildConnectionsResponse(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
 
-		url := fmt.Sprintf("http://%%s:6676/tlsparser/connections/?scenario=%s", test.scenario)
+			url := fmt.Sprintf("http://%%s:6676/tlsparser/connections/?scenario=%s", test.scenario)
 
-		result, _ := service.buildConnectionsResponse(url)
+			result, _ := service.buildConnectionsResponse(url)
 
-		assert.EqualValues(t, test.want, result)
-		assert.Contains(t, str.String(), test.error)
+			assert.EqualValues(t, test.want, result)
+			assert.Contains(t, str.String(), test.error)
 
 		})
 	}
@@ -248,16 +244,15 @@ func TestBuildDetailsResponse(t *testing.T) {
 	slog.SetDefault(logger)
 
 	var tests = []struct {
-		
 		scenario string
-		want model.TLSDetails
-		error 	string
+		want     model.TLSDetails
+		error    string
 	}{
 		{"ok_detail", dbDetails, ""},
 		{"ok_detail_empty", model.TLSDetails{}, ""},
 		{"error", model.TLSDetails{}, "[api] Cannot get stats"},
 		{"read", model.TLSDetails{}, "[api] Cannot read stats response"},
-		{"parse", model.TLSDetails{}, "[api] Cannot parse stats response"},	
+		{"parse", model.TLSDetails{}, "[api] Cannot parse stats response"},
 	}
 
 	mockHttpClient := &mockHttpClient{}
@@ -268,15 +263,14 @@ func TestBuildDetailsResponse(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
 
-		url := fmt.Sprintf("http://%%s:6676/tlsparser/connections/%s?scenario=%s", "id1", test.scenario)
+			url := fmt.Sprintf("http://%%s:6676/tlsparser/connections/%s?scenario=%s", "id1", test.scenario)
 
-		result, _ := service.buildDetailsResponse(url)
+			result, _ := service.buildDetailsResponse(url)
 
-		assert.EqualValues(t, test.want, result)
-		assert.Contains(t, str.String(), test.error)
+			assert.EqualValues(t, test.want, result)
+			assert.Contains(t, str.String(), test.error)
 
 		})
 	}
 
 }
-

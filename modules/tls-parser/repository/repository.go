@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/k8spacket/k8spacket/modules/db"
+	"github.com/k8spacket/k8spacket/external/db"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 )
 

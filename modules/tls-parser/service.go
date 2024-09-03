@@ -23,7 +23,7 @@ import (
 type Service struct {
 	repo        repository.IRepository
 	certificate certificate.ICertificate
-	httpClient httpclient.IHttpClient
+	httpClient  httpclient.IHttpClient
 	k8sClient   k8sclient.IK8SClient
 }
 

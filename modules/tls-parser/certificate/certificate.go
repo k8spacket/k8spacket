@@ -24,7 +24,7 @@ func (certificate *Certificate) UpdateCertificateInfo(newValue *model.TLSDetails
 		newValue.Certificate = oldValue.Certificate
 		return
 	}
-	scrapeCertificate(certificate ,newValue)
+	scrapeCertificate(certificate, newValue)
 
 	if !newValue.Certificate.NotAfter.IsZero() {
 		prometheus.K8sPacketTLSCertificateExpirationMetric.WithLabelValues(

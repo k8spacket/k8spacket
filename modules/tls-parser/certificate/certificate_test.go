@@ -102,20 +102,20 @@ type mockNetwork struct {
 }
 
 func (mockNetwork *mockNetwork) IsDomainReachable(domain string) bool {
-	if(domain == "unreachable") {
+	if domain == "unreachable" {
 		return false
 	}
 	return true
 }
 
 func (mockNetwork *mockNetwork) GetPeerCertificates(address string, port uint16) ([]*x509.Certificate, error) {
-	if(port == 100) {
+	if port == 100 {
 		return []*x509.Certificate{}, errors.New("wrong port")
 	}
-	if(address == "unreachable") {
+	if address == "unreachable" {
 		return []*x509.Certificate{}, errors.New("unreachable")
 	}
-	
+
 	block, errBytes := pem.Decode([]byte(certPem))
 	if block == nil {
 		fmt.Println(errBytes)
@@ -129,38 +129,37 @@ func (mockNetwork *mockNetwork) GetPeerCertificates(address string, port uint16)
 	return []*x509.Certificate{x509Cert}, nil
 }
 
-
 func TestUpdateCertificateInfo(t *testing.T) {
 
 	os.Setenv("K8S_PACKET_TLS_CERTIFICATE_CACHE_TTL", "1h")
 
 	var tests = []struct {
-		scenario string
-		oldValue, newValue  model.TLSDetails
-		want string
+		scenario           string
+		oldValue, newValue model.TLSDetails
+		want               string
 	}{
 		{"empty old", model.TLSDetails{Certificate: model.Certificate{LastScrape: time.Now().Add(time.Hour * -2)}},
-		model.TLSDetails{Domain: "k8spacket.io", Port: 443, 
-			Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, want},
+			model.TLSDetails{Domain: "k8spacket.io", Port: 443,
+				Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, want},
 		{"ttl", model.TLSDetails{Certificate: model.Certificate{LastScrape: time.Now().Add(time.Minute * -2), ServerChain: want}},
-		model.TLSDetails{Domain: "k8spacket.io", Port: 443, 
-			Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, want},
+			model.TLSDetails{Domain: "k8spacket.io", Port: 443,
+				Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, want},
 		{"invalid port", model.TLSDetails{Certificate: model.Certificate{}},
-		model.TLSDetails{Domain: "k8spacket.io", Port: 0, 
-			Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, "UNAVAILABLE"},
+			model.TLSDetails{Domain: "k8spacket.io", Port: 0,
+				Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, "UNAVAILABLE"},
 		{"unreachable domain", model.TLSDetails{Certificate: model.Certificate{}},
-		model.TLSDetails{Domain: "unreachable", Dst: "reachable", Port: 443, 
-			Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, want},
+			model.TLSDetails{Domain: "unreachable", Dst: "reachable", Port: 443,
+				Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, want},
 		{"wrong port", model.TLSDetails{Certificate: model.Certificate{}},
-		model.TLSDetails{Domain: "unreachable", Dst: "reachable", Port: 100, 
-			Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, want},
+			model.TLSDetails{Domain: "unreachable", Dst: "reachable", Port: 100,
+				Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, want},
 		{"unreachable domain and IP", model.TLSDetails{Certificate: model.Certificate{}},
-		model.TLSDetails{Domain: "unreachable", Dst: "unreachable", Port: 100, 
-			Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, "UNAVAILABLE"},
+			model.TLSDetails{Domain: "unreachable", Dst: "unreachable", Port: 100,
+				Certificate: model.Certificate{NotBefore: time.Now().Add(time.Hour * -1), NotAfter: time.Now().Add(time.Hour * 1)}}, "UNAVAILABLE"},
 	}
-	
+
 	mockNetwork := &mockNetwork{}
-	
+
 	certificate := &Certificate{mockNetwork}
 
 	for _, test := range tests {

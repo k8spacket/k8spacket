@@ -13,10 +13,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/k8spacket/k8spacket/external/db"
 	"github.com/k8spacket/k8spacket/external/handlerio"
 	"github.com/k8spacket/k8spacket/external/http"
 	"github.com/k8spacket/k8spacket/external/k8s"
-	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/model"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/repository"
 	"github.com/k8spacket/k8spacket/modules/nodegraph/stats"

@@ -20,17 +20,15 @@ var dbState = []model.TLSConnection{
 	model.TLSConnection{Src: "error", LastSeen: time.Now().Add(time.Hour * 1000)},
 }
 
-
 type mockConnectionDBHandler struct {
 	DBHandler   db.IDBHandler[model.TLSConnection]
 	queryResult []model.TLSConnection
 }
 
 type mockDetailsDBHandler struct {
-	DBHandler   db.IDBHandler[model.TLSDetails]
-	fnCalled	bool
+	DBHandler db.IDBHandler[model.TLSDetails]
+	fnCalled  bool
 }
-
 
 func (mock *mockConnectionDBHandler) Query(query *bolthold.Query) ([]model.TLSConnection, error) {
 	if mock.queryResult[0].LastSeen.After(time.Now().Add(time.Hour * 999)) {
@@ -103,10 +101,10 @@ func TestQuery(t *testing.T) {
 	slog.SetDefault(logger)
 
 	var tests = []struct {
-		msg                             string
-		from, to                        time.Time
-		want                            []model.TLSConnection
-		error                           string
+		msg      string
+		from, to time.Time
+		want     []model.TLSConnection
+		error    string
 	}{
 		{"from / to filter", time.Now().Add(time.Minute * -1), time.Now().Add(time.Minute), dbState[1:2], ""},
 		{"error", time.Now().Add(time.Hour * 998), time.Now().Add(time.Hour * 1001), []model.TLSConnection{}, "[db:tls_connections:Query] Error=error"},
@@ -120,10 +118,10 @@ func TestQuery(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {
 
-		result := repository.Query(test.from, test.to)
+			result := repository.Query(test.from, test.to)
 
-		assert.EqualValues(t, test.want, result)
-		assert.Contains(t, str.String(), test.error)
+			assert.EqualValues(t, test.want, result)
+			assert.Contains(t, str.String(), test.error)
 		})
 	}
 
