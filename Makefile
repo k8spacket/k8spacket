@@ -7,6 +7,9 @@ generate:
 	go run github.com/cilium/ebpf/cmd/bpf2go tc ./bpf/tc.bpf.c
 	popd
 
+fmt:
+	go fmt ./...
+
 build:
 	go build .
 
