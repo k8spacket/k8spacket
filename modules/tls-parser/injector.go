@@ -3,6 +3,7 @@ package tlsparser
 import (
 	"net/http"
 
+	httpclient "github.com/k8spacket/k8spacket/external/http"
 	"github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/external/network"
 	"github.com/k8spacket/k8spacket/modules"
@@ -21,7 +22,7 @@ func Init() modules.IListener[modules.TLSEvent] {
 	handlerDetails, _ := db.New[model.TLSDetails]("tls_details")
 	repo := &repository.Repository{DbConnectionHandler: handlerConnections, DbDetailsHandler: handlerDetails}
 	cert := &certificate.Certificate{Network: &network.Network{}}
-	service := &Service{repo, cert, &k8sclient.K8SClient{}}
+	service := &Service{repo, cert, &httpclient.HttpClient{}, &k8sclient.K8SClient{}}
 	controller := &Controller{service}
 	o11yController := &O11yController{service}
 

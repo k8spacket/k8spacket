@@ -54,9 +54,9 @@ func (repository *Repository) Read(key string) model.TLSDetails {
 	return result
 }
 
-type fn func(newValue *model.TLSDetails, oldValue *model.TLSDetails)
+type Fn func(newValue *model.TLSDetails, oldValue *model.TLSDetails)
 
-func (repository *Repository) UpsertDetails(key string, value *model.TLSDetails, fn fn) {
+func (repository *Repository) UpsertDetails(key string, value *model.TLSDetails, fn Fn) {
 	old := repository.Read(key)
 	fn(value, &old)
 	err := repository.DbDetailsHandler.Upsert(key, value)

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	httpclient "github.com/k8spacket/k8spacket/external/http"
 	"github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules/db"
 	"github.com/k8spacket/k8spacket/modules/tls-parser/certificate"
@@ -22,6 +23,7 @@ import (
 type Service struct {
 	repo        repository.IRepository
 	certificate certificate.ICertificate
+	httpClient httpclient.IHttpClient
 	k8sClient   k8sclient.IK8SClient
 }
 
@@ -38,24 +40,26 @@ func (service *Service) getConnection(id string) model.TLSDetails {
 }
 
 func (service *Service) filterConnections(query url.Values) []model.TLSConnection {
-	var from = query["from"]
-	var rangeFrom = time.Time{}
+	from := query["from"]
+	rangeFrom := time.Time{}
 	if len(from) > 0 {
 		i, err := strconv.ParseInt(from[0], 10, 64)
 		if err != nil {
-			slog.Error("[api] parse", "Error", err)
+			slog.Error("[api] cannot parse value", "Error", err)
+		} else {
+			rangeFrom = time.UnixMilli(i)
 		}
-		rangeFrom = time.UnixMilli(i)
 	}
 
-	var to = query["to"]
-	var rangeTo = time.Time{}
+	to := query["to"]
+	rangeTo := time.Time{}
 	if len(to) > 0 {
 		i, err := strconv.ParseInt(to[0], 10, 64)
 		if err != nil {
-			slog.Error("[api] parse", "Error", err)
+			slog.Error("[api] cannot parse value", "Error", err)
+		} else {
+			rangeTo = time.UnixMilli(i)
 		}
-		rangeTo = time.UnixMilli(i)
 	}
 
 	slog.Info("[api:params]", "from", rangeFrom, "to", rangeTo)
@@ -87,7 +91,8 @@ func buildResponse[T model.TLSDetails | []model.TLSConnection](service *Service,
 	out := t
 
 	for _, ip := range k8spacketIps {
-		resp, err := http.Get(fmt.Sprintf(url, ip))
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(url, ip), nil)
+		resp, err := service.httpClient.Do(req)
 
 		if err != nil {
 			slog.Error("[api] Cannot get stats", "Error", err)
@@ -100,7 +105,7 @@ func buildResponse[T model.TLSDetails | []model.TLSConnection](service *Service,
 			return out, err
 		}
 
-		_ = json.Unmarshal(responseData, &in)
+		err = json.Unmarshal(responseData, &in)
 		if err != nil {
 			slog.Error("[api] Cannot parse stats response", "Error", err)
 			return out, err
