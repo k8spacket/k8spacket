@@ -9,3 +9,6 @@ k8spacket
 
 # local db files
 *.db
+
+# pem files
+*.pem
