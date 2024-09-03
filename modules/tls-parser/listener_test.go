@@ -6,25 +6,8 @@ import (
 	"testing"
 
 	"github.com/k8spacket/k8spacket/modules"
-	"github.com/k8spacket/k8spacket/modules/tls-parser/model"
 	"github.com/stretchr/testify/assert"
 )
-
-type mockService struct {
-	IService
-	client, server     string
-	domain, usedCipher string
-	clientTLSVersions  []string
-}
-
-func (mockService *mockService) storeInDatabase(tlsConnection *model.TLSConnection, tlsDetails *model.TLSDetails) {
-
-	mockService.client = tlsConnection.Src
-	mockService.server = tlsConnection.Dst
-	mockService.domain = tlsConnection.Domain
-	mockService.usedCipher = tlsConnection.UsedCipherSuite
-	mockService.clientTLSVersions = tlsDetails.ClientTLSVersions
-}
 
 func TestListen(t *testing.T) {
 
