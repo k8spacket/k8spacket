@@ -58,10 +58,8 @@ func TestLoad(t *testing.T) {
 
 			mockInetEbpf := &mockInetEbpf{}
 			mockItcEbpf := &mockItcEbpf{}
-
-			loader := Loader{inetEbpf: mockInetEbpf, tcEbpf: mockItcEbpf}
-
-			loader.load()
+			loader := Init(mockInetEbpf, mockItcEbpf)
+			loader.Load()
 
 			assert.Eventually(t, func() bool {
 				return mockInetEbpf.initCalled == test.inetCalled && mockItcEbpf.initCalledCount == test.tcCalledCount && strings.Contains(str.String(), test.err)

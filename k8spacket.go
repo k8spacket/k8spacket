@@ -12,6 +12,8 @@ import (
 
 	"github.com/k8spacket/k8spacket/broker"
 	"github.com/k8spacket/k8spacket/ebpf"
+	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
+	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 	"github.com/k8spacket/k8spacket/modules/nodegraph"
 	tlsparser "github.com/k8spacket/k8spacket/modules/tls-parser"
 	"github.com/prometheus/client_golang/prometheus"
@@ -21,25 +23,34 @@ import (
 
 func main() {
 
-	nodegraphListener := nodegraph.Init()
-	tlsParserListener := tlsparser.Init()
-	b := broker.Init(nodegraphListener, tlsParserListener)
+	mux := http.NewServeMux()
 
-	go b.DistributeEvents()
-	ebpf.Init(b)
+	nodegraphListener := nodegraph.Init(mux)
+	tlsParserListener := tlsparser.Init(mux)
+	broker := broker.Init(nodegraphListener, tlsParserListener)
 
-	prometheus.MustRegister(collectors.NewBuildInfoCollector())
+	inetEbpf := &ebpf_inet.InetEbpf{Broker: broker}
+	tcEbpf := &ebpf_tc.TcEbpf{Broker: broker}
+	loader := ebpf.Init(inetEbpf, tcEbpf)
 
-	startHttpServer()
+	startApp(broker, loader, mux)
 }
 
-func startHttpServer() {
+func startApp(broker broker.IBroker, loader ebpf.ILoader, mux *http.ServeMux) {
+	go broker.DistributeEvents()
+	loader.Load()
+
+	prometheus.MustRegister(collectors.NewBuildInfoCollector())
+	startHttpServer(mux)
+}
+
+func startHttpServer(mux *http.ServeMux) {
 	listenerPort := os.Getenv("K8S_PACKET_TCP_LISTENER_PORT")
 	slog.Info("[api] Serving requests", "Port", listenerPort)
 
-	srv := &http.Server{Addr: fmt.Sprintf(":%s", listenerPort)}
+	srv := &http.Server{Addr: fmt.Sprintf(":%s", listenerPort), Handler: mux}
 	go func() {
-		http.Handle("/metrics", promhttp.Handler())
+		mux.Handle("/metrics", promhttp.Handler())
 		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("[api] Cannot start ListenAndServe", "Error", err)
 		}

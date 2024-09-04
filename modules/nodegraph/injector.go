@@ -14,7 +14,7 @@ import (
 	"github.com/k8spacket/k8spacket/modules/nodegraph/stats"
 )
 
-func Init() modules.IListener[modules.TCPEvent] {
+func Init(mux *http.ServeMux) modules.IListener[modules.TCPEvent] {
 
 	prometheus.Init()
 
@@ -25,10 +25,10 @@ func Init() modules.IListener[modules.TCPEvent] {
 	controller := &Controller{service}
 	o11yController := &O11yController{service}
 
-	http.HandleFunc("/nodegraph/connections", controller.ConnectionHandler)
-	http.HandleFunc("/nodegraph/api/health", o11yController.Health)
-	http.HandleFunc("/nodegraph/api/graph/fields", o11yController.NodeGraphFieldsHandler)
-	http.HandleFunc("/nodegraph/api/graph/data", o11yController.NodeGraphDataHandler)
+	mux.HandleFunc("/nodegraph/connections", controller.ConnectionHandler)
+	mux.HandleFunc("/nodegraph/api/health", o11yController.Health)
+	mux.HandleFunc("/nodegraph/api/graph/fields", o11yController.NodeGraphFieldsHandler)
+	mux.HandleFunc("/nodegraph/api/graph/data", o11yController.NodeGraphDataHandler)
 
 	listener := &Listener{service}
 

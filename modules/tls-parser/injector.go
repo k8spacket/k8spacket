@@ -14,7 +14,7 @@ import (
 	"github.com/k8spacket/k8spacket/modules/tls-parser/repository"
 )
 
-func Init() modules.IListener[modules.TLSEvent] {
+func Init(mux *http.ServeMux) modules.IListener[modules.TLSEvent] {
 
 	prometheus.Init()
 
@@ -26,9 +26,9 @@ func Init() modules.IListener[modules.TLSEvent] {
 	controller := &Controller{service}
 	o11yController := &O11yController{service}
 
-	http.HandleFunc("/tlsparser/connections/", controller.TLSConnectionHandler)
-	http.HandleFunc("/tlsparser/api/data", o11yController.TLSParserConnectionsHandler)
-	http.HandleFunc("/tlsparser/api/data/", o11yController.TLSParserConnectionDetailsHandler)
+	mux.HandleFunc("/tlsparser/connections/", controller.TLSConnectionHandler)
+	mux.HandleFunc("/tlsparser/api/data", o11yController.TLSParserConnectionsHandler)
+	mux.HandleFunc("/tlsparser/api/data/", o11yController.TLSParserConnectionDetailsHandler)
 
 	listener := &Listener{service}
 

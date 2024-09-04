@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/k8spacket/k8spacket/broker"
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
@@ -23,23 +22,17 @@ type Loader struct {
 	interfaces []string
 }
 
-func Init(broker broker.IBroker) {
-
-	inetEbpf := &ebpf_inet.InetEbpf{Broker: broker}
-	tcEbpf := &ebpf_tc.TcEbpf{Broker: broker}
-
-	loader := Loader{inetEbpf: inetEbpf, tcEbpf: tcEbpf}
-
-	loader.load()
+func Init(inetEbpf ebpf_inet.IInetEbpf, tcEbpf ebpf_tc.ItcEbpf) *Loader {
+	return &Loader{inetEbpf: inetEbpf, tcEbpf: tcEbpf}
 }
 
-func (loader *Loader) load() {
+func (loader *Loader) Load() {
 	// load inet_sock_set_state ebpf program
 	go loader.inetEbpf.Init()
-	go loader.interfacesRefresher(loader.tcEbpf)
+	go interfacesRefresher(*loader)
 }
 
-func (loader *Loader) interfacesRefresher(tc ebpf_tc.ItcEbpf) {
+func interfacesRefresher(loader Loader) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -58,7 +51,7 @@ func (loader *Loader) interfacesRefresher(tc ebpf_tc.ItcEbpf) {
 			for _, el := range loader.interfaces {
 				if (strings.TrimSpace(el) != "") && (!ebpf_tools.SliceContains(currentInterfaces, el)) {
 					// load traffic control ebpf program (qdisc filter)
-					go tc.Init(el)
+					go loader.tcEbpf.Init(el)
 					refreshK8sInfo = true
 				}
 			}

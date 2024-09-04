@@ -86,7 +86,7 @@ func FetchK8SInfo() map[string]IPResourceInfo {
 func (k8sClient *K8SClient) GetPodIPsBySelectors(fieldSelector string, labelSelector string) []string {
 
 	if disabledK8sResource {
-		return []string{}
+		return []string{"127.0.0.1"}
 	}
 
 	list := make([]string, 0)
