@@ -25,7 +25,7 @@ func main() {
 
 	nodegraphListener := nodegraph.Init()
 	tlsParserListener := tls_parser.Init()
-	b := &broker.Broker{NodegraphListener: nodegraphListener, TlsParserListener: tlsParserListener}
+	b := broker.Init(nodegraphListener, tlsParserListener)
 
 	go b.DistributeEvents()
 	ebpf.LoadEbpf(b)

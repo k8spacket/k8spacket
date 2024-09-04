@@ -47,21 +47,21 @@ func TestTLSParserConnectionsHandler(t *testing.T) {
 		t.Run(test.scenario, func(t *testing.T) {
 			t.Parallel()
 
-		req, err := http.NewRequest("GET", fmt.Sprintf("/tlsparser/api/data?scenario=%s", test.scenario), nil)
-		if err != nil {
-			t.Fatal(err)
-		}
+			req, err := http.NewRequest("GET", fmt.Sprintf("/tlsparser/api/data?scenario=%s", test.scenario), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(o11yController.TLSParserConnectionsHandler)
-		handler.ServeHTTP(rr, req)
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(o11yController.TLSParserConnectionsHandler)
+			handler.ServeHTTP(rr, req)
 
-		assert.EqualValues(t, rr.Code, test.status)
+			assert.EqualValues(t, rr.Code, test.status)
 
-		var result []model.TLSConnection
-		json.Unmarshal([]byte(rr.Body.String()), &result)
+			var result []model.TLSConnection
+			json.Unmarshal([]byte(rr.Body.String()), &result)
 
-		assert.EqualValues(t, test.want, result)
+			assert.EqualValues(t, test.want, result)
 		})
 	}
 }
@@ -86,21 +86,21 @@ func TestTLSParserConnectionDetailsHandler(t *testing.T) {
 		t.Run(test.scenario, func(t *testing.T) {
 			t.Parallel()
 
-		req, err := http.NewRequest("GET", fmt.Sprintf("/tlsparser/api/data/%s?scenario=%s", test.id, test.scenario), nil)
-		if err != nil {
-			t.Fatal(err)
-		}
+			req, err := http.NewRequest("GET", fmt.Sprintf("/tlsparser/api/data/%s?scenario=%s", test.id, test.scenario), nil)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(o11yController.TLSParserConnectionDetailsHandler)
-		handler.ServeHTTP(rr, req)
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(o11yController.TLSParserConnectionDetailsHandler)
+			handler.ServeHTTP(rr, req)
 
-		assert.EqualValues(t, rr.Code, test.status)
+			assert.EqualValues(t, rr.Code, test.status)
 
-		var result model.TLSDetails
-		json.Unmarshal([]byte(rr.Body.String()), &result)
+			var result model.TLSDetails
+			json.Unmarshal([]byte(rr.Body.String()), &result)
 
-		assert.EqualValues(t, test.want, result)
+			assert.EqualValues(t, test.want, result)
 		})
 	}
 }
