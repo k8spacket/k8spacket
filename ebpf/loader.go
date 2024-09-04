@@ -17,15 +17,29 @@ import (
 	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 )
 
-func LoadEbpf(broker broker.IBroker) {
-	// load inet_sock_set_state ebpf program
-	inetEbpf := ebpf_inet.InetEbpf{Broker: broker}
-	tcEbpf := ebpf_tc.TcEbpf{Broker: broker}
-	go inetEbpf.Init()
-	go interfacesRefresher(tcEbpf)
+type Loader struct {
+	inetEbpf   ebpf_inet.IInetEbpf
+	tcEbpf     ebpf_tc.ItcEbpf
+	interfaces []string
 }
 
-func interfacesRefresher(tc ebpf_tc.TcEbpf) {
+func Init(broker broker.IBroker) {
+
+	inetEbpf := &ebpf_inet.InetEbpf{Broker: broker}
+	tcEbpf := &ebpf_tc.TcEbpf{Broker: broker}
+
+	loader := Loader{inetEbpf: inetEbpf, tcEbpf: tcEbpf}
+
+	loader.load()
+}
+
+func (loader *Loader) load() {
+	// load inet_sock_set_state ebpf program
+	go loader.inetEbpf.Init()
+	go loader.interfacesRefresher(loader.tcEbpf)
+}
+
+func (loader *Loader) interfacesRefresher(tc ebpf_tc.ItcEbpf) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -39,9 +53,9 @@ func interfacesRefresher(tc ebpf_tc.TcEbpf) {
 			return
 		case <-time.After(refreshPeriod):
 			slog.Info("[tc-loop] Refreshing interfaces for capturing...")
-			interfaces = findInterfaces()
+			loader.interfaces = findInterfaces()
 			var refreshK8sInfo = false
-			for _, el := range interfaces {
+			for _, el := range loader.interfaces {
 				if (strings.TrimSpace(el) != "") && (!ebpf_tools.SliceContains(currentInterfaces, el)) {
 					// load traffic control ebpf program (qdisc filter)
 					go tc.Init(el)
@@ -52,7 +66,7 @@ func interfacesRefresher(tc ebpf_tc.TcEbpf) {
 				// there are some new workloads in the cluster and need to update info about k8s resources
 				ebpf_tools.K8sInfo = k8sclient.FetchK8SInfo()
 			}
-			currentInterfaces = interfaces
+			currentInterfaces = loader.interfaces
 		}
 	}
 }
@@ -69,5 +83,3 @@ func findInterfaces() []string {
 	}
 	return strings.Split(string(out), ",")
 }
-
-var interfaces []string
