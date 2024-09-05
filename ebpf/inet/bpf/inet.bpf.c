@@ -57,6 +57,7 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
 {
 	__u64 ts, rx_b, tx_b;
 	__u16 sport, dport;
+	__u8 protocol;
 	int new_state;
 	struct event event = {};
 	struct birth start = {}, *startp;
@@ -64,7 +65,8 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
 	struct sock *sk;
 
 	//allow TCP protocol only
-	if (BPF_CORE_READ(args, protocol) != IPPROTO_TCP)
+	protocol = BPF_CORE_READ(args, protocol);
+	if (protocol != IPPROTO_TCP)
 		return 0;
 
     sk = (struct sock *)BPF_CORE_READ(args, skaddr);

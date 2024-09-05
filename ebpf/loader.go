@@ -2,26 +2,37 @@ package ebpf
 
 import (
 	"context"
-	"github.com/k8spacket/k8s-api/v2"
-	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
-	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
-	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
-	k8spacket_log "github.com/k8spacket/k8spacket/log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
+
+	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
+	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
+	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
+	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 )
 
-func LoadEbpf() {
-	// load inet_sock_set_state ebpf program
-	go ebpf_inet.Init()
-	go interfacesRefresher()
+type Loader struct {
+	inetEbpf   ebpf_inet.IInetEbpf
+	tcEbpf     ebpf_tc.ItcEbpf
+	interfaces []string
 }
 
-func interfacesRefresher() {
+func Init(inetEbpf ebpf_inet.IInetEbpf, tcEbpf ebpf_tc.ItcEbpf) *Loader {
+	return &Loader{inetEbpf: inetEbpf, tcEbpf: tcEbpf}
+}
+
+func (loader *Loader) Load() {
+	// load inet_sock_set_state ebpf program
+	go loader.inetEbpf.Init()
+	go interfacesRefresher(*loader)
+}
+
+func interfacesRefresher(loader Loader) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -31,24 +42,24 @@ func interfacesRefresher() {
 	for {
 		select {
 		case <-ctx.Done():
-			k8spacket_log.LOGGER.Println("[tc-loop] Receive signal, exiting...")
+			slog.Info("[tc-loop] Receive signal, exiting...")
 			return
 		case <-time.After(refreshPeriod):
-			k8spacket_log.LOGGER.Println("[tc-loop] Refreshing interfaces for capturing...")
-			interfaces = findInterfaces()
+			slog.Info("[tc-loop] Refreshing interfaces for capturing...")
+			loader.interfaces = findInterfaces()
 			var refreshK8sInfo = false
-			for _, el := range interfaces {
+			for _, el := range loader.interfaces {
 				if (strings.TrimSpace(el) != "") && (!ebpf_tools.SliceContains(currentInterfaces, el)) {
 					// load traffic control ebpf program (qdisc filter)
-					go ebpf_tc.Init(el)
+					go loader.tcEbpf.Init(el)
 					refreshK8sInfo = true
 				}
 			}
 			if refreshK8sInfo {
 				// there are some new workloads in the cluster and need to update info about k8s resources
-				ebpf_tools.K8sInfo = k8s.FetchK8SInfo()
+				ebpf_tools.K8sInfo = k8sclient.FetchK8SInfo()
 			}
-			currentInterfaces = interfaces
+			currentInterfaces = loader.interfaces
 		}
 	}
 }
@@ -60,10 +71,8 @@ func findInterfaces() []string {
 	out, err := cmd.Output()
 
 	if err != nil {
-		k8spacket_log.LOGGER.Printf("[tc-loop] Cannot find interfaces to listen: %+v", err)
+		slog.Error("[tc-loop] Cannot find interfaces to listen", "Error", err)
 		return nil
 	}
 	return strings.Split(string(out), ",")
 }
-
-var interfaces []string

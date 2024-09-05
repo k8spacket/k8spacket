@@ -1,32 +1,39 @@
 package broker
 
 import (
-	"github.com/k8spacket/k8spacket/plugins"
-	"github.com/k8spacket/plugin-api/v2"
+	"github.com/k8spacket/k8spacket/modules"
 )
 
-var tcpEventChannel = make(chan plugin_api.TCPEvent)
-var tlsEventChannel = make(chan plugin_api.TLSEvent)
-
-func TCPEvent(event plugin_api.TCPEvent) {
-	tcpEventChannel <- event
+type Broker struct {
+	IBroker
+	NodegraphListener modules.IListener[modules.TCPEvent]
+	TlsParserListener modules.IListener[modules.TLSEvent]
+	tcpEventChannel   chan modules.TCPEvent
+	tlsEventChannel   chan modules.TLSEvent
 }
 
-func TLSEvent(event plugin_api.TLSEvent) {
-	tlsEventChannel <- event
+func Init(nodegraphListener modules.IListener[modules.TCPEvent], tlsParserListener modules.IListener[modules.TLSEvent]) *Broker {
+	broker := Broker{NodegraphListener: nodegraphListener, TlsParserListener: tlsParserListener}
+	broker.tcpEventChannel = make(chan modules.TCPEvent)
+	broker.tlsEventChannel = make(chan modules.TLSEvent)
+	return &broker
 }
 
-func DistributeEvents(manager *plugins.Manager) {
+func (broker *Broker) TCPEvent(event modules.TCPEvent) {
+	broker.tcpEventChannel <- event
+}
+
+func (broker *Broker) TLSEvent(event modules.TLSEvent) {
+	broker.tlsEventChannel <- event
+}
+
+func (broker *Broker) DistributeEvents() {
 	for {
 		select {
-		case event := <-tcpEventChannel:
-			for _, plugin := range manager.GetTCPConsumerPlugins() {
-				plugin.DistributeTCPEvent(event)
-			}
-		case event := <-tlsEventChannel:
-			for _, plugin := range manager.GetTLSConsumerPlugins() {
-				plugin.DistributeTLSEvent(event)
-			}
+		case event := <-broker.tcpEventChannel:
+			broker.NodegraphListener.Listen(event)
+		case event := <-broker.tlsEventChannel:
+			broker.TlsParserListener.Listen(event)
 		}
 	}
 }

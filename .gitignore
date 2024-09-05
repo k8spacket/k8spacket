@@ -4,3 +4,11 @@ k8spacket
 # Editor
 .idea
 
+# codecov out file
+*.out
+
+# local db files
+*.db
+
+# pem files
+*.pem
