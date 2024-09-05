@@ -96,22 +96,25 @@ func buildResponse[T model.TLSDetails | []model.TLSConnection](service *Service,
 
 		if err != nil {
 			slog.Error("[api] Cannot get stats", "Error", err)
-			return out, err
+			continue
 		}
+		
+		if resp.StatusCode == http.StatusOK {
 
-		responseData, err := io.ReadAll(resp.Body)
-		if err != nil {
-			slog.Error("[api] Cannot read stats response", "Error", err)
-			return out, err
+			responseData, err := io.ReadAll(resp.Body)
+			if err != nil {
+				slog.Error("[api] Cannot read stats response", "Error", err)
+				continue
+			}
+
+			err = json.Unmarshal(responseData, &in)
+			if err != nil {
+				slog.Error("[api] Cannot parse stats response", "Error", err)
+				continue
+			}
+
+			out = resultFunc(out, in)
 		}
-
-		err = json.Unmarshal(responseData, &in)
-		if err != nil {
-			slog.Error("[api] Cannot parse stats response", "Error", err)
-			return out, err
-		}
-
-		out = resultFunc(out, in)
 	}
 
 	return out, nil

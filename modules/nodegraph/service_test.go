@@ -63,6 +63,7 @@ func (httpClient *mockHttpClient) Do(req *http.Request) (*http.Response, error) 
 		result, _ := json.Marshal(dbState)
 		return &http.Response{
 			Body: io.NopCloser(bytes.NewBuffer(result)),
+			StatusCode: http.StatusOK,
 		}, nil
 	}
 	if req.URL.Query().Get("scenario") == "error" {
@@ -71,18 +72,21 @@ func (httpClient *mockHttpClient) Do(req *http.Request) (*http.Response, error) 
 		result, _ := json.Marshal(response)
 		return &http.Response{
 			Body: io.NopCloser(bytes.NewBuffer(result)),
+			StatusCode: http.StatusInternalServerError,
 		}, err
 	}
 	if req.URL.Query().Get("scenario") == "read" {
 		reader := BrokenReader{}
 		return &http.Response{
 			Body: &reader,
+			StatusCode: http.StatusOK,
 		}, nil
 	}
 	if req.URL.Query().Get("scenario") == "parse" {
 		result := []byte("parse error")
 		return &http.Response{
 			Body: io.NopCloser(bytes.NewBuffer(result)),
+			StatusCode: http.StatusOK,
 		}, nil
 	}
 	return &http.Response{}, nil

@@ -82,23 +82,26 @@ func (service *Service) buildO11yResponse(r *http.Request) (model.NodeGraph, err
 
 		if err != nil {
 			slog.Error("[api] Cannot get stats", "Error", err)
-			return model.NodeGraph{}, err
+			continue
 		}
 
-		responseData, err := io.ReadAll(resp.Body)
-		if err != nil {
-			slog.Error("[api] Cannot read stats response", "Error", err)
-			return model.NodeGraph{}, err
-		}
+		if resp.StatusCode == http.StatusOK {
 
-		err = json.Unmarshal(responseData, &in)
-		if err != nil {
-			slog.Error("[api] Cannot parse stats response", "Error", err)
-			return model.NodeGraph{}, err
-		}
+			responseData, err := io.ReadAll(resp.Body)
+			if err != nil {
+				slog.Error("[api] Cannot read stats response", "Error", err)
+				continue
+			}
 
-		for _, element := range in {
-			connectionItems[element.Src+"-"+element.Dst] = element
+			err = json.Unmarshal(responseData, &in)
+			if err != nil {
+				slog.Error("[api] Cannot parse stats response", "Error", err)
+				continue
+			}
+
+			for _, element := range in {
+				connectionItems[element.Src+"-"+element.Dst] = element
+			}
 		}
 	}
 
