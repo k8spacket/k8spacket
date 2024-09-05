@@ -29,10 +29,10 @@ func TestStartApp(t *testing.T) {
 
 	mux := http.NewServeMux()
 
-	broker := &broker.Broker{}
+	b := &broker.Broker{}
 	loader := &mockLoader{}
 
-	go startApp(broker, loader, mux)
+	go startApp(b, loader, mux)
 
 	assert.Eventually(t, func() bool {
 		resp, _ := http.Get("http://127.0.0.1:6676/metrics")
