@@ -24,6 +24,8 @@ jobs:
   e2e:
     runs-on: ubuntu-22.04
     steps:
+      - name: Checkout
+        uses: actions/checkout@main
       - name: Build binary
         run: make build
       - name: Install qemu & friends
