@@ -31,7 +31,7 @@ jobs:
       - name: Install qemu & friends
         run: |
           sudo apt-get update
-          sudo apt-get install -y libguestfs-tools qemu-utils qemu-system-x86_64
+          sudo apt-get install -y libguestfs-tools qemu-utils qemu-system-x86
       - name: Prepare filesystem
         run: |
           DOCKER_BUILDKIT=1 docker build --output "type=tar,dest=filesystem.tar" .
