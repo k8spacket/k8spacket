@@ -21,3 +21,35 @@ jobs:
           verbose: true # optional (default = false)
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  e2e:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Build binary
+        run: make build
+      - name: Install qemu & friends
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libguestfs-tools qemu-utils qemu-system-x86_64
+      - name: Prepare filesystem
+        run: |
+          DOCKER_BUILDKIT=1 docker build --output "type=tar,dest=filesystem.tar" .
+          virt-make-fs --format=qcow2 --size=+20M filesystem.tar filesystem-large.qcow2
+          qemu-img convert filesystem-large.qcow2 -O qcow2 filesystem.qcow2
+          rm filesystem-large.qcow2
+      - name: Run e2e tests on kernel 5.15
+        run: |
+          qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
+          qemu-system-x86_64 \
+          -cpu host \
+          -m 4G \
+          -smp 2 \
+          -kernel ./5.15/bzImage \
+          -append "console=ttyS0 root=/dev/sda rw" \
+          -drive file=filesystem-diff.qcow2,format=qcow2 \
+          -net nic -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::6676-:6676 \
+          -enable-kvm \
+          -display none \
+          -daemonize \
+          -pidfile qemu.pid
+          
+          curl https://k8spacket.domain -vk

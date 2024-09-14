@@ -11,7 +11,7 @@ import (
 func TestEnrichAddress(t *testing.T) {
 
 	os.Setenv("K8S_PACKET_REVERSE_WHOIS_REGEXP", "(?:OrgName:|org-name:)\\s*(.*)")
-	os.Setenv("K8S_PACKET_REVERSE_GEOIP2_DB_PATH", "../../tests/GeoLite2-City-Test.mmdb")
+	os.Setenv("K8S_PACKET_REVERSE_GEOIP2_DB_PATH", "../../tests/units/GeoLite2-City-Test.mmdb")
 
 	address := modules.Address{Addr: "89.160.20.129"}
 
