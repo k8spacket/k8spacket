@@ -16,6 +16,7 @@ func TestNodegraphHeathEndpoint(t *testing.T) {
 
 	assert.Eventually(t, func() bool {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		http.DefaultClient.Timeout = 1 * time.Second
 		resp, err := http.Get(fmt.Sprintf("http://%s:16676/nodegraph/api/health", host))
 		if err != nil {
 			log.Fatal(err)
