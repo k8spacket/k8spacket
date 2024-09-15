@@ -21,7 +21,7 @@ jobs:
           verbose: true # optional (default = false)
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  e2e:
+  e2e-build:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -29,10 +29,22 @@ jobs:
       - name: Build binary
         run: |
           make build
+      - uses: actions/upload-artifact@master
+        with:
+          name: k8spacket
+          path: ./k8spacket
+  e2e-5_15:
+    runs-on: ubuntu-22.04
+    needs: e2e-build
+    steps:
       - name: Install qemu & friends
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
+      - uses: actions/download-artifact@master
+        with:
+          name: k8spacket
+          path: ./k8spacket
       - name: Run e2e tests on kernel 5.15
         run: |
           cd ./tests/e2e/vm/
