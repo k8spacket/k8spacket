@@ -68,6 +68,7 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'chmod 0655 /root/k8spacket && systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           make test
   e2e-5_15:
     runs-on: ubuntu-22.04
@@ -104,6 +105,7 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'chmod 0655 /root/k8spacket && systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           make test
   e2e-5_10:
     runs-on: ubuntu-22.04
@@ -140,6 +142,7 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'chmod 0655 /root/k8spacket && systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           make test
   e2e-5_4:
     runs-on: ubuntu-22.04
@@ -176,4 +179,5 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'chmod 0655 /root/k8spacket && systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           make test
