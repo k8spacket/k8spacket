@@ -48,9 +48,15 @@ jobs:
           -kernel ./5.15/bzImage \
           -append "console=ttyS0 root=/dev/sda rw" \
           -drive file=filesystem-diff.qcow2,format=qcow2 \
-          -net nic -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::6676-:6676 \
+          -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
           -enable-kvm \
-          -display none \
-          -daemonize
+          -pidfile qemu.pid \
+          -nographic > qemu.log 2>&1 & 
           
-          wget -q -O - --no-check-certificate https://k8spacket.domain
+          wget -q -O - --no-check-certificate https://localhost:10443
+          sleep(5)
+          wget -q -O - --no-check-certificate https://localhost:10443
+          sleep(5)
+          wget -q -O - --no-check-certificate https://localhost:10443
+          sleep(5)
+          wget -q -O - --no-check-certificate https://localhost:10443
