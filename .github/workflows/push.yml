@@ -52,5 +52,5 @@ jobs:
           -enable-kvm \
           -nographic & 
           
-          sleep 50
-          curl https://127.0.0.1:10443 -vk
+          make test
+          
