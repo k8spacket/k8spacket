@@ -49,8 +49,6 @@ jobs:
           -enable-kvm \
           -nographic &
           
-          wait
-          
           cd ../
           sshpass -p root scp ../../k8spacket root@127.0.0.1:/root/k8spacket
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
