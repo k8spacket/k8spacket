@@ -26,12 +26,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
-#      - name: Build binary
-#        run: |
-#          whoami
-#          sudo whoami
-#          make build
-#          mv ./k8spacket ./tests/e2e/vm/
+      - name: Build binary
+        run: |
+          make build
       - name: Install qemu & friends
         run: |
           sudo apt-get update
