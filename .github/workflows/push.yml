@@ -34,17 +34,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libguestfs-tools qemu-utils qemu-system-x86
-      - name: Prepare filesystem
-        run: |
-          cd ./tests/e2e/vm/
-          DOCKER_BUILDKIT=1 docker build --output "type=tar,dest=filesystem.tar" .
-          export LIBGUESTFS_DEBUG=1 LIBGUESTFS_TRACE=1
-          virt-make-fs --format=qcow2 --size=+20M filesystem.tar filesystem-large.qcow2
-          qemu-img convert filesystem-large.qcow2 -O qcow2 filesystem.qcow2
-          rm filesystem-large.qcow2
       - name: Run e2e tests on kernel 5.15
         run: |
           cd ./tests/e2e/vm/
+          unzip filesystem.zip
           qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
           qemu-system-x86_64 \
           -cpu host \
