@@ -35,21 +35,21 @@ jobs:
           path: ./k8spacket
   e2e-6_10:
     needs: e2e-build
-    uses: k8spacket/kspacket/.github/workflows/reusable-workflow.yml@e2e
+    uses: ./.github/workflows/reusable-workflow.yml@e2e
     with:
       kernel: 6.10
   e2e-5_15:
     needs: e2e-build
-    uses: k8spacket/kspacket/.github/workflows/reusable-workflow.yml@e2e
+    uses: ./.github/workflows/reusable-workflow.yml@e2e
     with:
       kernel: 5.15
   e2e-5_10:
     needs: e2e-build
-    uses: k8spacket/kspacket/.github/workflows/reusable-workflow.yml@e2e
+    uses: ./.github/workflows/reusable-workflow.yml@e2e
     with:
       kernel: 5.10
   e2e-5_4:
     needs: e2e-build
-    uses: k8spacket/kspacket/.github/workflows/reusable-workflow.yml@e2e
+    uses: ./.github/workflows/reusable-workflow.yml@e2e
     with:
       kernel: 5.4
