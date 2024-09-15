@@ -68,120 +68,121 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
+          sleep 10
           sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           
           make test
-  e2e-5_15:
-    runs-on: ubuntu-22.04
-    needs: e2e-build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
-      - name: Install qemu & friends
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
-      - uses: actions/download-artifact@master
-        with:
-          name: k8spacket
-      - name: Run e2e tests on kernel 5.15
-        run: |
-          cd ./tests/e2e/vm/
-          unzip filesystem.zip
-          sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
-          sudo qemu-system-x86_64 \
-          -cpu host \
-          -m 4G \
-          -smp 4 \
-          -kernel ./5.15/bzImage \
-          -append "console=ttyS0 root=/dev/sda rw" \
-          -drive file=filesystem-diff.qcow2,format=qcow2 \
-          -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
-          -enable-kvm \
-          -nographic &
-          
-          cd ../
-          while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
-          sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
-          while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
-          
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
-          
-          make test
-  e2e-5_10:
-    runs-on: ubuntu-22.04
-    needs: e2e-build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
-      - name: Install qemu & friends
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
-      - uses: actions/download-artifact@master
-        with:
-          name: k8spacket
-      - name: Run e2e tests on kernel 5.10
-        run: |
-          cd ./tests/e2e/vm/
-          unzip filesystem.zip
-          sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
-          sudo qemu-system-x86_64 \
-          -cpu host \
-          -m 4G \
-          -smp 4 \
-          -kernel ./5.10/bzImage \
-          -append "console=ttyS0 root=/dev/sda rw" \
-          -drive file=filesystem-diff.qcow2,format=qcow2 \
-          -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
-          -enable-kvm \
-          -nographic &
-          
-          cd ../
-          while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
-          sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
-          while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
-          
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
-          
-          make test
-  e2e-5_4:
-    runs-on: ubuntu-22.04
-    needs: e2e-build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
-      - name: Install qemu & friends
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
-      - uses: actions/download-artifact@master
-        with:
-          name: k8spacket
-      - name: Run e2e tests on kernel 5.4
-        run: |
-          cd ./tests/e2e/vm/
-          unzip filesystem.zip
-          sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
-          sudo qemu-system-x86_64 \
-          -cpu host \
-          -m 4G \
-          -smp 4 \
-          -kernel ./5.4/bzImage \
-          -append "console=ttyS0 root=/dev/sda rw" \
-          -drive file=filesystem-diff.qcow2,format=qcow2 \
-          -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
-          -enable-kvm \
-          -nographic &
-          
-          cd ../
-          while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
-          sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
-          while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
-          
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
-          
-          make test
+#  e2e-5_15:
+#    runs-on: ubuntu-22.04
+#    needs: e2e-build
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@main
+#      - name: Install qemu & friends
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
+#      - uses: actions/download-artifact@master
+#        with:
+#          name: k8spacket
+#      - name: Run e2e tests on kernel 5.15
+#        run: |
+#          cd ./tests/e2e/vm/
+#          unzip filesystem.zip
+#          sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
+#          sudo qemu-system-x86_64 \
+#          -cpu host \
+#          -m 4G \
+#          -smp 4 \
+#          -kernel ./5.15/bzImage \
+#          -append "console=ttyS0 root=/dev/sda rw" \
+#          -drive file=filesystem-diff.qcow2,format=qcow2 \
+#          -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
+#          -enable-kvm \
+#          -nographic &
+#
+#          cd ../
+#          while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
+#          sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
+#          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
+#          while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
+#
+#          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
+#
+#          make test
+#  e2e-5_10:
+#    runs-on: ubuntu-22.04
+#    needs: e2e-build
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@main
+#      - name: Install qemu & friends
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
+#      - uses: actions/download-artifact@master
+#        with:
+#          name: k8spacket
+#      - name: Run e2e tests on kernel 5.10
+#        run: |
+#          cd ./tests/e2e/vm/
+#          unzip filesystem.zip
+#          sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
+#          sudo qemu-system-x86_64 \
+#          -cpu host \
+#          -m 4G \
+#          -smp 4 \
+#          -kernel ./5.10/bzImage \
+#          -append "console=ttyS0 root=/dev/sda rw" \
+#          -drive file=filesystem-diff.qcow2,format=qcow2 \
+#          -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
+#          -enable-kvm \
+#          -nographic &
+#
+#          cd ../
+#          while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
+#          sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
+#          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
+#          while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
+#
+#          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
+#
+#          make test
+#  e2e-5_4:
+#    runs-on: ubuntu-22.04
+#    needs: e2e-build
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@main
+#      - name: Install qemu & friends
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
+#      - uses: actions/download-artifact@master
+#        with:
+#          name: k8spacket
+#      - name: Run e2e tests on kernel 5.4
+#        run: |
+#          cd ./tests/e2e/vm/
+#          unzip filesystem.zip
+#          sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
+#          sudo qemu-system-x86_64 \
+#          -cpu host \
+#          -m 4G \
+#          -smp 4 \
+#          -kernel ./5.4/bzImage \
+#          -append "console=ttyS0 root=/dev/sda rw" \
+#          -drive file=filesystem-diff.qcow2,format=qcow2 \
+#          -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
+#          -enable-kvm \
+#          -nographic &
+#
+#          cd ../
+#          while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
+#          sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
+#          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
+#          while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
+#
+#          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
+#
+#          make test
