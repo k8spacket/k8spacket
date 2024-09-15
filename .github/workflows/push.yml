@@ -43,9 +43,9 @@ jobs:
           sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
           sudo qemu-system-x86_64 \
           -cpu host \
-          -m 5G \
-          -smp 8 \
-          -kernel ./tests/e2e/vm/5.15/bzImage \
+          -m 4G \
+          -smp 4 \
+          -kernel ./5.15/bzImage \
           -append "console=ttyS0 root=/dev/sda rw" \
           -drive file=filesystem-diff.qcow2,format=qcow2 \
           -net nic -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::6676-:6676 \
