@@ -66,6 +66,7 @@ jobs:
           while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
           sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
+          while ! systemctl is-active k8spacket ; do echo "waiting for k8spacket service"; sleep 1; done
           
           make test
   e2e-5_15:
@@ -101,6 +102,7 @@ jobs:
           while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
           sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
+          while ! systemctl is-active k8spacket ; do echo "waiting for k8spacket service"; sleep 1; done
           
           make test
   e2e-5_10:
@@ -136,6 +138,7 @@ jobs:
           while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
           sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
+          while ! systemctl is-active k8spacket ; do echo "waiting for k8spacket service"; sleep 1; done
           
           make test
   e2e-5_4:
@@ -171,5 +174,6 @@ jobs:
           while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
           sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ../../k8spacket root@127.0.0.1:/root/k8spacket
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
+          while ! systemctl is-active k8spacket ; do echo "waiting for k8spacket service"; sleep 1; done
           
           make test
