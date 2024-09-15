@@ -32,7 +32,7 @@ jobs:
       - name: Install qemu & friends
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-utils qemu-system-x86
+          sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
       - name: Run e2e tests on kernel 5.15
         run: |
           cd ./tests/e2e/vm/
@@ -47,8 +47,13 @@ jobs:
           -drive file=filesystem-diff.qcow2,format=qcow2 \
           -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
           -enable-kvm \
-          -nographic & 
+          -nographic &
+          
+          wait
           
           cd ../
+          sshpass -p root scp ../../k8spacket root@127.0.0.1:/root/k8spacket
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
+          
           make test
           
