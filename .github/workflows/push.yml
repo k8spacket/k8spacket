@@ -50,7 +50,7 @@ jobs:
           -drive file=filesystem-diff.qcow2,format=qcow2 \
           -net nic -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::6676-:6676 \
           -enable-kvm \
-          -daemonize \
-          -nographic
+          -display none \
+          -daemonize
           
           wget -q -O - --no-check-certificate https://k8spacket.domain
