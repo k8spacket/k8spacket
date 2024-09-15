@@ -37,6 +37,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: e2e-build
     steps:
+      - name: Checkout
+        uses: actions/checkout@main
       - name: Install qemu & friends
         run: |
           sudo apt-get update
