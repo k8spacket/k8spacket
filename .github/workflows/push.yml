@@ -50,7 +50,7 @@ jobs:
           -drive file=filesystem-diff.qcow2,format=qcow2 \
           -net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
           -enable-kvm \
-          -nographic
+          -nographic > qemu.log 2>&1 & 
           
           wget -q -O - --no-check-certificate https://localhost:10443
           sleep(5)
