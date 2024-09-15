@@ -68,7 +68,7 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl status k8spacket.service'
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           
           make test
   e2e-5_15:
@@ -106,7 +106,7 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl status k8spacket.service'
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           
           make test
   e2e-5_10:
@@ -144,7 +144,7 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl status k8spacket.service'
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           
           make test
   e2e-5_4:
@@ -182,6 +182,6 @@ jobs:
           sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl start k8spacket.service'
           while ! sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl is-active k8spacket.service' ; do echo "waiting for k8spacket service"; sleep 1; done
           
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'systemctl status k8spacket.service'
+          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
           
           make test
