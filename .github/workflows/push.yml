@@ -52,5 +52,6 @@ jobs:
           -enable-kvm \
           -nographic & 
           
+          cd ./tests/e2e/
           make test
           

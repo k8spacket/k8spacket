@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+var host = "127.0.0.1"
+
 func init() {
 	config := &ssh.ClientConfig{
 		User: "root",
@@ -23,7 +25,7 @@ func init() {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	client, err := ssh.Dial("tcp", "192.168.101.120:10022", config)
+	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:10022", host), config)
 	if err != nil {
 		log.Fatal("Error", err)
 	}
@@ -66,7 +68,7 @@ func init() {
 func TestNodegraphHeathEndpoint(t *testing.T) {
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	resp, err := http.Get("http://192.168.101.120:16676/nodegraph/api/health")
+	resp, err := http.Get(fmt.Sprintf("http://%s:16676/nodegraph/api/health", host))
 	if err != nil {
 		fmt.Println(err)
 	}
