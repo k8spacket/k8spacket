@@ -22,12 +22,14 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   e2e:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@main
       - name: Build binary
         run: |
+          whoami
+          sudo whoami
           make build
           mv ./k8spacket ./tests/e2e/vm/
       - name: Install qemu & friends
