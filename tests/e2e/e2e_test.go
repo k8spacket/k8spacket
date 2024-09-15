@@ -39,7 +39,7 @@ func init() {
 
 	clientScp, err := scp.NewClientBySSH(client)
 	if err != nil {
-		fmt.Println("Error creating new SSH session from existing connection", err)
+		log.Fatal("Error creating new SSH session from existing connection", err)
 	}
 
 	// Open a file
@@ -58,7 +58,7 @@ func init() {
 	err = clientScp.CopyFromFile(context.Background(), *f, "/root/k8spacket", "0655")
 
 	if err != nil {
-		fmt.Println("Error while copying file ", err)
+		log.Fatal("Error while copying file ", err)
 	}
 
 	session.Output("systemctl start k8spacket.service")
@@ -67,12 +67,13 @@ func init() {
 
 func TestNodegraphHeathEndpoint(t *testing.T) {
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	resp, err := http.Get(fmt.Sprintf("http://%s:16676/nodegraph/api/health", host))
-	if err != nil {
-		fmt.Println(err)
-	}
 	assert.Eventually(t, func() bool {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		resp, err := http.Get(fmt.Sprintf("http://%s:16676/nodegraph/api/health", host))
+		if err != nil {
+			log.Fatal(err)
+			return false
+		}
 		return resp.StatusCode == http.StatusOK
 	}, time.Second*10, time.Millisecond*1000)
 
