@@ -52,9 +52,5 @@ jobs:
           -enable-kvm \
           -nographic & 
           
-          sleep 5
-          wget -q -O - --no-check-certificate https://localhost:10443
-          sleep 5
-          wget -q -O - --no-check-certificate https://localhost:10443
-          sleep 5
-          wget -q -O - --no-check-certificate https://localhost:10443
+          sleep 50
+          curl https://127.0.0.1:10443 -vk
