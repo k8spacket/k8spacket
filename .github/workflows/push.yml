@@ -33,7 +33,7 @@ jobs:
       - name: Install qemu & friends
         run: |
           sudo apt-get update
-          sudo apt-get install -y libguestfs-tools qemu-utils qemu-system-x86
+          sudo apt-get install -y qemu-utils qemu-system-x86
       - name: Run e2e tests on kernel 5.15
         run: |
           cd ./tests/e2e/vm/
