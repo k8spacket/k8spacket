@@ -6,12 +6,12 @@ on:
       - master
 
 jobs:
-  test:
+  unit:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@main
-      - name: Run tests
+      - name: Run unit tests
         run: make test
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
@@ -46,7 +46,6 @@ jobs:
       - uses: actions/download-artifact@master
         with:
           name: k8spacket
-          path: ./k8spacket
       - name: Run e2e tests on kernel 5.15
         run: |
           cd ./tests/e2e/vm/
