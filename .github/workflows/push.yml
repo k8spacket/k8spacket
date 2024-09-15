@@ -38,8 +38,8 @@ jobs:
         run: |
           cd ./tests/e2e/vm/
           unzip filesystem.zip
-          qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
-          qemu-system-x86_64 \
+          sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
+          sudo qemu-system-x86_64 \
           -cpu host \
           -m 4G \
           -smp 2 \
@@ -52,4 +52,4 @@ jobs:
           -daemonize \
           -pidfile qemu.pid
           
-          curl https://k8spacket.domain -vk
+          wget -q -O - --no-check-certificate https://k8spacket.domain
