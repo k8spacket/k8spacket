@@ -26,12 +26,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
-      - name: Build binary
-        run: |
-          whoami
-          sudo whoami
-          make build
-          mv ./k8spacket ./tests/e2e/vm/
+#      - name: Build binary
+#        run: |
+#          whoami
+#          sudo whoami
+#          make build
+#          mv ./k8spacket ./tests/e2e/vm/
       - name: Install qemu & friends
         run: |
           sudo apt-get update
@@ -43,15 +43,13 @@ jobs:
           sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
           sudo qemu-system-x86_64 \
           -cpu host \
-          -m 4G \
-          -smp 2 \
-          -kernel ./5.15/bzImage \
+          -m 5G \
+          -smp 8 \
+          -kernel ./tests/e2e/vm/5.15/bzImage \
           -append "console=ttyS0 root=/dev/sda rw" \
           -drive file=filesystem-diff.qcow2,format=qcow2 \
           -net nic -net user,hostfwd=tcp::2222-:22,hostfwd=tcp::6676-:6676 \
           -enable-kvm \
-          -display none \
-          -daemonize \
-          -pidfile qemu.pid
+          -nographic
           
           wget -q -O - --no-check-certificate https://k8spacket.domain
