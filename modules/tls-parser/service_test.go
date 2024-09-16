@@ -70,21 +70,21 @@ func (httpClient *mockHttpClient) Do(req *http.Request) (*http.Response, error) 
 	if req.URL.Query().Get("scenario") == "ok" {
 		result, _ := json.Marshal(dbState)
 		return &http.Response{
-			Body: io.NopCloser(bytes.NewBuffer(result)),
+			Body:       io.NopCloser(bytes.NewBuffer(result)),
 			StatusCode: http.StatusOK,
 		}, nil
 	}
 	if req.URL.Query().Get("scenario") == "ok_detail" {
 		result, _ := json.Marshal(dbDetails)
 		return &http.Response{
-			Body: io.NopCloser(bytes.NewBuffer(result)),
+			Body:       io.NopCloser(bytes.NewBuffer(result)),
 			StatusCode: http.StatusOK,
 		}, nil
 	}
 	if req.URL.Query().Get("scenario") == "ok_detail_empty" {
 		result, _ := json.Marshal(model.TLSDetails{})
 		return &http.Response{
-			Body: io.NopCloser(bytes.NewBuffer(result)),
+			Body:       io.NopCloser(bytes.NewBuffer(result)),
 			StatusCode: http.StatusOK,
 		}, nil
 	}
@@ -93,21 +93,21 @@ func (httpClient *mockHttpClient) Do(req *http.Request) (*http.Response, error) 
 		err := errors.New("error")
 		result, _ := json.Marshal(response)
 		return &http.Response{
-			Body: io.NopCloser(bytes.NewBuffer(result)),
+			Body:       io.NopCloser(bytes.NewBuffer(result)),
 			StatusCode: http.StatusInternalServerError,
 		}, err
 	}
 	if req.URL.Query().Get("scenario") == "read" {
 		reader := BrokenReader{}
 		return &http.Response{
-			Body: &reader,
+			Body:       &reader,
 			StatusCode: http.StatusOK,
 		}, nil
 	}
 	if req.URL.Query().Get("scenario") == "parse" {
 		result := []byte("parse error")
 		return &http.Response{
-			Body: io.NopCloser(bytes.NewBuffer(result)),
+			Body:       io.NopCloser(bytes.NewBuffer(result)),
 			StatusCode: http.StatusOK,
 		}, nil
 	}

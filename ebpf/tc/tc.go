@@ -19,7 +19,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go tc ./bpf/tc.bpf.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_tc tc ./bpf/tc.bpf.c
 
 type TcEbpf struct {
 	Broker broker.IBroker
