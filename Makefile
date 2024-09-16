@@ -1,11 +1,11 @@
 generate:
-	cd ./ebpf/inet
-	go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target native -type event -go-package ebpf_inet bpf ./bpf/inet.bpf.c
-	cd ../../
+	pushd ./ebpf/inet \
+	go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target native -type event -go-package ebpf_inet bpf ./bpf/inet.bpf.c \
+	popd
 
-	cd ./ebpf/tc
-	go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_tc tc ./bpf/tc.bpf.c
-	cd ../../
+	pushd ./ebpf/tc \
+	go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_tc tc ./bpf/tc.bpf.c \
+	popd
 
 fmt:
 	go fmt ./...
