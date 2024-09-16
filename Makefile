@@ -1,7 +1,22 @@
-generate:
-	cd ./ebpf/inet/bpf && ./../../../libbpf.sh && cd ../ && go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target native -type event -go-package ebpf_inet bpf ./bpf/inet.bpf.c && cd ../../
+.ONESHELL:
+prepare:
+	cd ./ebpf/inet/bpf
+	./../../../libbpf.sh
+	cd ../../../
 
-	cd ./ebpf/tc/bpf && ./../../../libbpf.sh && cd ../ && go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_tc tc ./bpf/tc.bpf.c && cd ../../
+	cd ./ebpf/tc/bpf
+	./../../../libbpf.sh
+	cd ../../../
+
+.ONESHELL:
+generate: prepare
+	cd ./ebpf/inet
+	go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target native -type event -go-package ebpf_inet bpf ./bpf/inet.bpf.c
+	cd ../../
+
+	cd ./ebpf/tc
+	go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_tc tc ./bpf/tc.bpf.c
+	cd ../../
 
 fmt:
 	go fmt ./...
