@@ -89,7 +89,7 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
 		start.initiator = new_state == TCP_SYN_SENT;
 
 		//store in map births, sk sock struct (network layer representation of sockets) as a key
-		bpf_map_update_elem(&births, &sk, &start, BPF_ANY);
+		bpf_map_update_elem(&births, &sk, &start, 0);
 		return 0;
 	} else {
 		//get element from births map for that sock struct
@@ -121,7 +121,7 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
 		}
 
         //store event in BPF perf event
-		bpf_perf_event_output(args, &events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+		bpf_perf_event_output(args, &events, 0xffffffffULL, &event, sizeof(event));
 
 		//remove element from births based on sock struct
 		bpf_map_delete_elem(&births, &sk);
