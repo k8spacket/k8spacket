@@ -48,6 +48,11 @@ jobs:
     uses: ./.github/workflows/reusable-workflow.yml
     with:
       kernel: "5.10"
+  e2e-5_8:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "5.8"
   e2e-5_4:
     needs: e2e-build
     uses: ./.github/workflows/reusable-workflow.yml
