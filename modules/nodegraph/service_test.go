@@ -23,9 +23,10 @@ import (
 )
 
 var dbState = []model.ConnectionItem{
-	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour * -1), Src: "test", ConnCount: 10, ConnPersistent: 3, MaxDuration: 1},
-	model.ConnectionItem{LastSeen: time.Now(), SrcNamespace: "test", SrcName: "test", ConnCount: 4, ConnPersistent: 0},
-	model.ConnectionItem{LastSeen: time.Now().Add(time.Hour), DstNamespace: "test", Dst: "test", ConnCount: 101, ConnPersistent: 77},
+	{LastSeen: time.Now().Add(time.Hour * -1), Src: "client-1", Dst: "server-1", ConnCount: 10, ConnPersistent: 3, MaxDuration: 1},
+	{LastSeen: time.Now(), Src: "client-1", Dst: "server-2", SrcNamespace: "test", SrcName: "test", ConnCount: 6, ConnPersistent: 4},
+	{LastSeen: time.Now().Add(time.Hour), Src: "client-2", Dst: "server-2", DstNamespace: "test", ConnCount: 4, ConnPersistent: 0},
+	{LastSeen: time.Now().Add(time.Hour), Src: "client-3", Dst: "server-3", DstNamespace: "test", ConnCount: 101, ConnPersistent: 77},
 }
 
 type mockRepository struct {
@@ -194,16 +195,17 @@ func TestBuildO11yResponse(t *testing.T) {
 
 		{"ok", &model.NodeGraph{
 			Nodes: []model.Node{
-				model.Node{Id: "test", Title: "", SubTitle: "test", MainStat: "all: 101", SecondaryStat: "persistent: 77", Arc1: 0.7623762376237624, Arc2: 0.2376237623762376, Arc3: 0},
-				model.Node{Id: "", Title: "", SubTitle: "", MainStat: "all: 14", SecondaryStat: "persistent: 3", Arc1: 0.21428571428571427, Arc2: 0.7857142857142857, Arc3: 0},
-				model.Node{Id: "", Title: "", SubTitle: "", MainStat: "all: 14", SecondaryStat: "persistent: 3", Arc1: 0.21428571428571427, Arc2: 0.7857142857142857, Arc3: 0},
-				model.Node{Id: "", Title: "", SubTitle: "", MainStat: "all: 14", SecondaryStat: "persistent: 3", Arc1: 0.21428571428571427, Arc2: 0.7857142857142857, Arc3: 0},
-				model.Node{Id: "", Title: "", SubTitle: "", MainStat: "all: 14", SecondaryStat: "persistent: 3", Arc1: 0.21428571428571427, Arc2: 0.7857142857142857, Arc3: 0},
-				model.Node{Id: "test", Title: "", SubTitle: "test", MainStat: "all: 101", SecondaryStat: "persistent: 77", Arc1: 0.7623762376237624, Arc2: 0.2376237623762376, Arc3: 0}},
+				{Id: "client-1", Title: "", SubTitle: "client-1", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
+				{Id: "server-1", Title: "", SubTitle: "server-1", MainStat: "all: 10", SecondaryStat: "persistent: 3", Arc1: 0.3, Arc2: 0.7, Arc3: 0},
+				{Id: "server-2", Title: "", SubTitle: "server-2", MainStat: "all: 10", SecondaryStat: "persistent: 4", Arc1: 0.4, Arc2: 0.6, Arc3: 0},
+				{Id: "client-2", Title: "", SubTitle: "client-2", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
+				{Id: "client-3", Title: "", SubTitle: "client-3", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
+				{Id: "server-3", Title: "", SubTitle: "server-3", MainStat: "all: 101", SecondaryStat: "persistent: 77", Arc1: 0.7623762376237624, Arc2: 0.2376237623762376, Arc3: 0}},
 			Edges: []model.Edge{
-				model.Edge{Id: "test-", Source: "test", Target: "", MainStat: "all: 10", SecondaryStat: "persistent: 3"},
-				model.Edge{Id: "-", Source: "", Target: "", MainStat: "all: 4", SecondaryStat: "persistent: 0"},
-				model.Edge{Id: "-test", Source: "", Target: "test", MainStat: "all: 101", SecondaryStat: "persistent: 77"}}}, ""},
+				{Id: "client-3-server-3", Source: "client-3", Target: "server-3", MainStat: "all: 101", SecondaryStat: "persistent: 77"},
+				{Id: "client-1-server-1", Source: "client-1", Target: "server-1", MainStat: "all: 10", SecondaryStat: "persistent: 3"},
+				{Id: "client-1-server-2", Source: "client-1", Target: "server-2", MainStat: "all: 6", SecondaryStat: "persistent: 4"},
+				{Id: "client-2-server-2", Source: "client-2", Target: "server-2", MainStat: "all: 4", SecondaryStat: "persistent: 0"}}}, ""},
 		{"error", &model.NodeGraph{}, "[api] Cannot get stats"},
 		{"read", &model.NodeGraph{}, "[api] Cannot read stats response"},
 		{"parse", &model.NodeGraph{}, "[api] Cannot parse stats response"},
