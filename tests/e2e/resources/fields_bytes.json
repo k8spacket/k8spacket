@@ -1,0 +1,60 @@
+{
+  "edges_fields": [
+    {
+      "field_name": "id",
+      "type": "string"
+    },
+    {
+      "field_name": "source",
+      "type": "string"
+    },
+    {
+      "field_name": "target",
+      "type": "string"
+    },
+    {
+      "field_name": "mainStat",
+      "type": "string"
+    },
+    {
+      "field_name": "secondaryStat",
+      "type": "string"
+    }
+  ],
+  "nodes_fields": [
+    {
+      "field_name": "id",
+      "type": "string"
+    },
+    {
+      "field_name": "title",
+      "type": "string"
+    },
+    {
+      "field_name": "subTitle",
+      "type": "string"
+    },
+    {
+      "field_name": "mainStat",
+      "displayName": "Bytes received ",
+      "type": "string"
+    },
+    {
+      "field_name": "secondaryStat",
+      "displayName": "Bytes responded ",
+      "type": "string"
+    },
+    {
+      "color": "blue",
+      "field_name": "arc__1",
+      "type": "number",
+      "displayName": "Bytes received"
+    },
+    {
+      "color": "yellow",
+      "field_name": "arc__2",
+      "type": "number",
+      "displayName": "Bytes responded"
+    }
+  ]
+}

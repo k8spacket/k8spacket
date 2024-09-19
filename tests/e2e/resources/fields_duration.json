@@ -1,0 +1,60 @@
+{
+  "edges_fields": [
+    {
+      "field_name": "id",
+      "type": "string"
+    },
+    {
+      "field_name": "source",
+      "type": "string"
+    },
+    {
+      "field_name": "target",
+      "type": "string"
+    },
+    {
+      "field_name": "mainStat",
+      "type": "string"
+    },
+    {
+      "field_name": "secondaryStat",
+      "type": "string"
+    }
+  ],
+  "nodes_fields": [
+    {
+      "field_name": "id",
+      "type": "string"
+    },
+    {
+      "field_name": "title",
+      "type": "string"
+    },
+    {
+      "field_name": "subTitle",
+      "type": "string"
+    },
+    {
+      "field_name": "mainStat",
+      "displayName": "Average duration ",
+      "type": "string"
+    },
+    {
+      "field_name": "secondaryStat",
+      "displayName": "Max duration ",
+      "type": "string"
+    },
+    {
+      "color": "purple",
+      "field_name": "arc__1",
+      "type": "number",
+      "displayName": "Average duration"
+    },
+    {
+      "color": "white",
+      "field_name": "arc__2",
+      "type": "number",
+      "displayName": "Max duration"
+    }
+  ]
+}

@@ -1,28 +1,40 @@
 FROM ubuntu:22.04
 
 RUN apt-get update \
+    # install systemd as initialization module
     && apt-get install --no-install-recommends --no-install-suggests -y systemd \
+    # install ssh to allow connect from outside
     && apt-get install -y openssh-server \
+    # install net-tools to enable eth0 network interface
     && apt-get install --no-install-recommends --no-install-suggests -y net-tools \
     && rm -rf /var/lib/apt/lists/*
 
+# switch initialization target from GUI (graphical.target) to text (multi-user.target) mode
 RUN cd /lib/systemd/system && ln -sf multi-user.target default.target
 
+# enable serial port to use for login
 RUN systemctl enable getty@ttyS0.service
+# enable ssh server
 RUN systemctl enable ssh.service
 
+# set root password
 RUN echo "root:root" | chpasswd
 
+# enable autologin on serial port
 RUN sed -i 's/ExecStart=.*/ExecStart=-\/sbin\/agetty --noissue --autologin root %I $TERM/g' /lib/systemd/system/getty@.service
+# keep boot messages on tty console
 RUN sed -i 's/TTYVTDisallocate=yes/TTYVTDisallocate=no/g' /lib/systemd/system/getty@.service
+# allow login as root through ssh
 RUN sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
 
+# set hostname
 RUN echo "k8spacket" > /etc/hostname
 
 COPY key.pem /root/
 COPY cert.pem /root/
 COPY https_server.py /root/
 
+# enable eth0 and start python https server
 RUN cat <<EOF >> /etc/systemd/system/eth0.service
     [Unit]
     Description=eth0 service
@@ -43,6 +55,7 @@ EOF
 
 RUN systemctl enable eth0.service
 
+# prepare k8spacket service
 RUN cat <<EOF >> /etc/systemd/system/k8spacket.conf
     K8S_PACKET_TCP_LISTENER_PORT=6676
     K8S_PACKET_TLS_CERTIFICATE_CACHE_TTL=30s
