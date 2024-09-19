@@ -60,5 +60,5 @@ prepare_e2e: start_qemu
 
 .ONESHELL:
 e2e: prepare_e2e
-	cd cd ${GITHUB_WORKSPACE}/tests/e2e
+	cd ${GITHUB_WORKSPACE}/tests/e2e
 	go test
