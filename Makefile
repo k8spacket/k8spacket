@@ -35,21 +35,23 @@ run_local:
 
 .ONESHELL:
 start_qemu:
-	unzip ./tests/e2e/vm/filesystem/filesystem.zip -d ./tests/e2e/vm/filesystem/
-	sudo qemu-img create -f qcow2 -b ./tests/e2e/vm/filesystem/filesystem.qcow2 -F qcow2 ./tests/e2e/vm/filesystem/filesystem-diff.qcow2
+	cd ${GITHUB_WORKSPACE}/tests/e2e/vm/filesystem
+	unzip ./filesystem.zip
+	sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
 	sudo qemu-system-x86_64 \
 	-cpu host \
 	-m 4G \
 	-smp 4 \
-	-kernel ./tests/e2e/vm/kernels/${KERNEL}/bzImage \
+	-kernel ${GITHUB_WORKSPACE}/tests/e2e/vm/kernels/${KERNEL}/bzImage \
 	-append "console=ttyS0 root=/dev/sda rw" \
-	-drive file=./tests/e2e/vm/filesystem/filesystem-diff.qcow2,format=qcow2 \
+	-drive file=${GITHUB_WORKSPACE}/tests/e2e/vm/filesystem/filesystem-diff.qcow2,format=qcow2 \
 	-net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
 	-enable-kvm \
 	-nographic &
 
 .ONESHELL:
 prepare_e2e: start_qemu
+	cd ${GITHUB_WORKSPACE}
 	while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
 	sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ./k8spacket root@127.0.0.1:/root/k8spacket
 	sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ./fields.json root@127.0.0.1:/root/fields.json
@@ -58,5 +60,5 @@ prepare_e2e: start_qemu
 
 .ONESHELL:
 e2e: prepare_e2e
-	cd ./tests/e2e
+	cd cd ${GITHUB_WORKSPACE}/tests/e2e
 	go test
