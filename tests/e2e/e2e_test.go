@@ -135,6 +135,8 @@ func doNodegraphTest(t *testing.T, statsType string, assertFunc func(nodeMainSta
 		}
 		body, _ := io.ReadAll(resp.Body)
 
+		fmt.Println(string(body))
+
 		nodeMainStatVal := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").mainStat", guest)).String()
 		nodeSecStatVal := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").secondaryStat", guest)).String()
 		nodeArg1Val := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").arc__1", guest)).Float()
