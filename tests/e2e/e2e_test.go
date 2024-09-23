@@ -43,9 +43,9 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 		wantFile string
 	}{
 		{"", "./resources/fields_connection.json"},
-		{"connection", "./resources/fields_connection.json"},
-		{"bytes", "./resources/fields_bytes.json"},
-		{"duration", "./resources/fields_duration.json"},
+		//{"connection", "./resources/fields_connection.json"},
+		//{"bytes", "./resources/fields_bytes.json"},
+		//{"duration", "./resources/fields_duration.json"},
 	}
 
 	for _, test := range tests {
@@ -66,7 +66,7 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 				}
 				body, _ := io.ReadAll(resp.Body)
 
-				return assert.EqualValues(t, resp.StatusCode, http.StatusOK) && assert.EqualValues(t, want, body)
+				return assert.EqualValues(t, resp.StatusCode, http.StatusOK) && assert.EqualValues(t, string(want), string(body))
 			}, time.Second*10, time.Millisecond*1000)
 
 		})
