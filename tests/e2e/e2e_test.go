@@ -88,7 +88,7 @@ func TestNodegraphDataEndpoint(t *testing.T) {
 		return assert.Greater(t, nodeAll, int64(0)) &&
 			assert.Greater(t, edgeAll, int64(0)) &&
 			assert.Greater(t, nodeArg1Val, 0.0) &&
-			assert.Greater(t, nodeArg2Val, 0.0) &&
+			assert.EqualValues(t, nodeArg2Val, 0.0) &&
 			assert.EqualValues(t, nodeArg3Val, 0.0)
 	})
 
@@ -167,6 +167,7 @@ func initData() {
 	rand.Read(body)
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	http.DefaultClient.Timeout = 5 * time.Second
 
 	for _, item := range data {
 		req, _ := http.NewRequest("POST", fmt.Sprintf("https://%s:10443?size=%d&sleep=%d", host, item.size, item.sleep), bytes.NewReader(body))
