@@ -13,6 +13,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -66,7 +67,7 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 				}
 				body, _ := io.ReadAll(resp.Body)
 
-				return assert.EqualValues(t, resp.StatusCode, http.StatusOK) && assert.EqualValues(t, string(want), string(body))
+				return assert.EqualValues(t, resp.StatusCode, http.StatusOK) && assert.EqualValues(t, strings.TrimSpace(string(want)), strings.TrimSpace(string(body)))
 			}, time.Second*10, time.Millisecond*1000)
 
 		})
