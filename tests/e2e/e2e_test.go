@@ -166,12 +166,13 @@ func initData() {
 	body := make([]byte, 1000)
 	rand.Read(body)
 
+	httpClient := http.DefaultClient
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	http.DefaultClient.Timeout = 5 * time.Second
+	httpClient.Timeout = 5 * time.Second
 
 	for _, item := range data {
 		req, _ := http.NewRequest("POST", fmt.Sprintf("https://%s:10443?size=%d&sleep=%d", host, item.size, item.sleep), bytes.NewReader(body))
 		req.Header.Set("Connection", "close")
-		http.DefaultClient.Do(req)
+		httpClient.Do(req)
 	}
 }
