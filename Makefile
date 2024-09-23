@@ -61,4 +61,4 @@ prepare_e2e: start_qemu
 .ONESHELL:
 e2e: prepare_e2e
 	cd ${GITHUB_WORKSPACE}/tests/e2e
-	go test
+	CLIENT_IP=192.168.101.141 HOST_IP=10.0.2.2 GUEST_IP=10.0.2.15 go test
