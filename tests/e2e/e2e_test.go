@@ -1,23 +1,32 @@
 package main
 
 import (
+	"bytes"
+	"crypto/rand"
 	"crypto/tls"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/tidwall/gjson"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"regexp"
+	"strconv"
 	"testing"
 	"time"
 )
 
-var host = "127.0.0.1"
+var client = os.Getenv("CLIENT_IP")
+var host = os.Getenv("HOST_IP")
+var guest = os.Getenv("GUEST_IP")
+var port = 16676
 
 func TestNodegraphHeathEndpoint(t *testing.T) {
 
 	assert.Eventually(t, func() bool {
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		http.DefaultClient.Timeout = 1 * time.Second
-		resp, err := http.Get(fmt.Sprintf("http://%s:16676/nodegraph/api/health", host))
+		resp, err := http.Get(fmt.Sprintf("http://%s:%d/nodegraph/api/health", host, port))
 		if err != nil {
 			log.Fatal(err)
 			return false
@@ -25,4 +34,140 @@ func TestNodegraphHeathEndpoint(t *testing.T) {
 		return resp.StatusCode == http.StatusOK
 	}, time.Second*10, time.Millisecond*1000)
 
+}
+
+func TestNodegraphFieldsEndpoint(t *testing.T) {
+
+	var tests = []struct {
+		scenario string
+		wantFile string
+	}{
+		{"", "./resources/fields_connection.json"},
+		{"connection", "./resources/fields_connection.json"},
+		{"bytes", "./resources/fields_bytes.json"},
+		{"duration", "./resources/fields_duration.json"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.scenario, func(t *testing.T) {
+			t.Parallel()
+
+			want, _ := os.ReadFile(test.wantFile)
+
+			assert.Eventually(t, func() bool {
+				http.DefaultClient.Timeout = 1 * time.Second
+
+				req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/nodegraph/api/graph/fields?stats-type=%s", host, port, test.scenario), nil)
+				req.Header.Set("Connection", "close")
+				resp, err := http.DefaultClient.Do(req)
+				if err != nil {
+					log.Fatal(err)
+					return false
+				}
+				body, _ := io.ReadAll(resp.Body)
+
+				return assert.EqualValues(t, resp.StatusCode, http.StatusOK) && assert.EqualValues(t, want, body)
+			}, time.Second*10, time.Millisecond*1000)
+
+		})
+	}
+}
+
+func TestNodegraphDataEndpoint(t *testing.T) {
+
+	initData()
+
+	doNodegraphTest(t, "connection", func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool {
+		re := regexp.MustCompile("\\w: (\\d*).*")
+
+		nodeAll, _ := strconv.ParseInt(re.FindStringSubmatch(nodeMainStatVal)[1], 10, 64)
+
+		edgeAll, _ := strconv.ParseInt(re.FindStringSubmatch(edgeMainStatVal)[1], 10, 64)
+
+		return assert.Greater(t, nodeAll, int64(0)) &&
+			assert.Greater(t, edgeAll, int64(0)) &&
+			assert.Greater(t, nodeArg1Val, 0.0) &&
+			assert.Greater(t, nodeArg2Val, 0.0) &&
+			assert.EqualValues(t, nodeArg3Val, 0.0)
+	})
+
+	doNodegraphTest(t, "bytes", func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool {
+		re := regexp.MustCompile("\\w: (\\d*\\.\\d*).*")
+
+		nodeRecv, _ := strconv.ParseFloat(re.FindStringSubmatch(nodeMainStatVal)[1], 64)
+		nodeResp, _ := strconv.ParseFloat(re.FindStringSubmatch(nodeSecStatVal)[1], 64)
+
+		edgeSent, _ := strconv.ParseFloat(re.FindStringSubmatch(edgeMainStatVal)[1], 64)
+		edgeRecv, _ := strconv.ParseFloat(re.FindStringSubmatch(edgeSecStatVal)[1], 64)
+
+		return assert.Greater(t, nodeRecv, 0.0) &&
+			assert.Greater(t, nodeResp, 0.0) &&
+			assert.Greater(t, edgeSent, 0.0) &&
+			assert.Greater(t, edgeRecv, 0.0) &&
+			assert.Greater(t, nodeArg1Val, 0.0) &&
+			assert.Greater(t, nodeArg2Val, 0.0) &&
+			assert.EqualValues(t, nodeArg3Val, 0.0)
+	})
+
+	doNodegraphTest(t, "duration", func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool {
+		nodeMax, _ := time.ParseDuration(nodeSecStatVal[5:])
+		edgeMax, _ := time.ParseDuration(edgeSecStatVal[5:])
+
+		return assert.Greater(t, nodeMax, time.Second*2) &&
+			assert.Greater(t, edgeMax, time.Second*2) &&
+			assert.Greater(t, nodeArg1Val, 0.0) &&
+			assert.Greater(t, nodeArg2Val, 0.0) &&
+			assert.EqualValues(t, nodeArg3Val, 0.0)
+	})
+
+}
+
+func doNodegraphTest(t *testing.T, statsType string, assertFunc func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool) {
+	assert.Eventually(t, func() bool {
+		http.DefaultClient.Timeout = 1 * time.Second
+		req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/nodegraph/api/graph/data?stats-type=%s", host, port, statsType), nil)
+		req.Header.Set("Connection", "close")
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Fatal(err)
+			return false
+		}
+		body, _ := io.ReadAll(resp.Body)
+
+		nodeMainStatVal := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").mainStat", guest)).String()
+		nodeSecStatVal := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").secondaryStat", guest)).String()
+		nodeArg1Val := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").arc__1", guest)).Float()
+		nodeArg2Val := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").arc__2", guest)).Float()
+		nodeArg3Val := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").arc__3", guest)).Float()
+
+		edgeMainStatVal := gjson.GetBytes(body, fmt.Sprintf("edges.#(id==\"%s-%s\").mainStat", client, guest)).String()
+		edgeSecStatVal := gjson.GetBytes(body, fmt.Sprintf("edges.#(id==\"%s-%s\").secondaryStat", client, guest)).String()
+
+		return assertFunc(nodeMainStatVal, nodeSecStatVal, nodeArg1Val, nodeArg2Val, nodeArg3Val, edgeMainStatVal, edgeSecStatVal)
+
+	}, time.Second*10, time.Millisecond*1000)
+}
+
+func initData() {
+
+	var data = []struct {
+		size  int
+		sleep int
+	}{
+		{1, 0},
+		{1, 2},
+		{500, 0},
+		{1000, 0},
+	}
+
+	body := make([]byte, 1000)
+	rand.Read(body)
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	for _, item := range data {
+		req, _ := http.NewRequest("POST", fmt.Sprintf("https://%s:10443?size=%d&sleep=%d", host, item.size, item.sleep), bytes.NewReader(body))
+		req.Header.Set("Connection", "close")
+		http.DefaultClient.Do(req)
+	}
 }

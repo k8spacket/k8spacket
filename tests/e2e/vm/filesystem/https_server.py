@@ -13,7 +13,7 @@ import time
 
 class Handler(SimpleHTTPRequestHandler):
 
-    def do_GET(self):
+    def do_POST(self):
         parsed_url = urlparse(self.path)
         params = parse_qs(parsed_url.query)
 
@@ -32,6 +32,9 @@ class Handler(SimpleHTTPRequestHandler):
         time.sleep(int(sleep))
 
         self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.send_header("Content-length", len(res))
+        self.send_header("Connection", "close")
         self.end_headers()
         self.wfile.write(res.encode('utf-8'))
 
