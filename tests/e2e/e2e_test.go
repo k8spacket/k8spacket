@@ -26,7 +26,7 @@ var port = 16676
 func TestNodegraphHeathEndpoint(t *testing.T) {
 
 	assert.Eventually(t, func() bool {
-		httpClient := http.DefaultClient
+		httpClient := &http.Client{}
 		httpClient.Timeout = 1 * time.Second
 		resp, err := httpClient.Get(fmt.Sprintf("http://%s:%d/nodegraph/api/health", host, port))
 		if err != nil {
@@ -50,7 +50,7 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 		{"duration", "./resources/fields_duration.json"},
 	}
 
-	httpClient := http.DefaultClient
+	httpClient := &http.Client{}
 	httpClient.Timeout = 1 * time.Second
 
 	for _, test := range tests {
@@ -128,7 +128,7 @@ func TestNodegraphDataEndpoint(t *testing.T) {
 }
 
 func doNodegraphTest(t *testing.T, statsType string, assertFunc func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool) {
-	httpClient := http.DefaultClient
+	httpClient := &http.Client{}
 	httpClient.Timeout = 1 * time.Second
 	assert.Eventually(t, func() bool {
 		req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/nodegraph/api/graph/data?stats-type=%s", host, port, statsType), nil)
@@ -171,7 +171,7 @@ func initData() {
 	body := make([]byte, 1000)
 	rand.Read(body)
 
-	httpClient := http.DefaultClient
+	httpClient := &http.Client{}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	httpClient.Timeout = 5 * time.Second
 
