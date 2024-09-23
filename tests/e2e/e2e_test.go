@@ -26,8 +26,9 @@ var port = 16676
 func TestNodegraphHeathEndpoint(t *testing.T) {
 
 	assert.Eventually(t, func() bool {
-		http.DefaultClient.Timeout = 1 * time.Second
-		resp, err := http.Get(fmt.Sprintf("http://%s:%d/nodegraph/api/health", host, port))
+		httpClient := http.DefaultClient
+		httpClient.Timeout = 1 * time.Second
+		resp, err := httpClient.Get(fmt.Sprintf("http://%s:%d/nodegraph/api/health", host, port))
 		if err != nil {
 			log.Fatal(err)
 			return false
@@ -44,10 +45,13 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 		wantFile string
 	}{
 		{"", "./resources/fields_connection.json"},
-		//{"connection", "./resources/fields_connection.json"},
-		//{"bytes", "./resources/fields_bytes.json"},
-		//{"duration", "./resources/fields_duration.json"},
+		{"connection", "./resources/fields_connection.json"},
+		{"bytes", "./resources/fields_bytes.json"},
+		{"duration", "./resources/fields_duration.json"},
 	}
+
+	httpClient := http.DefaultClient
+	httpClient.Timeout = 1 * time.Second
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
@@ -56,11 +60,11 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 			want, _ := os.ReadFile(test.wantFile)
 
 			assert.Eventually(t, func() bool {
-				http.DefaultClient.Timeout = 1 * time.Second
+				httpClient.Timeout = 1 * time.Second
 
 				req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/nodegraph/api/graph/fields?stats-type=%s", host, port, test.scenario), nil)
 				req.Header.Set("Connection", "close")
-				resp, err := http.DefaultClient.Do(req)
+				resp, err := httpClient.Do(req)
 				if err != nil {
 					log.Fatal(err)
 					return false
@@ -124,11 +128,12 @@ func TestNodegraphDataEndpoint(t *testing.T) {
 }
 
 func doNodegraphTest(t *testing.T, statsType string, assertFunc func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool) {
+	httpClient := http.DefaultClient
+	httpClient.Timeout = 1 * time.Second
 	assert.Eventually(t, func() bool {
-		http.DefaultClient.Timeout = 1 * time.Second
 		req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/nodegraph/api/graph/data?stats-type=%s", host, port, statsType), nil)
 		req.Header.Set("Connection", "close")
-		resp, err := http.DefaultClient.Do(req)
+		resp, err := httpClient.Do(req)
 		if err != nil {
 			log.Fatal(err)
 			return false
