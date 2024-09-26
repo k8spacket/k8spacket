@@ -34,24 +34,39 @@ run_local:
 	K8S_PACKET_TCP_LISTENER_PORT=6676 K8S_PACKET_TLS_CERTIFICATE_CACHE_TTL=30s K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND="echo -n eno2" K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD=3s K8S_PACKET_K8S_RESOURCES_DISABLED=true go run k8spacket.go
 
 .ONESHELL:
+prepare_e2e_filesystem:
+	cd ./tests/e2e/vm/filesystem
+	# build filesystem image and store as tar archive
+	DOCKER_BUILDKIT=1 docker build --output "type=tar,dest=filesystem.tar" .
+	# convert tar to qcow2 image
+	sudo virt-make-fs --format=qcow2 --size=+100M filesystem.tar filesystem-large.qcow2
+	# reduce size of image
+	qemu-img convert filesystem-large.qcow2 -O qcow2 filesystem.qcow2
+	# reduce size by packing
+	zip filesystem.zip filesystem.qcow2
+	# remove unnecessary files
+	rm -f filesystem-large.qcow2 filesystem.qcow2 filesystem.tar
+
+.ONESHELL:
 start_qemu:
-	cd ${GITHUB_WORKSPACE}/tests/e2e/vm/filesystem
+	cd ./tests/e2e/vm/filesystem
+	rm -f filesystem.qcow2 filesystem-diff.qcow2
 	unzip ./filesystem.zip
 	sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
+	PWD=$(pwd)
 	sudo qemu-system-x86_64 \
 	-cpu host \
 	-m 4G \
 	-smp 4 \
-	-kernel ${GITHUB_WORKSPACE}/tests/e2e/vm/kernels/${KERNEL}/bzImage \
+	-kernel ${PWD}/tests/e2e/vm/kernels/${KERNEL}/bzImage \
 	-append "console=ttyS0 root=/dev/sda rw" \
-	-drive file=${GITHUB_WORKSPACE}/tests/e2e/vm/filesystem/filesystem-diff.qcow2,format=qcow2 \
+	-drive file="${PWD}/tests/e2e/vm/filesystem/filesystem-diff.qcow2,format=qcow2" \
 	-net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
 	-enable-kvm \
 	-nographic &
 
 .ONESHELL:
 prepare_e2e: start_qemu
-	cd ${GITHUB_WORKSPACE}
 	while ! nc -z 127.0.0.1 10022 ; do echo "waiting for ssh"; sleep 1; done
 	sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ./k8spacket root@127.0.0.1:/root/k8spacket
 	sshpass -p root scp -o 'StrictHostKeyChecking no' -P 10022 ./fields.json root@127.0.0.1:/root/fields.json
@@ -60,6 +75,6 @@ prepare_e2e: start_qemu
 
 .ONESHELL:
 e2e: prepare_e2e
-	cd ${GITHUB_WORKSPACE}/tests/e2e
+	cd ./tests/e2e
 	ifconfig
 	CLIENT_IP=10.0.2.2 HOST_IP=127.0.0.1 GUEST_IP=10.0.2.15 go test -v

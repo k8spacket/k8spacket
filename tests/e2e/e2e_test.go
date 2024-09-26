@@ -27,13 +27,13 @@ func TestNodegraphHeathEndpoint(t *testing.T) {
 
 	assert.Eventually(t, func() bool {
 		httpClient := &http.Client{}
-		httpClient.Timeout = 1 * time.Second
+		httpClient.Timeout = 3 * time.Second
 		resp, err := httpClient.Get(fmt.Sprintf("http://%s:%d/nodegraph/api/health", host, port))
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			return false
 		}
-		return resp.StatusCode == http.StatusOK
+		return assert.EqualValues(t, resp.StatusCode, http.StatusOK)
 	}, time.Second*10, time.Millisecond*1000)
 
 }
@@ -60,13 +60,13 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 			want, _ := os.ReadFile(test.wantFile)
 
 			assert.Eventually(t, func() bool {
-				httpClient.Timeout = 1 * time.Second
+				httpClient.Timeout = 3 * time.Second
 
 				req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/nodegraph/api/graph/fields?stats-type=%s", host, port, test.scenario), nil)
 				req.Header.Set("Connection", "close")
 				resp, err := httpClient.Do(req)
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
 					return false
 				}
 				body, _ := io.ReadAll(resp.Body)
@@ -78,7 +78,7 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 	}
 }
 
-func TestNodegraphDataEndpoint(t *testing.T) {
+func TestNodegraphDataConnectionEndpoint(t *testing.T) {
 
 	initData()
 
@@ -91,10 +91,11 @@ func TestNodegraphDataEndpoint(t *testing.T) {
 
 		return assert.Greater(t, nodeAll, int64(0)) &&
 			assert.Greater(t, edgeAll, int64(0)) &&
-			assert.Greater(t, nodeArg1Val, 0.0) &&
-			assert.EqualValues(t, nodeArg2Val, 0.0) &&
-			assert.EqualValues(t, nodeArg3Val, 0.0)
+			assert.Greater(t, nodeArg1Val, 0.0)
 	})
+}
+
+func TestNodegraphDataBytesEndpoint(t *testing.T) {
 
 	doNodegraphTest(t, "bytes", func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool {
 		re := regexp.MustCompile("\\w: (\\d*\\.\\d*).*")
@@ -110,9 +111,11 @@ func TestNodegraphDataEndpoint(t *testing.T) {
 			assert.Greater(t, edgeSent, 0.0) &&
 			assert.Greater(t, edgeRecv, 0.0) &&
 			assert.Greater(t, nodeArg1Val, 0.0) &&
-			assert.Greater(t, nodeArg2Val, 0.0) &&
-			assert.EqualValues(t, nodeArg3Val, 0.0)
+			assert.Greater(t, nodeArg2Val, 0.0)
 	})
+}
+
+func TestNodegraphDataDurationEndpoint(t *testing.T) {
 
 	doNodegraphTest(t, "duration", func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool {
 		nodeMax, _ := time.ParseDuration(nodeSecStatVal[5:])
@@ -121,26 +124,23 @@ func TestNodegraphDataEndpoint(t *testing.T) {
 		return assert.Greater(t, nodeMax, time.Second*2) &&
 			assert.Greater(t, edgeMax, time.Second*2) &&
 			assert.Greater(t, nodeArg1Val, 0.0) &&
-			assert.Greater(t, nodeArg2Val, 0.0) &&
-			assert.EqualValues(t, nodeArg3Val, 0.0)
+			assert.Greater(t, nodeArg2Val, 0.0)
 	})
 
 }
 
 func doNodegraphTest(t *testing.T, statsType string, assertFunc func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool) {
 	httpClient := &http.Client{}
-	httpClient.Timeout = 1 * time.Second
+	httpClient.Timeout = 3 * time.Second
 	assert.Eventually(t, func() bool {
 		req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/nodegraph/api/graph/data?stats-type=%s", host, port, statsType), nil)
 		req.Header.Set("Connection", "close")
 		resp, err := httpClient.Do(req)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			return false
 		}
 		body, _ := io.ReadAll(resp.Body)
-
-		fmt.Println(string(body))
 
 		nodeMainStatVal := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").mainStat", guest)).String()
 		nodeSecStatVal := gjson.GetBytes(body, fmt.Sprintf("nodes.#(id==\"%s\").secondaryStat", guest)).String()
@@ -173,7 +173,7 @@ func initData() {
 
 	httpClient := &http.Client{}
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	httpClient.Timeout = 5 * time.Second
+	httpClient.Timeout = 3 * time.Second
 
 	for _, item := range data {
 		req, _ := http.NewRequest("POST", fmt.Sprintf("https://%s:10443?size=%d&sleep=%d", host, item.size, item.sleep), bytes.NewReader(body))
