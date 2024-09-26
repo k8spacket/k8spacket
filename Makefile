@@ -79,4 +79,6 @@ e2e: prepare_e2e
 	cd ./tests/e2e
 	ifconfig
 	CLIENT_IP=10.0.2.2 HOST_IP=127.0.0.1 GUEST_IP=10.0.2.15 go test -v
+	
+	sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
 	sudo cat ./vm/filesystem/qemu.pid | sudo xargs kill
