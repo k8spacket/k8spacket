@@ -63,6 +63,7 @@ start_qemu:
 	-drive file="${PWD}/tests/e2e/vm/filesystem/filesystem-diff.qcow2,format=qcow2" \
 	-net nic -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::16676-:6676,hostfwd=tcp::10443-:443 \
 	-enable-kvm \
+	-pidfile qemu.pid \
 	-nographic &
 
 .ONESHELL:
@@ -78,3 +79,4 @@ e2e: prepare_e2e
 	cd ./tests/e2e
 	ifconfig
 	CLIENT_IP=10.0.2.2 HOST_IP=127.0.0.1 GUEST_IP=10.0.2.15 go test -v
+	sudo cat ./vm/filesystem/qemu.pid | sudo xargs kill
