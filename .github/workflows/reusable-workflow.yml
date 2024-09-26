@@ -24,4 +24,3 @@ jobs:
       - name: Run e2e tests on kernel ${{ inputs.kernel }}
         run: |
           KERNEL=${{ inputs.kernel }} make e2e
-          sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
