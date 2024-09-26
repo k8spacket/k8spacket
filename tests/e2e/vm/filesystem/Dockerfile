@@ -33,9 +33,10 @@ RUN echo "k8spacket" > /etc/hostname
 COPY key.pem /root/
 COPY cert.pem /root/
 COPY https_server.py /root/
+COPY https_client.py /root/
 
-# enable eth0 and start python https server
-RUN cat <<EOF >> /etc/systemd/system/eth0.service
+# enable eth0
+RUN cat <<EOF >> /etc/systemd/system/e2e_config.service
     [Unit]
     Description=eth0 service
 
@@ -48,12 +49,44 @@ RUN cat <<EOF >> /etc/systemd/system/eth0.service
     ExecStart=/bin/bash -c '/usr/bin/echo nameserver 8.8.8.8 > /etc/resolv.conf'
     ExecStart=/bin/bash -c '/usr/bin/echo "127.0.0.1 k8spacket.domain" > /etc/hosts'
     ExecStart=/bin/bash -c 'python3.10 /root/https_server.py'
+    ExecStart=/bin/bash -c 'python3.10 /root/https_client.py'
 
     [Install]
     WantedBy=multi-user.target
 EOF
-
 RUN systemctl enable eth0.service
+
+#start python https server
+RUN cat <<EOF >> /etc/systemd/system/https_server.service
+    [Unit]
+    Description=https server service
+
+    [Service]
+    User=root
+    WorkingDirectory=/root
+    Type=oneshot
+    ExecStart=/bin/bash -c 'python3.10 /root/https_server.py'
+
+    [Install]
+    WantedBy=multi-user.target
+EOF
+RUN systemctl enable https_server.service
+
+#start python https client
+RUN cat <<EOF >> /etc/systemd/system/https_client.service
+    [Unit]
+    Description=https client service
+
+    [Service]
+    User=root
+    WorkingDirectory=/root
+    Type=oneshot
+    ExecStart=/bin/bash -c 'python3.10 /root/https_client.py'
+
+    [Install]
+    WantedBy=multi-user.target
+EOF
+RUN systemctl enable https_client.service
 
 # prepare k8spacket service
 RUN cat <<EOF >> /etc/systemd/system/k8spacket.conf

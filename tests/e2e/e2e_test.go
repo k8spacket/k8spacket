@@ -34,7 +34,7 @@ func TestNodegraphHeathEndpoint(t *testing.T) {
 			return false
 		}
 		return assert.EqualValues(t, resp.StatusCode, http.StatusOK)
-	}, time.Second*10, time.Millisecond*1000)
+	}, 10*time.Second, 1*time.Second)
 
 }
 
@@ -72,7 +72,7 @@ func TestNodegraphFieldsEndpoint(t *testing.T) {
 				body, _ := io.ReadAll(resp.Body)
 
 				return assert.EqualValues(t, resp.StatusCode, http.StatusOK) && assert.EqualValues(t, strings.TrimSpace(string(want)), strings.TrimSpace(string(body)))
-			}, time.Second*10, time.Millisecond*1000)
+			}, 10*time.Second, 1*time.Second)
 
 		})
 	}
@@ -153,7 +153,7 @@ func doNodegraphTest(t *testing.T, statsType string, assertFunc func(nodeMainSta
 
 		return assertFunc(nodeMainStatVal, nodeSecStatVal, nodeArg1Val, nodeArg2Val, nodeArg3Val, edgeMainStatVal, edgeSecStatVal)
 
-	}, time.Second*10, time.Millisecond*1000)
+	}, 10*time.Second, 1*time.Second)
 }
 
 func initData() {
