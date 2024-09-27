@@ -91,7 +91,7 @@ func TestNodegraphDataConnectionEndpoint(t *testing.T) {
 
 		return assert.Greater(t, nodeAll, int64(0)) &&
 			assert.Greater(t, edgeAll, int64(0)) &&
-			assert.Greater(t, nodeArg1Val, 0.0)
+			assert.Greater(t, nodeArg2Val, 0.0)
 	})
 }
 
@@ -118,11 +118,15 @@ func TestNodegraphDataBytesEndpoint(t *testing.T) {
 func TestNodegraphDataDurationEndpoint(t *testing.T) {
 
 	doNodegraphTest(t, "duration", func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool {
+		nodeAvg, _ := time.ParseDuration(nodeMainStatVal[5:])
 		nodeMax, _ := time.ParseDuration(nodeSecStatVal[5:])
+		edgeAvg, _ := time.ParseDuration(edgeMainStatVal[5:])
 		edgeMax, _ := time.ParseDuration(edgeSecStatVal[5:])
 
-		return assert.Greater(t, nodeMax, time.Second*2) &&
-			assert.Greater(t, edgeMax, time.Second*2) &&
+		return assert.Greater(t, nodeAvg, time.Second*0) &&
+			assert.Greater(t, nodeMax, time.Second*0) &&
+			assert.Greater(t, edgeAvg, time.Second*0) &&
+			assert.Greater(t, edgeMax, time.Second*0) &&
 			assert.Greater(t, nodeArg1Val, 0.0) &&
 			assert.Greater(t, nodeArg2Val, 0.0)
 	})

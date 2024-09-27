@@ -7,11 +7,21 @@ from urllib.parse import parse_qs
 
 import ssl
 import string
+import sys
 import random
 import time
 
 
 class Handler(SimpleHTTPRequestHandler):
+
+    def log_message(self, format, *args):
+        message = format % args
+        sys.stderr.write("%s:%s -> %s - - [%s] %s\n" %
+            (self.client_address[0],
+            self.client_address[1],
+            self.address_string(),
+            self.log_date_time_string(),
+            message.translate(self._control_char_table)))
 
     def do_POST(self):
         parsed_url = urlparse(self.path)
@@ -23,9 +33,6 @@ class Handler(SimpleHTTPRequestHandler):
         size = "1"
         if 'size' in params:
             size = params['size'][0]
-
-        print(sleep)
-        print(size)
 
         res = ''.join(random.choices(string.ascii_letters, k=int(size)))
 

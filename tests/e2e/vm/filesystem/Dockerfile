@@ -36,7 +36,7 @@ COPY https_server.py /root/
 COPY https_client.py /root/
 
 # enable eth0
-RUN cat <<EOF >> /etc/systemd/system/e2e_config.service
+RUN cat <<EOF >> /etc/systemd/system/eth0.service
     [Unit]
     Description=eth0 service
 
@@ -47,9 +47,7 @@ RUN cat <<EOF >> /etc/systemd/system/e2e_config.service
     ExecStart=ifconfig eth0 10.0.2.15 netmask 255.255.255.0
     ExecStart=route add default gw 10.0.2.2
     ExecStart=/bin/bash -c '/usr/bin/echo nameserver 8.8.8.8 > /etc/resolv.conf'
-    ExecStart=/bin/bash -c '/usr/bin/echo "127.0.0.1 k8spacket.domain" > /etc/hosts'
-    ExecStart=/bin/bash -c 'python3.10 /root/https_server.py'
-    ExecStart=/bin/bash -c 'python3.10 /root/https_client.py'
+    ExecStart=/bin/bash -c '/usr/bin/echo "10.0.2.15 k8spacket.domain" > /etc/hosts'
 
     [Install]
     WantedBy=multi-user.target
@@ -72,12 +70,19 @@ RUN cat <<EOF >> /etc/systemd/system/https_server.service
 EOF
 RUN systemctl enable https_server.service
 
+# prepare python https client
+RUN cat <<EOF >> /etc/systemd/system/https_client.conf
+    HOST=k8spacket.domain
+    PORT=443
+EOF
+
 #start python https client
 RUN cat <<EOF >> /etc/systemd/system/https_client.service
     [Unit]
     Description=https client service
 
     [Service]
+    EnvironmentFile=/etc/systemd/system/https_client.conf
     User=root
     WorkingDirectory=/root
     Type=oneshot
@@ -95,6 +100,7 @@ RUN cat <<EOF >> /etc/systemd/system/k8spacket.conf
     K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND="echo -n eth0,lo"
     K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD=3s
     K8S_PACKET_K8S_RESOURCES_DISABLED=true
+    K8S_PACKET_TCP_PERSISTENT_DURATION=10s
 EOF
 
 RUN cat <<EOF >> /etc/systemd/system/k8spacket.service

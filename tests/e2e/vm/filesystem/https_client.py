@@ -1,22 +1,29 @@
+import contextlib
 import random
-import requests
+import ssl
+import string
 import time
+
 from os import environ
+from urllib import parse
+from urllib.request import urlopen, Request
 
 def main():
     while 1:
 
-        s = requests.Session()
-
         url = f"https://{environ['HOST']}:{environ['PORT']}?size={random.randrange(0, 100)}&sleep={random.randrange(0, 2)}"
-        headers = {"Connection": "close"}
-        req = "request payload"
+
+        payload = ''.join(random.choices(string.ascii_letters,k=random.randrange(100, 10000))).encode('utf-8')
+        request = Request(url, headers={"Connection": "close"}, data=payload)
+
+        context = ssl._create_unverified_context()
         try:
-            resp = s.post(url, data=req, verify='cert.pem', headers=headers)
-            print(f"req - {req} \nresp - {str(resp.content)}")
+            with contextlib.closing(urlopen(request, context=context)) as response:
+                print(f"req - {payload} \nresp\n status - {response.status}\n body -  {response.read().decode()}")
         except Exception:
             pass
-        print(f"Going sleep for 2 seconds")
+
+        print(f"Going sleep for 0.5 second")
         time.sleep(0.5)
 
 if __name__ == "__main__":
