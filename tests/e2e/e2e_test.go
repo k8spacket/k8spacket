@@ -133,6 +133,27 @@ func TestNodegraphDataDurationEndpoint(t *testing.T) {
 
 }
 
+func TestTlsParserConnectionsEndpoint(t *testing.T) {
+	httpClient := &http.Client{}
+	httpClient.Timeout = 3 * time.Second
+	assert.Eventually(t, func() bool {
+		req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/tlsparser/api/data", host, port), nil)
+		req.Header.Set("Connection", "close")
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		body, _ := io.ReadAll(resp.Body)
+
+		node := gjson.GetBytes(body, "#(domain==\"k8spacket.domain\")").String()
+
+		println(node)
+
+		return true
+	}, 10*time.Second, 1*time.Second)
+}
+
 func doNodegraphTest(t *testing.T, statsType string, assertFunc func(nodeMainStatVal string, nodeSecStatVal string, nodeArg1Val float64, nodeArg2Val float64, nodeArg3Val float64, edgeMainStatVal string, edgeSecStatVal string) bool) {
 	httpClient := &http.Client{}
 	httpClient.Timeout = 3 * time.Second

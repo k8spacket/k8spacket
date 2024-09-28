@@ -47,7 +47,9 @@ RUN cat <<EOF >> /etc/systemd/system/eth0.service
     ExecStart=ifconfig eth0 10.0.2.15 netmask 255.255.255.0
     ExecStart=route add default gw 10.0.2.2
     ExecStart=/bin/bash -c '/usr/bin/echo nameserver 8.8.8.8 > /etc/resolv.conf'
-    ExecStart=/bin/bash -c '/usr/bin/echo "10.0.2.15 k8spacket.domain" > /etc/hosts'
+    ExecStart=/bin/bash -c '/usr/bin/echo "10.0.2.15 k8spacket.domain" >> /etc/hosts'
+    ExecStart=/bin/bash -c '/usr/bin/echo "10.0.2.15 k8spacket-tls12.domain" >> /etc/hosts'
+    ExecStart=/bin/bash -c '/usr/bin/echo "10.0.2.15 k8spacket-tls13.domain" >> /etc/hosts'
 
     [Install]
     WantedBy=multi-user.target
@@ -72,7 +74,8 @@ RUN systemctl enable https_server.service
 
 # prepare python https client
 RUN cat <<EOF >> /etc/systemd/system/https_client.conf
-    HOST=k8spacket.domain
+    HOST_TLS12=k8spacket-tls12.domain
+    HOST_TLS13=k8spacket-tls13.domain
     PORT=443
 EOF
 
