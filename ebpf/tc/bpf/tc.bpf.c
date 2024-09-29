@@ -234,7 +234,7 @@ int tc_filter(struct __sk_buff *ctx)
                         break;
                     }
                 }
-                //store event in BPF ringbuf events map
+                //store event in BPF perf events map
                 bpf_perf_event_output(ctx, &output_events, 0xffffffffULL, event, sizeof(struct tls_handshake_event));
             }
             //remove element from events based on sequence number
