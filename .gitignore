@@ -12,3 +12,4 @@ k8spacket
 
 # pem files
 *.pem
+!tests/**/*.pem

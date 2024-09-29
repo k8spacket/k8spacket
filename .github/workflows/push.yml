@@ -6,12 +6,12 @@ on:
       - master
 
 jobs:
-  test:
+  unit:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@main
-      - name: Run tests
+      - name: Run unit tests
         run: make test
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
@@ -21,3 +21,50 @@ jobs:
           verbose: true # optional (default = false)
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  e2e-build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Build binary
+        run: |
+          make build
+      - uses: actions/upload-artifact@master
+        with:
+          name: k8spacket
+          path: ./k8spacket
+  e2e-6_10:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "6.10"
+  e2e-6_6:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "6.6"
+  e2e-6_1:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "6.1"
+  e2e-5_15:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "5.15"
+  e2e-5_10:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "5.10"
+  e2e-5_8:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "5.8"
+  e2e-5_4:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "5.4"

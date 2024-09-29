@@ -1,0 +1,26 @@
+name: reusable jobs
+
+on:
+  workflow_call:
+    inputs:
+      kernel:
+        description: 'Kernel'
+        required: true
+        type: string
+
+jobs:
+  e2e-kernel:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Install qemu & friends
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-utils qemu-system-x86 sshpass
+      - uses: actions/download-artifact@master
+        with:
+          name: k8spacket
+      - name: Run e2e tests on kernel ${{ inputs.kernel }}
+        run: |
+          KERNEL=${{ inputs.kernel }} make e2e

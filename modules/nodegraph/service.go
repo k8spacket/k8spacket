@@ -142,7 +142,7 @@ func prepareConnections(connectionItems map[string]model.ConnectionItem, connect
 	for _, conn := range connectionItems {
 		var connEndpointSrc = connectionEndpoints[conn.Src]
 		if (model.ConnectionEndpoint{} == connEndpointSrc) {
-			connEndpointSrc = *&model.ConnectionEndpoint{Ip: conn.Src, Name: conn.SrcName, Namespace: conn.SrcNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
+			connEndpointSrc = model.ConnectionEndpoint{Ip: conn.Src, Name: conn.SrcName, Namespace: conn.SrcNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
 		}
 		connEndpointSrc.BytesSent += conn.BytesSent
 		connEndpointSrc.BytesReceived += conn.BytesReceived
@@ -150,7 +150,7 @@ func prepareConnections(connectionItems map[string]model.ConnectionItem, connect
 
 		var connEndpointDst = connectionEndpoints[conn.Dst]
 		if (model.ConnectionEndpoint{} == connEndpointDst) {
-			connEndpointDst = *&model.ConnectionEndpoint{Ip: conn.Dst, Name: conn.DstName, Namespace: conn.DstNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
+			connEndpointDst = model.ConnectionEndpoint{Ip: conn.Dst, Name: conn.DstName, Namespace: conn.DstNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
 		}
 		connEndpointDst.ConnCount += conn.ConnCount
 		connEndpointDst.ConnPersistent += conn.ConnPersistent
@@ -169,10 +169,12 @@ func buildApiResponse(connectionItems map[string]model.ConnectionItem, connectio
 	var nodeArray []model.Node
 	var edgeArray []model.Edge
 
-	for _, conn := range connectionItems {
-		nodeArray = fillNodesArray(conn.Src, nodeArray, connectionEndpoints, statsImpl)
-		nodeArray = fillNodesArray(conn.Dst, nodeArray, connectionEndpoints, statsImpl)
-		edgeArray = fillEdgesArray(conn.Src+"-"+conn.Dst, edgeArray, connectionItems, statsImpl)
+	for _, item := range connectionEndpoints {
+		nodeArray = fillNodesArray(item.Ip, nodeArray, connectionEndpoints, statsImpl)
+	}
+
+	for _, item := range connectionItems {
+		edgeArray = fillEdgesArray(item.Src+"-"+item.Dst, edgeArray, connectionItems, statsImpl)
 	}
 
 	return model.NodeGraph{Nodes: nodeArray, Edges: edgeArray}

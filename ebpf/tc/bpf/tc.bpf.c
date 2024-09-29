@@ -50,7 +50,7 @@ struct {
 } events SEC(".maps");
 
 struct {
-    __uint(type, BPF_MAP_TYPE_RINGBUF);
+    __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
     __uint(max_entries, MAX_ENTRIES);
 } output_events SEC(".maps");
 
@@ -235,7 +235,7 @@ int tc_filter(struct __sk_buff *ctx)
                     }
                 }
                 //store event in BPF ringbuf events map
-                bpf_ringbuf_output(&output_events, event, sizeof(struct tls_handshake_event), 0);
+                bpf_perf_event_output(ctx, &output_events, 0xffffffffULL, event, sizeof(struct tls_handshake_event));
             }
             //remove element from events based on sequence number
             bpf_map_delete_elem(&events, &tcp->seq);

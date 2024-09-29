@@ -98,7 +98,7 @@ func buildResponse[T model.TLSDetails | []model.TLSConnection](service *Service,
 			slog.Error("[api] Cannot get stats", "Error", err)
 			continue
 		}
-		
+
 		if resp.StatusCode == http.StatusOK {
 
 			responseData, err := io.ReadAll(resp.Body)

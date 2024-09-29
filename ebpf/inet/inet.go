@@ -25,10 +25,11 @@ args:
 -cc clang - select C compiler
 -target native - means get target platform from golang env GOARCH
 -type event - name of type in C ebpf program to generate Go declaration
+-go-package -package for output go file
 bpf - identity name of generating program
 ./bpf/inet.bpf.c - C language source file
 */
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target native -type event bpf ./bpf/inet.bpf.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target native -type event -go-package ebpf_inet bpf ./bpf/inet.bpf.c
 
 type InetEbpf struct {
 	Broker broker.IBroker

@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/cilium/ebpf/ringbuf"
+	"github.com/cilium/ebpf/perf"
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
 	"github.com/k8spacket/k8spacket/modules"
@@ -19,7 +19,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-//go:generate go run github.com/cilium/ebpf/cmd/bpf2go tc ./bpf/tc.bpf.c
+//go:generate go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_tc tc ./bpf/tc.bpf.c
 
 type TcEbpf struct {
 	Broker broker.IBroker
@@ -73,7 +73,7 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 	addFilter(link, progFd, netlink.HANDLE_MIN_EGRESS)
 
 	// create new reader for ringbuf events
-	rd, err := ringbuf.NewReader(objs.OutputEvents)
+	rd, err := perf.NewReader(objs.OutputEvents, os.Getpagesize())
 	if err != nil {
 		slog.Error("[tc] Creating perf event reader", "Error", err)
 	}
@@ -85,7 +85,7 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 		for {
 			record, err := rd.Read()
 			if err != nil {
-				if errors.Is(err, ringbuf.ErrClosed) {
+				if errors.Is(err, perf.ErrClosed) {
 					slog.Info("[tc] Received signal, exiting..")
 					return
 				}
@@ -167,6 +167,10 @@ func distribute(event tcTlsHandshakeEvent, tc *TcEbpf) {
 		ServerName:     string(event.ServerName[:serverNameLen]),
 		UsedTlsVersion: event.UsedTlsVersion,
 		UsedCipher:     event.UsedCipher}
+	if len(tlsEvent.TlsVersions) <= 0 {
+		tlsEvent.TlsVersions = append(tlsEvent.TlsVersions, event.TlsVersion)
+	}
+
 	ebpf_tools.EnrichAddress(&tlsEvent.Client)
 	ebpf_tools.EnrichAddress(&tlsEvent.Server)
 	tc.Broker.TLSEvent(tlsEvent)
