@@ -161,7 +161,7 @@ func doTlsParserTest(t *testing.T, domain string, tlsVer string) {
 		tlsVersion = gjson.GetBytes(body, fmt.Sprintf("#(domain==\"%s\").usedTLSVersion", domain)).String()
 		cipher = gjson.GetBytes(body, fmt.Sprintf("#(domain==\"%s\").usedCipherSuite", domain)).String()
 		lastSeenStr := gjson.GetBytes(body, fmt.Sprintf("#(domain==\"%s\").lastSeen", domain)).String()
-		lastSeen, err := time.Parse("2006-01-02T15:04:05.000000000Z", lastSeenStr)
+		lastSeen, _ := time.Parse("2006-01-02T15:04:05.000000000Z", lastSeenStr)
 
 		return assert.EqualValues(t, tlsVer, tlsVersion) &&
 			assert.NotEmpty(t, cipher) &&
@@ -182,9 +182,20 @@ func doTlsParserTest(t *testing.T, domain string, tlsVer string) {
 		clientTLSVersions := gjson.GetBytes(body, "clientTLSVersions").String()
 		clientCipherSuites := gjson.GetBytes(body, "clientCipherSuites").String()
 
+		notBeforeStr := gjson.GetBytes(body, "certificate.notBefore").String()
+		notAfterStr := gjson.GetBytes(body, "certificate.notAfter").String()
+
+		notBefore, _ := time.Parse("2006-01-02T15:04:05Z", notBeforeStr)
+		notAfter, _ := time.Parse("2006-01-02T15:04:05Z", notAfterStr)
+
+		chain := gjson.GetBytes(body, "certificate.serverChain").String()
+
 		return assert.EqualValues(t, domain, d) &&
 			assert.Contains(t, clientTLSVersions, tlsVersion) &&
-			assert.Contains(t, clientCipherSuites, cipher)
+			assert.Contains(t, clientCipherSuites, cipher) &&
+			assert.Greater(t, time.Now(), notBefore) &&
+			assert.Less(t, time.Now(), notAfter) &&
+			assert.Contains(t, chain, "C=PL,ST=Poznan,UnknownOID=2.5.4.7,O=k8spacket,OU=k8spacket,CN=k8spacket.domain")
 	}, 10*time.Second, 1*time.Second)
 }
 
