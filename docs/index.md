@@ -147,4 +147,3 @@ Go to `k8spacket - node graph` in Grafana Dashboards and use filters as below
 ### Filter by include or exclude workflow name
 
 ![includeexclude.gif](includeexclude.gif)
-
