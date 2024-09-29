@@ -18,7 +18,7 @@ It uses
 - traffic control and queueing discipline filters on ingress and egress to collect information about TLS handshake process
 
 To use `k8spacket v2.x.x`, the minimum required kernel version is **5.4** with enabled BTF.\
-See [e2e tests README](https://github.com/k8spacket/k8spacket/blob/readme/tests/e2e/README.md)
+See [e2e tests README](https://github.com/k8spacket/k8spacket/blob/master/tests/e2e/README.md)
 
 New features:
 - Dashboard `k8spacket - TLS certificate expiration` shows the remaining time until the certificates expire. By variable `Past interval to analyze`, you can narrow or expand the scope of data to analyze. Data sorted by expiring earliest first. It's easy to build alerts based on the certificate expiration date. See more raw metrics in the dashboard `k8spacket - TLS metrics`
