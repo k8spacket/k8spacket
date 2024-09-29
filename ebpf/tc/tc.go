@@ -167,6 +167,10 @@ func distribute(event tcTlsHandshakeEvent, tc *TcEbpf) {
 		ServerName:     string(event.ServerName[:serverNameLen]),
 		UsedTlsVersion: event.UsedTlsVersion,
 		UsedCipher:     event.UsedCipher}
+	if len(tlsEvent.TlsVersions) <= 0 {
+		tlsEvent.TlsVersions = append(tlsEvent.TlsVersions, event.TlsVersion)
+	}
+	
 	ebpf_tools.EnrichAddress(&tlsEvent.Client)
 	ebpf_tools.EnrichAddress(&tlsEvent.Server)
 	tc.Broker.TLSEvent(tlsEvent)

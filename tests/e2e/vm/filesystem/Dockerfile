@@ -48,7 +48,7 @@ RUN cat <<EOF >> /etc/systemd/system/eth0.service
     ExecStart=route add default gw 10.0.2.2
     ExecStart=/bin/bash -c '/usr/bin/echo nameserver 8.8.8.8 > /etc/resolv.conf'
     ExecStart=/bin/bash -c '/usr/bin/echo "10.0.2.15 k8spacket.domain" >> /etc/hosts'
-    ExecStart=/bin/bash -c '/usr/bin/echo "10.0.2.15 k8spacket-tls12.domain" >> /etc/hosts'
+    ExecStart=/bin/bash -c '/usr/bin/echo "127.0.0.1 k8spacket-tls12.domain" >> /etc/hosts'
     ExecStart=/bin/bash -c '/usr/bin/echo "10.0.2.15 k8spacket-tls13.domain" >> /etc/hosts'
 
     [Install]

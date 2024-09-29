@@ -133,9 +133,20 @@ func TestNodegraphDataDurationEndpoint(t *testing.T) {
 
 }
 
-func TestTlsParserConnectionsEndpoint(t *testing.T) {
+func TestTlsParserTLS13Endpoint(t *testing.T) {
+	doTlsParserTest(t, "k8spacket-tls13.domain", "TLS 1.3")
+}
+
+func TestTlsParserTLS12Endpoint(t *testing.T) {
+	doTlsParserTest(t, "k8spacket-tls12.domain", "TLS 1.2")
+}
+
+func doTlsParserTest(t *testing.T, domain string, tlsVer string) {
 	httpClient := &http.Client{}
 	httpClient.Timeout = 3 * time.Second
+	detailId := ""
+	tlsVersion := ""
+	cipher := ""
 	assert.Eventually(t, func() bool {
 		req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/tlsparser/api/data", host, port), nil)
 		req.Header.Set("Connection", "close")
@@ -146,11 +157,34 @@ func TestTlsParserConnectionsEndpoint(t *testing.T) {
 		}
 		body, _ := io.ReadAll(resp.Body)
 
-		node := gjson.GetBytes(body, "#(domain==\"k8spacket.domain\")").String()
+		detailId = gjson.GetBytes(body, fmt.Sprintf("#(domain==\"%s\").id", domain)).String()
+		tlsVersion = gjson.GetBytes(body, fmt.Sprintf("#(domain==\"%s\").usedTLSVersion", domain)).String()
+		cipher = gjson.GetBytes(body, fmt.Sprintf("#(domain==\"%s\").usedCipherSuite", domain)).String()
+		lastSeenStr := gjson.GetBytes(body, fmt.Sprintf("#(domain==\"%s\").lastSeen", domain)).String()
+		lastSeen, err := time.Parse("2006-01-02T15:04:05.000000000Z", lastSeenStr)
 
-		println(node)
+		return assert.EqualValues(t, tlsVer, tlsVersion) &&
+			assert.NotEmpty(t, cipher) &&
+			assert.Greater(t, time.Now(), lastSeen)
+	}, 10*time.Second, 1*time.Second)
 
-		return true
+	assert.Eventually(t, func() bool {
+		req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%d/tlsparser/api/data/%s", host, port, detailId), nil)
+		req.Header.Set("Connection", "close")
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		body, _ := io.ReadAll(resp.Body)
+
+		d := gjson.GetBytes(body, "domain").String()
+		clientTLSVersions := gjson.GetBytes(body, "clientTLSVersions").String()
+		clientCipherSuites := gjson.GetBytes(body, "clientCipherSuites").String()
+
+		return assert.EqualValues(t, domain, d) &&
+			assert.Contains(t, clientTLSVersions, tlsVersion) &&
+			assert.Contains(t, clientCipherSuites, cipher)
 	}, 10*time.Second, 1*time.Second)
 }
 

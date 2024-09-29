@@ -12,15 +12,16 @@ def main():
     while 1:
 
         scenario = random.randrange(2,4)
+        host = f"HOST_TLS1{scenario}"
 
-        url = f"https://{environ[f"HOST_TLS1{scenario}"]}:{environ['PORT']}?size={random.randrange(0, 100)}&sleep={random.randrange(0, 3)}"
+        url = f"https://{environ[host]}:{environ['PORT']}?size={random.randrange(0, 100)}&sleep={random.randrange(0, 3)}"
 
         payload = ''.join(random.choices(string.ascii_letters,k=random.randrange(100, 10000))).encode('utf-8')
         request = Request(url, headers={"Connection": "close"}, data=payload)
 
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         if scenario == 2:
-            ctx.options |= ssl.OP_NO_TLSv1_3
+            ctx.maximum_version = ssl.TLSVersion.TLSv1_2
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
 
