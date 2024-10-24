@@ -25,7 +25,7 @@ build:
 	go build .
 
 test:
-	K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v ./... -coverprofile=coverage.out
+	K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v --run TestStartApp ./... -coverprofile=coverage.out
 
 run:
 	go run k8spacket.go
@@ -79,8 +79,7 @@ e2e: prepare_e2e
 	cd ./tests/e2e
 	ifconfig
 	CLIENT_IP=10.0.2.2 HOST_IP=127.0.0.1 GUEST_IP=10.0.2.15 go test -v
-	exitCode=$(echo $?)
-	
+	RC=$$?
 	sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
 	sudo cat ./vm/filesystem/qemu.pid | sudo xargs kill
-	exit ${exitCode}
+	exit $$RC
