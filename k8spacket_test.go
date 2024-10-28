@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -38,7 +37,7 @@ func TestStartApp(t *testing.T) {
 		resp, _ := http.Get("http://127.0.0.1:6676/metrics")
 		body, _ := io.ReadAll(resp.Body)
 		bodyStr := string(body)
-		return resp.StatusCode == http.StatusOK && strings.Contains(bodyStr, "go_info{version=\"go1.23.0\"}")
+		return assert.EqualValues(t, resp.StatusCode, http.StatusOK) && assert.Regexp(t, "go_info{version=\"go.*\"}", bodyStr)
 	}, time.Second*2, time.Millisecond*100)
 
 }
