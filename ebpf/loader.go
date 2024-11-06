@@ -2,18 +2,18 @@ package ebpf
 
 import (
 	"context"
+	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 	"log/slog"
 	"os"
 	"os/exec"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
 
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
-	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
-	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 )
 
 type Loader struct {
@@ -27,6 +27,7 @@ func Init(inetEbpf ebpf_inet.IInetEbpf, tcEbpf ebpf_tc.ItcEbpf) *Loader {
 }
 
 func (loader *Loader) Load() {
+	k8sclient.Init()
 	// load inet_sock_set_state ebpf program
 	go loader.inetEbpf.Init()
 	go interfacesRefresher(*loader)
@@ -47,17 +48,11 @@ func interfacesRefresher(loader Loader) {
 		case <-time.After(refreshPeriod):
 			slog.Info("[tc-loop] Refreshing interfaces for capturing...")
 			loader.interfaces = findInterfaces()
-			var refreshK8sInfo = false
 			for _, el := range loader.interfaces {
-				if (strings.TrimSpace(el) != "") && (!ebpf_tools.SliceContains(currentInterfaces, el)) {
+				if (strings.TrimSpace(el) != "") && (!slices.Contains(currentInterfaces, el)) {
 					// load traffic control ebpf program (qdisc filter)
 					go loader.tcEbpf.Init(el)
-					refreshK8sInfo = true
 				}
-			}
-			if refreshK8sInfo {
-				// there are some new workloads in the cluster and need to update info about k8s resources
-				ebpf_tools.K8sInfo = k8sclient.FetchK8SInfo()
 			}
 			currentInterfaces = loader.interfaces
 		}
