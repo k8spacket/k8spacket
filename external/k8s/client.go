@@ -12,6 +12,7 @@ import (
 	"os"
 	"slices"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -33,18 +34,28 @@ type K8SClient struct {
 	IK8SClient
 }
 
-var k8sInfo = make(map[string]ipResourceInfo)
+type SafeMap struct {
+	mu   sync.RWMutex
+	data map[string]ipResourceInfo
+}
+
+var k8sInfo *SafeMap
 
 var clientset *kubernetes.Clientset
 
 var disabledK8sResource, _ = strconv.ParseBool(os.Getenv("K8S_PACKET_K8S_RESOURCES_DISABLED"))
 
-func Init() {
-	_, clientset = configClusterClient()
-	factory := informers.NewSharedInformerFactoryWithOptions(clientset, 5*time.Minute)
-	go createPodInformer(factory)
-	go createSvcInformer(factory)
-	go createNodeInformer(factory)
+func init() {
+	k8sInfo = &SafeMap{data: make(map[string]ipResourceInfo)}
+	if !disabledK8sResource {
+		_, clientset = configClusterClient()
+		factory := informers.NewSharedInformerFactoryWithOptions(clientset, 5*time.Minute)
+		stopChan := make(chan struct{})
+		createPodInformer(factory)
+		createSvcInformer(factory)
+		createNodeInformer(factory)
+		factory.Start(stopChan)
+	}
 }
 
 func (k8sClient *K8SClient) GetPodIPsBySelectors(fieldSelector string, labelSelector string) []string {
@@ -70,10 +81,6 @@ func (k8sClient *K8SClient) GetPodIPsBySelectors(fieldSelector string, labelSele
 
 func configClusterClient() (error, *kubernetes.Clientset) {
 
-	if disabledK8sResource {
-		return nil, nil
-	}
-
 	config, err := rest.InClusterConfig()
 
 	if err != nil {
@@ -91,8 +98,6 @@ func configClusterClient() (error, *kubernetes.Clientset) {
 
 func createPodInformer(factory informers.SharedInformerFactory) {
 	podInformer := factory.Core().V1().Pods().Informer()
-	podChan := make(chan struct{})
-	defer close(podChan)
 
 	_, err := podInformer.AddEventHandler(cache.FilteringResourceEventHandler{
 		FilterFunc: func(obj interface{}) bool {
@@ -113,8 +118,6 @@ func createPodInformer(factory informers.SharedInformerFactory) {
 		fmt.Println(err)
 		return
 	}
-
-	podInformer.Run(podChan)
 }
 
 func addPod(obj interface{}) {
@@ -130,8 +133,6 @@ func addPod(obj interface{}) {
 
 func createSvcInformer(factory informers.SharedInformerFactory) {
 	svcInformer := factory.Core().V1().Services().Informer()
-	svcChan := make(chan struct{})
-	defer close(svcChan)
 
 	svcInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -141,8 +142,6 @@ func createSvcInformer(factory informers.SharedInformerFactory) {
 			addSvc(obj)
 		},
 	})
-
-	svcInformer.Run(svcChan)
 }
 
 func addSvc(obj interface{}) {
@@ -158,8 +157,6 @@ func addSvc(obj interface{}) {
 
 func createNodeInformer(factory informers.SharedInformerFactory) {
 	nodeInformer := factory.Core().V1().Nodes().Informer()
-	nodeChan := make(chan struct{})
-	defer close(nodeChan)
 
 	nodeInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
@@ -168,8 +165,6 @@ func createNodeInformer(factory informers.SharedInformerFactory) {
 		UpdateFunc: func(oldObj interface{}, obj interface{}) {
 			addNode(obj)
 		}})
-
-	nodeInformer.Run(nodeChan)
 }
 
 func addNode(obj interface{}) {
@@ -189,12 +184,20 @@ func addNode(obj interface{}) {
 }
 
 func GetNameAndNamespace(id string) (string, string) {
-	item := k8sInfo[id]
-	return item.Name, item.Namespace
+	k8sInfo.mu.RLock()
+	defer k8sInfo.mu.RUnlock()
+	item, ok := k8sInfo.data[id]
+	if ok {
+		return item.Name, item.Namespace
+	} else {
+		return "", ""
+	}
 }
 
 func addItem(id string, info ipResourceInfo) {
-	if k8sInfo[id].ipResourceInfoType != Node {
-		k8sInfo[id] = info
+	k8sInfo.mu.Lock()
+	defer k8sInfo.mu.Unlock()
+	if k8sInfo.data[id].ipResourceInfoType != Node {
+		k8sInfo.data[id] = info
 	}
 }

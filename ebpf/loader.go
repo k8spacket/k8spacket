@@ -2,7 +2,6 @@ package ebpf
 
 import (
 	"context"
-	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -27,7 +26,6 @@ func Init(inetEbpf ebpf_inet.IInetEbpf, tcEbpf ebpf_tc.ItcEbpf) *Loader {
 }
 
 func (loader *Loader) Load() {
-	k8sclient.Init()
 	// load inet_sock_set_state ebpf program
 	go loader.inetEbpf.Init()
 	go interfacesRefresher(*loader)
