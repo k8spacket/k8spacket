@@ -9,6 +9,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+	"log/slog"
 	"os"
 	"slices"
 	"strconv"
@@ -128,7 +129,7 @@ func addPod(obj interface{}) {
 		Namespace:          pod.Namespace,
 	}
 	addItem(pod.Status.PodIP, ipResourceInfo)
-	fmt.Printf("Added pod - Name: %s, Namespace - %v, IP - %s\n", pod.Name, pod.Namespace, pod.Status.PodIP)
+	slog.Debug("Added pod", "Name", pod.Name, "Namespace", pod.Namespace, "IP", pod.Status.PodIP)
 }
 
 func createSvcInformer(factory informers.SharedInformerFactory) {
@@ -152,7 +153,7 @@ func addSvc(obj interface{}) {
 		Namespace:          svc.Namespace,
 	}
 	addItem(svc.Spec.ClusterIP, ipResourceInfo)
-	fmt.Printf("Added svc - Name: %s, Namespace - %v, IP - %s\n", svc.Name, svc.Namespace, svc.Spec.ClusterIP)
+	slog.Debug("Added svc", "Name", svc.Name, "Namespace", svc.Namespace, "IP", svc.Spec.ClusterIP)
 }
 
 func createNodeInformer(factory informers.SharedInformerFactory) {
@@ -177,7 +178,7 @@ func addNode(obj interface{}) {
 	for _, address := range node.Status.Addresses {
 		if address.Type == v1.NodeInternalIP {
 			addItem(address.Address, ipResourceInfo)
-			fmt.Printf("Added node - Name: %s, IP - %s\n", node.Name, address.Address)
+			slog.Debug("Added node", "Name", node.Name, "IP", address.Address)
 			break
 		}
 	}
