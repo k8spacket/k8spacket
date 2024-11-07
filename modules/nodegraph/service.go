@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/k8spacket/k8spacket/external/db"
@@ -30,10 +29,7 @@ type Service struct {
 	handlerIO  handlerio.IHandlerIO
 }
 
-var connectionItemsMutex = sync.RWMutex{}
-
 func (service *Service) update(src string, srcName string, srcNamespace string, dst string, dstName string, dstNamespace string, persistent bool, bytesSent float64, bytesReceived float64, duration float64) {
-	connectionItemsMutex.Lock()
 	var id = strconv.Itoa(int(db.HashId(fmt.Sprintf("%s-%s", src, dst))))
 	var connection = service.repo.Read(id)
 	if (model.ConnectionItem{} == connection) {
@@ -55,7 +51,6 @@ func (service *Service) update(src string, srcName string, srcNamespace string, 
 	}
 	connection.LastSeen = time.Now()
 	service.repo.Set(id, &connection)
-	connectionItemsMutex.Unlock()
 }
 
 func (service *Service) getConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {

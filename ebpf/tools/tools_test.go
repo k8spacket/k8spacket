@@ -32,12 +32,3 @@ func TestEnrichAddress(t *testing.T) {
 	assert.EqualValues(t, "N/A", address.Name)
 
 }
-
-func TestSliceContains(t *testing.T) {
-
-	slice := []string{"A", "B", "C"}
-
-	assert.EqualValues(t, true, SliceContains(slice, "B"))
-	assert.EqualValues(t, false, SliceContains(slice, "D"))
-
-}

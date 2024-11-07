@@ -17,9 +17,7 @@ type Controller struct {
 }
 
 func (controller *Controller) ConnectionHandler(w http.ResponseWriter, r *http.Request) {
-	connectionItemsMutex.RLock()
 	var response = filterConnections(controller, r.URL.Query())
-	connectionItemsMutex.RUnlock()
 
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(response)

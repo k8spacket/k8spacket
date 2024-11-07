@@ -33,6 +33,7 @@ func main() {
 	tcEbpf := &ebpf_tc.TcEbpf{Broker: broker}
 	loader := ebpf.Init(inetEbpf, tcEbpf)
 
+	buildLogger()
 	startApp(broker, loader, mux)
 }
 
@@ -65,4 +66,13 @@ func startHttpServer(mux *http.ServeMux) {
 		slog.Error("[graceful] Server shutdown failed", "Error", err)
 	}
 	slog.Info("[graceful] Application closed gracefully")
+}
+
+func buildLogger() {
+	var l slog.Level
+	err := l.UnmarshalText([]byte(os.Getenv("LOG_LEVEL")))
+	if err != nil {
+		l = slog.LevelInfo
+	}
+	slog.SetLogLoggerLevel(l)
 }

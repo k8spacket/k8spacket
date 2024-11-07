@@ -1,11 +1,11 @@
 package ebpf_tools
 
 import (
+	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 	"net"
 	"os"
 	"regexp"
 
-	k8sclient "github.com/k8spacket/k8spacket/external/k8s"
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/likexian/whois"
 	"github.com/oschwald/geoip2-golang"
@@ -13,14 +13,13 @@ import (
 
 var reverseLookupMap = make(map[string]string)
 
-var K8sInfo = make(map[string]k8sclient.IPResourceInfo)
-
 func EnrichAddress(addr *modules.Address) {
-	addr.Name = K8sInfo[addr.Addr].Name
+	name, namespace := k8sclient.GetNameAndNamespace(addr.Addr)
+	addr.Name = name
 	if addr.Name == "" {
 		addr.Name = reverseLookup(addr.Addr)
 	}
-	addr.Namespace = K8sInfo[addr.Addr].Namespace
+	addr.Namespace = namespace
 }
 
 // try to find organization name and (if GeoLite2 Free Geolocation Data enabled) country and city by external IP
@@ -62,13 +61,4 @@ func reverseLookup(ip string) string {
 func privateIPCheck(ip string) bool {
 	ipAddress := net.ParseIP(ip)
 	return ipAddress.IsPrivate()
-}
-
-func SliceContains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-	return false
 }
