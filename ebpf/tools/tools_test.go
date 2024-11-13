@@ -1,7 +1,6 @@
 package ebpf_tools
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -27,7 +26,7 @@ func TestEnrichAddress(t *testing.T) {
 	assert.EqualValues(t, "N/A", address.Name)
 
 	address = modules.Address{Addr: "89.160.20.129", Port: 443}
-	StoreDomain(fmt.Sprintf("%s-%d", address.Addr, address.Port), "89-160-20-129.cust.bredband2.com")
+	StoreDomain(address.Addr, address.Port, "89-160-20-129.cust.bredband2.com")
 
 	EnrichAddress(&address)
 

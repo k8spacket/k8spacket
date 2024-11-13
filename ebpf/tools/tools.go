@@ -13,6 +13,10 @@ import (
 	"github.com/oschwald/geoip2-golang"
 )
 
+const (
+	id_format string = "%s-%d"
+)
+
 var domainsMap = make(map[string]string)
 var reverseLookupMap = make(map[string]string)
 
@@ -33,7 +37,7 @@ func reverseLookup(ip string, port uint16) string {
 	}
 
 	var name []string
-	if val, ok := domainsMap[fmt.Sprintf("%s-%d", ip, port)]; ok {
+	if val, ok := domainsMap[fmt.Sprintf(id_format, ip, port)]; ok {
 		name = append(name, val)
 	}
 
@@ -72,8 +76,8 @@ func privateIPCheck(ip string) bool {
 	return ipAddress.IsPrivate()
 }
 
-func StoreDomain(id string, domain string) {
+func StoreDomain(ip string, port uint16, domain string) {
 	if len(domain) > 0 {
-		domainsMap[id] = domain
+		domainsMap[fmt.Sprintf(id_format, ip, port)] = domain
 	}
 }
