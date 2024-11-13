@@ -1,6 +1,8 @@
 package certificate
 
 import (
+	"fmt"
+	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
 	"log/slog"
 	"os"
 	"strconv"
@@ -25,6 +27,7 @@ func (certificate *Certificate) UpdateCertificateInfo(newValue *model.TLSDetails
 		return
 	}
 	scrapeCertificate(certificate, newValue)
+	ebpf_tools.StoreDomain(fmt.Sprintf("%s-%d", newValue.Dst, newValue.Port), newValue.Domain)
 
 	if !newValue.Certificate.NotAfter.IsZero() {
 		prometheus.K8sPacketTLSCertificateExpirationMetric.WithLabelValues(
