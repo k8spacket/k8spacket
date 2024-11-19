@@ -27,6 +27,8 @@ type bpfEvent struct {
 	DeltaUs uint64
 	RxB     uint64
 	TxB     uint64
+	Closed  bool
+	_       [7]byte
 }
 
 // loadBpf returns the embedded CollectionSpec for bpf.
