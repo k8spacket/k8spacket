@@ -29,7 +29,7 @@ func TestListen(t *testing.T) {
 	service := &mockService{}
 	listener := &Listener{service}
 
-	event := modules.TCPEvent{Client: modules.Address{Addr: "client"}, Server: modules.Address{Addr: "server"}, DeltaUs: 2}
+	event := modules.TCPEvent{Client: modules.Address{Addr: "client"}, Server: modules.Address{Addr: "server"}, DeltaUs: 2, Closed: true}
 	listener.Listen(event)
 
 	assert.EqualValues(t, event.Client.Addr, service.client)
