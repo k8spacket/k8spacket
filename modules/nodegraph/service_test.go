@@ -169,7 +169,7 @@ func TestUpdate(t *testing.T) {
 			mockRepository := &mockRepository{result: test.item}
 			service := &Service{mockRepository, &stats.Factory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &handlerio.HandlerIO{}}
 
-			service.update("src", "srcName", "srcNs", "dst", "dstName", "dstNs", true, 100, 200, 1)
+			service.update("src", "srcName", "srcNs", "dst", "dstName", "dstNs", true, 100, 200, 1, true)
 
 			result := mockRepository.Read("")
 
