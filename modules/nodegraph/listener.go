@@ -38,7 +38,8 @@ func (listener *Listener) Listen(event modules.TCPEvent) {
 			"persistent", persistent,
 			"bytesSent", float64(event.TxB),
 			"bytesReceived", float64(event.RxB),
-			"duration", float64(event.DeltaUs))
+			"duration", float64(event.DeltaUs),
+			"close", event.Closed)
 	}
 }
 
