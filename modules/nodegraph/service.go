@@ -39,22 +39,22 @@ func (service *Service) update(src string, srcName string, srcNamespace string, 
 	var connection = service.repo.Read(id)
 	if (model.ConnectionItem{} == connection) {
 		connection = *&model.ConnectionItem{Src: src, Dst: dst}
-	} else if !closed {
-		return
 	}
 	connection.SrcName = srcName
 	connection.SrcNamespace = srcNamespace
 	connection.DstName = dstName
 	connection.DstNamespace = dstNamespace
-	connection.ConnCount++
-	if persistent {
-		connection.ConnPersistent++
-	}
-	connection.BytesSent += bytesSent
-	connection.BytesReceived += bytesReceived
-	connection.Duration += duration
-	if duration > connection.MaxDuration {
-		connection.MaxDuration = duration
+	if closed {
+		connection.ConnCount++
+		if persistent {
+			connection.ConnPersistent++
+		}
+		connection.BytesSent += bytesSent
+		connection.BytesReceived += bytesReceived
+		connection.Duration += duration
+		if duration > connection.MaxDuration {
+			connection.MaxDuration = duration
+		}
 	}
 	connection.LastSeen = time.Now()
 	service.repo.Set(id, &connection)
