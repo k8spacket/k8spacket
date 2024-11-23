@@ -14,8 +14,8 @@ import (
 )
 
 var repo = []model.ConnectionItem{
-	model.ConnectionItem{Src: "src", Dst: "dst"},
-	model.ConnectionItem{Src: "src1", Dst: "dst1"},
+	{Src: "src", Dst: "dst"},
+	{Src: "src1", Dst: "dst1"},
 }
 
 type mockService struct {

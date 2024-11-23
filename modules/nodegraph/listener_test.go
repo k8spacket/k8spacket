@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (mockService *mockService) update(src string, srcName string, srcNamespace string, dst string, dstName string, dstNamespace string, persistent bool, bytesSent float64, bytesReceived float64, duration float64) {
+func (mockService *mockService) update(src string, srcName string, srcNamespace string, dst string, dstName string, dstNamespace string, persistent bool, bytesSent float64, bytesReceived float64, duration float64, closed bool) {
 	mockService.client = src
 	mockService.server = dst
 }
@@ -29,7 +29,7 @@ func TestListen(t *testing.T) {
 	service := &mockService{}
 	listener := &Listener{service}
 
-	event := modules.TCPEvent{Client: modules.Address{Addr: "client"}, Server: modules.Address{Addr: "server"}, DeltaUs: 2}
+	event := modules.TCPEvent{Client: modules.Address{Addr: "client"}, Server: modules.Address{Addr: "server"}, DeltaUs: 2, Closed: true}
 	listener.Listen(event)
 
 	assert.EqualValues(t, event.Client.Addr, service.client)

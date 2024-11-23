@@ -12,6 +12,7 @@ type TCPEvent struct {
 	TxB     uint64
 	RxB     uint64
 	DeltaUs uint64
+	Closed  bool
 }
 
 type TLSEvent struct {

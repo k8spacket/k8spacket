@@ -13,6 +13,7 @@ struct event {
 	__u64 delta_us;	// duration in microseconds 
 	__u64 rx_b;		// received bytes
 	__u64 tx_b;		// transmited bytes
+	bool closed; 	// close connection
 };
 
 struct birth {
@@ -88,6 +89,15 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
 		//am I the initiator of the connection
 		start.initiator = new_state == TCP_SYN_SENT;
 
+		//source and destination IPs and ports depend on initiator flag
+		if(start.initiator)
+		    source_and_destination(args, &event.saddr, &event.sport, &event.daddr, &event.dport);
+		else
+		    source_and_destination(args, &event.daddr, &event.dport, &event.saddr, &event.sport);
+
+		//store event in BPF perf event
+		bpf_perf_event_output(args, &events, 0xffffffffULL, &event, sizeof(event));
+
 		//store in map births, sk sock struct (network layer representation of sockets) as a key
 		bpf_map_update_elem(&births, &sk, &start, 0);
 		return 0;
@@ -119,6 +129,8 @@ int inet_sock_set_state(struct trace_event_raw_inet_sock_set_state *args)
             event.rx_b = tx_b;
             event.tx_b = rx_b;
 		}
+
+		event.closed = true;
 
         //store event in BPF perf event
 		bpf_perf_event_output(args, &events, 0xffffffffULL, &event, sizeof(event));

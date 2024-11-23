@@ -109,7 +109,8 @@ func distribute(event bpfEvent, inet *InetEbpf) {
 			Port: event.Dport},
 		TxB:     event.TxB,
 		RxB:     event.RxB,
-		DeltaUs: event.DeltaUs / 1000}
+		DeltaUs: event.DeltaUs / 1000,
+		Closed:  event.Closed}
 	ebpf_tools.EnrichAddress(&tcpEvent.Client)
 	ebpf_tools.EnrichAddress(&tcpEvent.Server)
 

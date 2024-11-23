@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/k8spacket/k8spacket/modules"
 	"github.com/likexian/whois"
@@ -17,8 +18,13 @@ const (
 	id_format string = "%s-%d"
 )
 
-var domainsMap = make(map[string]string)
-var reverseLookupMap = make(map[string]string)
+type SafeMap struct {
+	mu   sync.RWMutex
+	data map[string]string
+}
+
+var domainsMap = &SafeMap{data: make(map[string]string)}
+var reverseLookupMap = &SafeMap{data: make(map[string]string)}
 
 func EnrichAddress(addr *modules.Address) {
 	name, namespace := k8sclient.GetNameAndNamespace(addr.Addr)
@@ -37,11 +43,14 @@ func reverseLookup(ip string, port uint16) string {
 	}
 
 	var name []string
-	if val, ok := domainsMap[fmt.Sprintf(id_format, ip, port)]; ok {
+	domainsMap.mu.RLock()
+	if val, ok := domainsMap.data[fmt.Sprintf(id_format, ip, port)]; ok {
 		name = append(name, val)
 	}
+	domainsMap.mu.RUnlock()
 
-	if _, ok := reverseLookupMap[ip]; !ok {
+	reverseLookupMap.mu.Lock()
+	if _, ok := reverseLookupMap.data[ip]; !ok {
 
 		result, _ := whois.Whois(ip)
 
@@ -64,9 +73,12 @@ func reverseLookup(ip string, port uint16) string {
 				reverseLookup += "(" + record.Country.IsoCode + ", " + record.City.Names["en"] + ")"
 			}
 		}
-		reverseLookupMap[ip] = reverseLookup
+		reverseLookupMap.data[ip] = reverseLookup
 	}
-	name = append(name, reverseLookupMap[ip])
+	if val, ok := reverseLookupMap.data[ip]; ok {
+		name = append(name, val)
+	}
+	reverseLookupMap.mu.Unlock()
 	return strings.Join(name, ", ")
 }
 
@@ -78,6 +90,8 @@ func privateIPCheck(ip string) bool {
 
 func StoreDomain(ip string, port uint16, domain string) {
 	if len(domain) > 0 {
-		domainsMap[fmt.Sprintf(id_format, ip, port)] = domain
+		domainsMap.mu.Lock()
+		domainsMap.data[fmt.Sprintf(id_format, ip, port)] = domain
+		domainsMap.mu.Unlock()
 	}
 }
