@@ -18,6 +18,10 @@ generate: prepare
 	go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_tc tc ./bpf/tc.bpf.c
 	cd ../../
 
+	cd ./ebpf/socketfilter
+	go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_socketfilter socketfilter ./bpf/socketfilter.bpf.c
+	cd ../../
+
 fmt:
 	go fmt ./...
 
