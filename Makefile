@@ -33,7 +33,7 @@ build:
 	go build .
 
 test:
-	K8S_PACKET_K8S_RESOURCES_DISABLED=true go env -w GOTOOLCHAIN=go1.25.0+auto && go test -v ./... -coverprofile=coverage.out
+	K8S_PACKET_K8S_RESOURCES_DISABLED=true && go env -w GOTOOLCHAIN=go1.25.0+auto && go test -v ./... -coverprofile=coverage.out
 
 run:
 	go run k8spacket.go
