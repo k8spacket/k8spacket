@@ -1,15 +1,14 @@
-#include "bpf/vmlinux.h"
-#include "bpf/bpf_core_read.h"
-#include "bpf/bpf_tracing.h"
-#include "bpf/bpf_helpers.h"
-#include "bpf/bpf_endian.h"
+#include "vmlinux.h"
+#include "bpf_core_read.h"
+#include "bpf_tracing.h"
+#include "bpf_helpers.h"
+#include "bpf_endian.h"
 
 #define MAX_ENTRIES 1024 * 4
 
 #define ETH_HLEN 14
 #define ETH_P_IP 0x0800
 
-#define TC_ACT_OK 0
 #define HANDSHAKE_RECORD 0x16
 #define CLIENT_HELLO 0x01
 #define SERVER_HELLO 0x02
@@ -60,7 +59,6 @@ struct {
 SEC("socket/http_filter")
 int socket__http_filter(struct __sk_buff *skb) {
 
-    __u8 verlen;
     __u16 proto;
     __u32 nhoff = ETH_HLEN;
     __u32 ip_proto = 0;
@@ -113,10 +111,10 @@ int socket__http_filter(struct __sk_buff *skb) {
     bpf_skb_load_bytes(skb, tcp_hdr_len + offsetof(struct tcphdr, seq), &seq, sizeof(seq));
 
     __u8 doff;
-    bpf_skb_load_bytes(skb, tcp_hdr_len + offsetof(struct tcphdr, ack_seq) + 4, &doff, sizeof(doff)); // read the first byte past __tcphdr->ack_seq, we can't do offsetof bit fields
-    doff &= 0xf0; // clean-up res1
-    doff >>= 4; // move the upper 4 bits to low
-    doff *= 4; // convert to bytes length
+    bpf_skb_load_bytes(skb, tcp_hdr_len + offsetof(struct tcphdr, ack_seq) + 4, &doff, sizeof(doff));
+    doff &= 0xf0;
+    doff >>= 4;
+    doff *= 4;
 
     payload_offset = ETH_HLEN + hdr_len + doff;
 

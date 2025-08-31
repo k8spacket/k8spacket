@@ -1,5 +1,7 @@
 package modules
 
+import "fmt"
+
 type Address struct {
 	Addr      string
 	Port      uint16
@@ -15,7 +17,26 @@ type TCPEvent struct {
 	Closed  bool
 }
 
+type EventSource int
+
+const (
+	TC EventSource = iota
+	SocketFilter
+)
+
+func (source EventSource) String() string {
+	switch source {
+	case TC:
+		return "TC"
+	case SocketFilter:
+		return "SocketFilter"
+	default:
+		return fmt.Sprintf("EventSource(%d)", source)
+	}
+}
+
 type TLSEvent struct {
+	Source         EventSource
 	Client         Address
 	Server         Address
 	TlsVersions    []uint16

@@ -8,17 +8,20 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+	"structs"
 
 	"github.com/cilium/ebpf"
 )
 
 type bpfBirth struct {
+	_         structs.HostLayout
 	Ts        uint64
 	Initiator bool
 	_         [7]byte
 }
 
 type bpfEvent struct {
+	_       structs.HostLayout
 	Saddr   uint32
 	Daddr   uint32
 	Sport   uint16
@@ -66,9 +69,10 @@ func loadBpfObjects(obj interface{}, opts *ebpf.CollectionOptions) error {
 type bpfSpecs struct {
 	bpfProgramSpecs
 	bpfMapSpecs
+	bpfVariableSpecs
 }
 
-// bpfSpecs contains programs before they are loaded into the kernel.
+// bpfProgramSpecs contains programs before they are loaded into the kernel.
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type bpfProgramSpecs struct {
@@ -83,12 +87,20 @@ type bpfMapSpecs struct {
 	Events *ebpf.MapSpec `ebpf:"events"`
 }
 
+// bpfVariableSpecs contains global variables before they are loaded into the kernel.
+//
+// It can be passed ebpf.CollectionSpec.Assign.
+type bpfVariableSpecs struct {
+	Unused *ebpf.VariableSpec `ebpf:"unused"`
+}
+
 // bpfObjects contains all objects after they have been loaded into the kernel.
 //
 // It can be passed to loadBpfObjects or ebpf.CollectionSpec.LoadAndAssign.
 type bpfObjects struct {
 	bpfPrograms
 	bpfMaps
+	bpfVariables
 }
 
 func (o *bpfObjects) Close() error {
@@ -111,6 +123,13 @@ func (m *bpfMaps) Close() error {
 		m.Births,
 		m.Events,
 	)
+}
+
+// bpfVariables contains all global variables after they have been loaded into the kernel.
+//
+// It can be passed to loadBpfObjects or ebpf.CollectionSpec.LoadAndAssign.
+type bpfVariables struct {
+	Unused *ebpf.Variable `ebpf:"unused"`
 }
 
 // bpfPrograms contains all programs after they have been loaded into the kernel.

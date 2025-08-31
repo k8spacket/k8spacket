@@ -156,6 +156,7 @@ func distribute(event tcTlsHandshakeEvent, tc *TcEbpf) {
 	}
 
 	tlsEvent := modules.TLSEvent{
+		Source: modules.TC,
 		Client: modules.Address{
 			Addr: intToIP4(event.Saddr),
 			Port: event.Sport},
