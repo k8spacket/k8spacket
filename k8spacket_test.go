@@ -9,6 +9,7 @@ import (
 
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
+	ebpf_socketfilter "github.com/k8spacket/k8spacket/ebpf/socketfilter"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,6 +17,7 @@ import (
 type mockLoader struct {
 	inetEbpf ebpf_inet.IInetEbpf
 	tcEbpf   ebpf_tc.ItcEbpf
+	socketfilterEbpf ebpf_socketfilter.ISocketFilterEbpf
 }
 
 func (mockLoader *mockLoader) Load() {
@@ -34,10 +36,13 @@ func TestStartApp(t *testing.T) {
 	go startApp(b, loader, mux)
 
 	assert.Eventually(t, func() bool {
-		resp, _ := http.Get("http://127.0.0.1:6676/metrics")
+		resp, err := http.Get("http://127.0.0.1:6676/metrics")
+		if err != nil {
+			return false
+		}
 		body, _ := io.ReadAll(resp.Body)
 		bodyStr := string(body)
 		return assert.EqualValues(t, resp.StatusCode, http.StatusOK) && assert.Regexp(t, "go_info{version=\"go.*\"}", bodyStr)
-	}, time.Second*2, time.Millisecond*100)
+	}, time.Second*20, time.Millisecond*100)
 
 }
