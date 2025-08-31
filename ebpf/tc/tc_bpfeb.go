@@ -8,11 +8,13 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+	"structs"
 
 	"github.com/cilium/ebpf"
 )
 
 type tcTlsHandshakeEvent struct {
+	_                 structs.HostLayout
 	Saddr             uint32
 	Daddr             uint32
 	Sport             uint16
@@ -64,9 +66,10 @@ func loadTcObjects(obj interface{}, opts *ebpf.CollectionOptions) error {
 type tcSpecs struct {
 	tcProgramSpecs
 	tcMapSpecs
+	tcVariableSpecs
 }
 
-// tcSpecs contains programs before they are loaded into the kernel.
+// tcProgramSpecs contains programs before they are loaded into the kernel.
 //
 // It can be passed ebpf.CollectionSpec.Assign.
 type tcProgramSpecs struct {
@@ -81,12 +84,19 @@ type tcMapSpecs struct {
 	OutputEvents *ebpf.MapSpec `ebpf:"output_events"`
 }
 
+// tcVariableSpecs contains global variables before they are loaded into the kernel.
+//
+// It can be passed ebpf.CollectionSpec.Assign.
+type tcVariableSpecs struct {
+}
+
 // tcObjects contains all objects after they have been loaded into the kernel.
 //
 // It can be passed to loadTcObjects or ebpf.CollectionSpec.LoadAndAssign.
 type tcObjects struct {
 	tcPrograms
 	tcMaps
+	tcVariables
 }
 
 func (o *tcObjects) Close() error {
@@ -109,6 +119,12 @@ func (m *tcMaps) Close() error {
 		m.Events,
 		m.OutputEvents,
 	)
+}
+
+// tcVariables contains all global variables after they have been loaded into the kernel.
+//
+// It can be passed to loadTcObjects or ebpf.CollectionSpec.LoadAndAssign.
+type tcVariables struct {
 }
 
 // tcPrograms contains all programs after they have been loaded into the kernel.

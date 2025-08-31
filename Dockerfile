@@ -18,7 +18,7 @@ COPY ./libbpf.sh .
 RUN ./libbpf.sh
 
 
-FROM golang:1.24.3 AS build
+FROM golang:1.25.0 AS build
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y clang llvm
 

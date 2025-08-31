@@ -12,23 +12,33 @@ import (
 	"time"
 
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
+	ebpf_socketfilter "github.com/k8spacket/k8spacket/ebpf/socketfilter"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 )
 
 type Loader struct {
-	inetEbpf   ebpf_inet.IInetEbpf
-	tcEbpf     ebpf_tc.ItcEbpf
-	interfaces []string
+	inetEbpf         ebpf_inet.IInetEbpf
+	tcEbpf           ebpf_tc.ItcEbpf
+	socketFilterEbpf ebpf_socketfilter.ISocketFilterEbpf
+	interfaces       []string
 }
 
-func Init(inetEbpf ebpf_inet.IInetEbpf, tcEbpf ebpf_tc.ItcEbpf) *Loader {
-	return &Loader{inetEbpf: inetEbpf, tcEbpf: tcEbpf}
+func Init(inetEbpf ebpf_inet.IInetEbpf, tcEbpf ebpf_tc.ItcEbpf, socketFilterEbpf ebpf_socketfilter.ISocketFilterEbpf) *Loader {
+	return &Loader{inetEbpf: inetEbpf, tcEbpf: tcEbpf, socketFilterEbpf: socketFilterEbpf}
 }
 
 func (loader *Loader) Load() {
 	// load inet_sock_set_state ebpf program
+	slog.Info("[loader] Tracepoint (sock/inet_sock_set_state) eBPF program is activating...")
 	go loader.inetEbpf.Init()
-	go interfacesRefresher(*loader)
+	listenerSource := os.Getenv("K8S_PACKET_LOADER_SOURCE")
+	if listenerSource == "tc" {
+		slog.Info("[loader] Traffic Control (TC) eBPF program is activating...")
+		go interfacesRefresher(*loader)
+	} else {
+		slog.Info("[loader] Socket Filter eBPF program is activating...")
+		go loader.socketFilterEbpf.Init()
+	}
 }
 
 func interfacesRefresher(loader Loader) {

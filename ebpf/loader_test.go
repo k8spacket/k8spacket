@@ -9,6 +9,7 @@ import (
 	"time"
 
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
+	ebpf_socketfilter "github.com/k8spacket/k8spacket/ebpf/socketfilter"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,16 +32,30 @@ func (mockItcEbpf *mockItcEbpf) Init(iface string) {
 	mockItcEbpf.initCalledCount++
 }
 
+type mockIsocketfilterEbpf struct {
+	ebpf_socketfilter.ISocketFilterEbpf
+	initCalledCount int
+}
+
+func (mockIsocketfilterEbpf *mockIsocketfilterEbpf) Init() {
+	mockIsocketfilterEbpf.initCalledCount++
+}
+
 func TestLoad(t *testing.T) {
 
 	var tests = []struct {
-		command       string
-		inetCalled    bool
-		tcCalledCount int
-		err           string
+		command                 string
+		loaderSource            string
+		inetCalled              bool
+		socketfilterCalledCount int
+		tcCalledCount           int
+		err                     string
 	}{
-		{"echo 'iface1,iface2'", true, 2, ""},
-		{"exit 1", true, 0, "[tc-loop] Cannot find interfaces to listen"},
+		{"echo 'iface1,iface2'", "socketfilter", true, 1, 0, ""},
+		{"echo 'iface1,iface2'", "tc", true, 0, 2, ""},
+		{"echo 'iface1,iface2'", "", true, 1, 0, ""},
+		{"echo 'iface1,iface2'", "some_other_value", true, 1, 0, ""},
+		{"exit 1", "tc", true, 0, 0, "[tc-loop] Cannot find interfaces to listen"},
 	}
 
 	var str bytes.Buffer
@@ -55,14 +70,16 @@ func TestLoad(t *testing.T) {
 		t.Run(test.command, func(t *testing.T) {
 
 			os.Setenv("K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND", test.command)
+			os.Setenv("K8S_PACKET_LOADER_SOURCE", test.loaderSource)
 
 			mockInetEbpf := &mockInetEbpf{}
 			mockItcEbpf := &mockItcEbpf{}
-			loader := Init(mockInetEbpf, mockItcEbpf)
+			mockIsocketfilterEbpf := &mockIsocketfilterEbpf{}
+			loader := Init(mockInetEbpf, mockItcEbpf, mockIsocketfilterEbpf)
 			loader.Load()
 
 			assert.Eventually(t, func() bool {
-				return mockInetEbpf.initCalled == test.inetCalled && mockItcEbpf.initCalledCount == test.tcCalledCount && strings.Contains(str.String(), test.err)
+				return mockInetEbpf.initCalled == test.inetCalled && mockItcEbpf.initCalledCount == test.tcCalledCount && mockIsocketfilterEbpf.initCalledCount == test.socketfilterCalledCount && strings.Contains(str.String(), test.err)
 			}, time.Second*1, time.Millisecond*100)
 		})
 	}

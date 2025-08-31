@@ -49,7 +49,7 @@ func (listener *Listener) Listen(tlsEvent modules.TLSEvent) {
 	sendPrometheusMetrics(tlsConnection, tlsDetails)
 
 	var j, _ = json.Marshal(tlsConnection)
-	slog.Info("TLS connection", "Record", string(j))
+	slog.Info("TLS connection", "Source", tlsEvent.Source.String(), "Record", string(j))
 }
 
 func sendPrometheusMetrics(tlsConnection model.TLSConnection, tlsDetails model.TLSDetails) {

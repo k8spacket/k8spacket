@@ -13,6 +13,7 @@ import (
 	"github.com/k8spacket/k8spacket/broker"
 	"github.com/k8spacket/k8spacket/ebpf"
 	ebpf_inet "github.com/k8spacket/k8spacket/ebpf/inet"
+	ebpf_socketfilter "github.com/k8spacket/k8spacket/ebpf/socketfilter"
 	ebpf_tc "github.com/k8spacket/k8spacket/ebpf/tc"
 	"github.com/k8spacket/k8spacket/modules/nodegraph"
 	tlsparser "github.com/k8spacket/k8spacket/modules/tls-parser"
@@ -31,7 +32,8 @@ func main() {
 
 	inetEbpf := &ebpf_inet.InetEbpf{Broker: broker}
 	tcEbpf := &ebpf_tc.TcEbpf{Broker: broker}
-	loader := ebpf.Init(inetEbpf, tcEbpf)
+	socketFilterEbpf := &ebpf_socketfilter.SocketFilterEbpf{Broker: broker}
+	loader := ebpf.Init(inetEbpf, tcEbpf, socketFilterEbpf)
 
 	buildLogger()
 	startApp(broker, loader, mux)
