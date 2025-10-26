@@ -30,7 +30,7 @@ fmt:
 	go fmt ./...
 
 build:
-	go build .
+	env CGO_ENABLED=0 go build .
 
 test:
 	go env -w GOTOOLCHAIN=go1.25.0+auto && K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v ./... -coverprofile=coverage.out
