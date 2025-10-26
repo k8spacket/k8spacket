@@ -30,7 +30,7 @@ fmt:
 	go fmt ./...
 
 build:
-	go build .
+	env CGO_ENABLED=0 go build .
 
 test:
 	go env -w GOTOOLCHAIN=go1.25.0+auto && K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v ./... -coverprofile=coverage.out
@@ -40,6 +40,9 @@ run:
 
 run_local:
 	K8S_PACKET_TCP_LISTENER_PORT=6676 K8S_PACKET_LOADER_SOURCE=socketfilter K8S_PACKET_TLS_CERTIFICATE_CACHE_TTL=30s K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND="echo -n eno2" K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD=3s K8S_PACKET_K8S_RESOURCES_DISABLED=true go run k8spacket.go
+
+docker_build_local:
+	docker buildx build --platform linux/amd64 -t k8spacket/k8spacket:local .
 
 .ONESHELL:
 prepare_e2e_filesystem:
