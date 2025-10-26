@@ -42,14 +42,11 @@ RUN cd /home/k8spacket/ebpf/tc && go generate -ldflags "-w -s"
 COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/ebpf/socketfilter/bpf
 RUN cd /home/k8spacket/ebpf/socketfilter && go generate -ldflags "-w -s"
 
-RUN cd /home/k8spacket && go build .
+RUN cd /home/k8spacket && env CGO_ENABLED=0 go build .
 
 
-FROM alpine:3.22.2 AS final
+FROM gcr.io/distroless/static-debian12
 
-RUN apk add --no-cache iproute2 libc6-compat
-
-RUN mkdir /home/k8spacket && cd /home/k8spacket
 WORKDIR /home/k8spacket
 
 COPY --from=build ./home/k8spacket/k8spacket /home/k8spacket/

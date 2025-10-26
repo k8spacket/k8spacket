@@ -41,6 +41,9 @@ run:
 run_local:
 	K8S_PACKET_TCP_LISTENER_PORT=6676 K8S_PACKET_LOADER_SOURCE=socketfilter K8S_PACKET_TLS_CERTIFICATE_CACHE_TTL=30s K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND="echo -n eno2" K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD=3s K8S_PACKET_K8S_RESOURCES_DISABLED=true go run k8spacket.go
 
+docker_build_local:
+	docker buildx build --platform linux/amd64 -t k8spacket/k8spacket:local .
+
 .ONESHELL:
 prepare_e2e_filesystem:
 	cd ./tests/e2e/vm/filesystem
