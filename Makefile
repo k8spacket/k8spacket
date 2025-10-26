@@ -60,9 +60,9 @@ start_qemu:
 	cd ./tests/e2e/vm/filesystem
 	rm -f filesystem.qcow2 filesystem-diff.qcow2
 	unzip ./filesystem.zip
-	qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
+	sudo qemu-img create -f qcow2 -b filesystem.qcow2 -F qcow2 filesystem-diff.qcow2
 	PWD=$(pwd)
-	qemu-system-x86_64 \
+	sudo qemu-system-x86_64 \
 	-cpu host \
 	-m 4G \
 	-smp 4 \
@@ -89,5 +89,5 @@ e2e: prepare_e2e
 	CLIENT_IP=10.0.2.2 HOST_IP=127.0.0.1 GUEST_IP=10.0.2.15 go test -v
 	RC=$$?
 	sshpass -p root ssh -p 10022 root@127.0.0.1 'journalctl -u k8spacket -n100'
-	cat ./vm/filesystem/qemu.pid | xargs kill
+	sudo cat ./vm/filesystem/qemu.pid | sudo xargs kill
 	exit $$RC
