@@ -1,6 +1,6 @@
-FROM ubuntu:22.04 AS libbpf
+FROM ubuntu:24.04 AS libbpf
 
-RUN apt-get update && apt-get install -y libelf-dev libpcap-dev libbfd-dev binutils-dev build-essential make
+RUN apt-get update && apt-get install -y libelf-dev libpcap-dev libbfd-dev libssl-dev binutils-dev build-essential make
 RUN apt-get install -y linux-tools-common git curl
 
 RUN mkdir /home/k8spacket/

@@ -3,7 +3,7 @@
 set -x
 
 # Version of libbpf to fetch headers from
-LIBBPF_VERSION=1.5.0
+LIBBPF_VERSION=1.6.2
 
 # The headers we want
 prefix=libbpf-"$LIBBPF_VERSION"
