@@ -11,6 +11,8 @@ on:
 jobs:
   e2e-kernel:
     runs-on: ubuntu-24.04
+    container:
+      image: k8spacket/ci-e2e-test:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
