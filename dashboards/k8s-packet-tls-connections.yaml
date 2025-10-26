@@ -207,7 +207,7 @@ data:
           "id": 2,
           "options": {
             "afterRender": "",
-            "content": "<div>\n  <span>Domain\n    <samp>{{domain}}</samp>\n  </span>\n  <span>Client TLS versions\n    <samp>{{clientTlsVersions}}</samp>\n  </span>\n  <span>Client cipher suites\n    <samp style=\"line-break: anywhere\">{{clientCipherSuites}}</samp>\n  </span>\n  <span>Used TLS version\n    <samp>{{usedTLSVersion}}</samp>\n  </span>\n  <span>Used cipher suite\n    <samp>{{usedCipherSuite}}</samp>\n  </span>\n  <span>Server certificate<span style=\"float:right;font-size:10px\">Last scrape: <samp>{{lastScrape}}</samp></span>\n  Valid from: <samp>{{notBefore}}</samp>\n  Valid to: <samp>{{notAfter}}</samp>\n  <span>\n      <samp>{{serverChain}}</samp>\n    </span>\n  </span>\n  <div>",
+            "content": "<div>\n  <span>Domain\n    <samp>{{domain}}</samp>\n  </span>\n  <span>Client TLS versions\n    <samp>{{clientTlsVersions}}</samp>\n  </span>\n  <span>Client cipher suites\n    <samp style=\"line-break: anywhere\">{{clientCipherSuites}}</samp>\n  </span>\n  <span>Used TLS version\n    <samp>{{usedTLSVersion}}</samp>\n  </span>\n  <span>Used cipher suite\n    <samp>{{usedCipherSuite}}</samp>\n  </span>\n  <span>Server certificate<span style=\"float:right;font-size:10px\">Last scraped: <samp>{{lastScrape}}</samp></span>\n  Valid from: <samp>{{notBefore}}</samp>\n  Valid to: <samp>{{notAfter}}</samp>\n  <span>\n      <samp>{{serverChain}}</samp>\n    </span>\n  </span>\n  <div>",
             "defaultContent": "The query didn't return any results.",
             "editor": {
               "format": "auto",
@@ -221,7 +221,7 @@ data:
             "externalStyles": [],
             "helpers": "",
             "renderMode": "everyRow",
-            "styles": "  div {\n    white-space: pre-wrap;\n  }\n\n  span {\n    font-weight: bold;\n    color:grey;\n  }\n\n  samp {\n    font-weight: normal;\n    color: white;\n  }",
+            "styles": "  div {\n    white-space: pre-wrap;\n  }\n\n  span {\n    font-weight: bold;\n    color:grey;\n  }\n\n  samp {\n    font-weight: normal;\n    color: white;\n    border: none;\n    background-color: transparent;\n  }",
             "wrap": true
           },
           "pluginVersion": "4.3.0",
@@ -288,6 +288,7 @@ data:
             }
           ],
           "title": "TLS Details",
+          "transparent": true,
           "type": "marcusolsson-dynamictext-panel"
         }
       ],
