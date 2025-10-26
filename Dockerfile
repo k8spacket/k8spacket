@@ -39,6 +39,9 @@ RUN cd /home/k8spacket/ebpf/inet && go generate -ldflags "-w -s"
 COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/ebpf/tc/bpf
 RUN cd /home/k8spacket/ebpf/tc && go generate -ldflags "-w -s"
 
+COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/ebpf/socketfilter/bpf
+RUN cd /home/k8spacket/ebpf/socketfilter && go generate -ldflags "-w -s"
+
 RUN cd /home/k8spacket && go build .
 
 
