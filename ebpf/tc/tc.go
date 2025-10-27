@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/cilium/ebpf/perf"
+	"github.com/cilium/ebpf/ringbuf"
 	"github.com/k8spacket/k8spacket/broker"
 	ebpf_tools "github.com/k8spacket/k8spacket/ebpf/tools"
 	"github.com/k8spacket/k8spacket/modules"
@@ -73,7 +73,7 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 	addFilter(link, progFd, netlink.HANDLE_MIN_EGRESS)
 
 	// create new reader for perf events
-	rd, err := perf.NewReader(objs.OutputEvents, os.Getpagesize())
+	rd, err := ringbuf.NewReader(objs.OutputEvents)
 	if err != nil {
 		slog.Error("[tc] Creating perf event reader", "Error", err)
 	}
@@ -85,7 +85,7 @@ func (tcEbpf *TcEbpf) Init(iface string) {
 		for {
 			record, err := rd.Read()
 			if err != nil {
-				if errors.Is(err, perf.ErrClosed) {
+				if errors.Is(err, ringbuf.ErrClosed) {
 					slog.Info("[tc] Received signal, exiting..")
 					return
 				}
