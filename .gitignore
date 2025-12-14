@@ -16,4 +16,4 @@ k8spacket
 
 # Virtual machine images for e2e tests
 *.qcow2
-tests/e2e/vm/filesystem/*.qcow2
+tests/**/*.qcow2
