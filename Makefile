@@ -30,7 +30,7 @@ fmt:
 	go fmt ./...
 
 build:
-	env CGO_ENABLED=0 go build ./cmd/k8spacket
+	env CGO_ENABLED=0 go build -o ./k8spacket ./cmd/k8spacket
 
 test:
 	go env -w GOTOOLCHAIN=go1.25.0+auto && K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v ./... -coverprofile=coverage.out
