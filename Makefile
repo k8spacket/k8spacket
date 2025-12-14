@@ -1,48 +1,51 @@
 .ONESHELL:
 prepare:
-	cd ./ebpf/inet/bpf
-	./../../../libbpf.sh
-	cd ../../../
+	cd ./internal/ebpf/inet/bpf
+	./../../../../libbpf.sh
+	cd ../../../../
 
-	cd ./ebpf/tc/bpf
-	./../../../libbpf.sh
-	cd ../../../
+	cd ./internal/ebpf/tc/bpf
+	./../../../../libbpf.sh
+	cd ../../../../
 
-	cd ./ebpf/socketfilter/bpf
-	./../../../libbpf.sh
-	cd ../../../
+	cd ./internal/ebpf/socketfilter/bpf
+	./../../../../libbpf.sh
+	cd ../../../../
 
 .ONESHELL:
 generate: prepare
-	cd ./ebpf/inet
+	cd ./internal/ebpf/inet
 	go run github.com/cilium/ebpf/cmd/bpf2go -cc clang -target native -type event -go-package ebpf_inet bpf ./bpf/inet.bpf.c
-	cd ../../
+	cd ../../../
 
-	cd ./ebpf/tc
+	cd ./internal/ebpf/tc
 	go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_tc tc ./bpf/tc.bpf.c
-	cd ../../
+	cd ../../../
 
-	cd ./ebpf/socketfilter
+	cd ./internal/ebpf/socketfilter
 	go run github.com/cilium/ebpf/cmd/bpf2go -go-package ebpf_socketfilter socketfilter ./bpf/socketfilter.bpf.c
-	cd ../../
+	cd ../../../
 
 fmt:
 	go fmt ./...
 
 build:
-	env CGO_ENABLED=0 go build .
+	env CGO_ENABLED=0 go build -o ./k8spacket ./cmd/k8spacket
 
 test:
 	go env -w GOTOOLCHAIN=go1.25.0+auto && K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v ./... -coverprofile=coverage.out
 
 run:
-	go run k8spacket.go
+	go run ./cmd/k8spacket
 
 run_local:
-	K8S_PACKET_TCP_LISTENER_PORT=6676 K8S_PACKET_LOADER_SOURCE=socketfilter K8S_PACKET_TLS_CERTIFICATE_CACHE_TTL=30s K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND="echo -n eno2" K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD=3s K8S_PACKET_K8S_RESOURCES_DISABLED=true go run k8spacket.go
+	K8S_PACKET_TCP_LISTENER_PORT=6676 K8S_PACKET_LOADER_SOURCE=socketfilter K8S_PACKET_TLS_CERTIFICATE_CACHE_TTL=30s K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND="echo -n eno2" K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD=3s K8S_PACKET_K8S_RESOURCES_DISABLED=true go run ./cmd/k8spacket
 
 docker_build_local:
 	docker buildx build --platform linux/amd64 -t k8spacket/k8spacket:local .
+
+docker_run_local:
+	docker run -it -v /sys/kernel/tracing:/sys/kernel/tracing --userns=host --network=host --privileged --cap-add=CAP_SYS_ADMIN --cap-add=CAP_NET_ADMIN --cap-add=CAP_NET_RAW --env K8S_PACKET_K8S_RESOURCES_DISABLED=true --env K8S_PACKET_TCP_LISTENER_INTERFACES_REFRESH_PERIOD=3s --env K8S_PACKET_TCP_LISTENER_INTERFACES_COMMAND="echo 'eth0' | tr '\n' ','" k8spacket/k8spacket:refactor
 
 .ONESHELL:
 prepare_e2e_filesystem:

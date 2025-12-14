@@ -24,25 +24,21 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -
 
 RUN mkdir /home/k8spacket/
 
-COPY ./broker /home/k8spacket/broker
-COPY ./ebpf /home/k8spacket/ebpf
-COPY ./external /home/k8spacket/external
-COPY ./modules /home/k8spacket/modules
+COPY ./cmd /home/k8spacket/cmd
+COPY ./internal /home/k8spacket/internal
 COPY ./go.mod /home/k8spacket/
 COPY ./go.sum /home/k8spacket/
-COPY *.go /home/k8spacket/
 
 #`-ldflags "-w -s"` means strip the debugging information to make binary smaller
-COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/ebpf/inet/bpf
-RUN cd /home/k8spacket/ebpf/inet && go generate -ldflags "-w -s"
+COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/internal/ebpf/inet/bpf
+RUN cd /home/k8spacket/internal/ebpf/inet && go generate -ldflags "-w -s"
 
-COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/ebpf/tc/bpf
-RUN cd /home/k8spacket/ebpf/tc && go generate -ldflags "-w -s"
+COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/internal/ebpf/tc/bpf
+RUN cd /home/k8spacket/internal/ebpf/tc && go generate -ldflags "-w -s"
+COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/internal/ebpf/socketfilter/bpf
+RUN cd /home/k8spacket/internal/ebpf/socketfilter && go generate -ldflags "-w -s"
 
-COPY --from=libbpf ./home/k8spacket/*.h /home/k8spacket/ebpf/socketfilter/bpf
-RUN cd /home/k8spacket/ebpf/socketfilter && go generate -ldflags "-w -s"
-
-RUN cd /home/k8spacket && env CGO_ENABLED=0 go build .
+RUN cd /home/k8spacket && env CGO_ENABLED=0 go build ./cmd/k8spacket
 
 
 FROM gcr.io/distroless/static-debian12

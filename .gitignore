@@ -1,5 +1,5 @@
 # Compiled binary
-k8spacket
+/k8spacket
 
 # Editor
 .idea
@@ -13,3 +13,7 @@ k8spacket
 # pem files
 *.pem
 !tests/**/*.pem
+
+# Virtual machine images for e2e tests
+*.qcow2
+tests/**/*.qcow2
