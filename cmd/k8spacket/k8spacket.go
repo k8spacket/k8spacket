@@ -16,7 +16,7 @@ import (
 	ebpf_socketfilter "github.com/k8spacket/k8spacket/internal/ebpf/socketfilter"
 	ebpf_tc "github.com/k8spacket/k8spacket/internal/ebpf/tc"
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph"
-	tlsparser "github.com/k8spacket/k8spacket/internal/modules/tls-parser"
+	"github.com/k8spacket/k8spacket/internal/modules/tlsparser"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -30,16 +30,16 @@ func main() {
 	tlsParserListener := tlsparser.Init(mux)
 	broker := broker.Init(nodegraphListener, tlsParserListener)
 
-	inetEbpf := &ebpf_inet.InetEbpf{Broker: broker}
-	tcEbpf := &ebpf_tc.TcEbpf{Broker: broker}
-	socketFilterEbpf := &ebpf_socketfilter.SocketFilterEbpf{Broker: broker}
+	inetEbpf := &ebpf_inet.EbpfInet{Broker: broker}
+	tcEbpf := &ebpf_tc.EbpfTc{Broker: broker}
+	socketFilterEbpf := &ebpf_socketfilter.EbpfSocketFilter{Broker: broker}
 	loader := ebpf.Init(inetEbpf, tcEbpf, socketFilterEbpf)
 
 	buildLogger()
 	startApp(broker, loader, mux)
 }
 
-func startApp(broker broker.IBroker, loader ebpf.ILoader, mux *http.ServeMux) {
+func startApp(broker broker.Broker, loader ebpf.Loader, mux *http.ServeMux) {
 	go broker.DistributeEvents()
 	loader.Load()
 

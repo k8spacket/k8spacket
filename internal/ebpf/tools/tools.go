@@ -2,7 +2,7 @@ package ebpf_tools
 
 import (
 	"fmt"
-	k8sclient "github.com/k8spacket/k8spacket/internal/external/k8s"
+	"github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
 	"net"
 	"os"
 	"regexp"

@@ -19,14 +19,14 @@ var response = model.NodeGraph{
 	Edges: []model.Edge{
 		model.Edge{Id: "test edge"}}}
 
-func (mockService *mockService) getO11yStatsConfig(statsType string) (string, error) {
+func (mockNodegraphService *mockNodegraphService) getO11yStatsConfig(statsType string) (string, error) {
 	if statsType == "error" {
 		return "", errors.New("error")
 	}
 	return fmt.Sprintf("%s selected", statsType), nil
 }
 
-func (mockService *mockService) buildO11yResponse(r *http.Request) (model.NodeGraph, error) {
+func (mockNodegraphService *mockNodegraphService) buildO11yResponse(r *http.Request) (model.NodeGraph, error) {
 	if r.Header.Get("scenario") == "error" {
 		return model.NodeGraph{}, errors.New("error")
 	}
@@ -35,7 +35,7 @@ func (mockService *mockService) buildO11yResponse(r *http.Request) (model.NodeGr
 
 func TestHealth(t *testing.T) {
 
-	o11yController := &O11yController{service: &Service{}}
+	o11yController := &O11yController{service: &NodegraphService{}}
 
 	req, err := http.NewRequest("GET", "/nodegraph/health", nil)
 	if err != nil {
@@ -63,7 +63,7 @@ func TestNodeGraphFieldsHandler(t *testing.T) {
 		{"error", "error", http.StatusInternalServerError, "error"},
 	}
 
-	service := &mockService{}
+	service := &mockNodegraphService{}
 	o11yController := &O11yController{service: service}
 
 	for _, test := range tests {
@@ -99,7 +99,7 @@ func TestNodeGraphDataHandler(t *testing.T) {
 		{"error", model.NodeGraph{}, http.StatusInternalServerError, "error"},
 	}
 
-	service := &mockService{}
+	service := &mockNodegraphService{}
 	o11yController := &O11yController{service: service}
 
 	for _, test := range tests {

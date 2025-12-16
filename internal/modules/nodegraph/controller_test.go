@@ -18,25 +18,25 @@ var repo = []model.ConnectionItem{
 	{Src: "src1", Dst: "dst1"},
 }
 
-type mockService struct {
-	IService
+type mockNodegraphService struct {
+	Service
 	from, to                        time.Time
 	patternNs, patternIn, patternEx string
 	client, server                  string
 }
 
-func (mockService *mockService) getConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
-	mockService.from = from
-	mockService.to = to
-	mockService.patternNs = patternNs.String()
-	mockService.patternIn = patternIn.String()
-	mockService.patternEx = patternEx.String()
+func (mockNodegraphService *mockNodegraphService) getConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
+	mockNodegraphService.from = from
+	mockNodegraphService.to = to
+	mockNodegraphService.patternNs = patternNs.String()
+	mockNodegraphService.patternIn = patternIn.String()
+	mockNodegraphService.patternEx = patternEx.String()
 	return repo
 }
 
 func TestConnectionHandler(t *testing.T) {
 
-	service := &mockService{}
+	service := &mockNodegraphService{}
 	controller := &Controller{service: service}
 
 	req, err := http.NewRequest("GET", "/nodegraph/connections", nil)

@@ -13,7 +13,7 @@ import (
 )
 
 type Controller struct {
-	service IService
+	service Service
 }
 
 func (controller *Controller) ConnectionHandler(w http.ResponseWriter, r *http.Request) {
