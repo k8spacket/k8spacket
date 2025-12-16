@@ -136,7 +136,7 @@ func TestGetConnections(t *testing.T) {
 	slog.SetDefault(logger)
 
 	mockRepository := &mockRepository{}
-	service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &resource.FileResource{}}
+	service := &NodegraphService{repo: mockRepository, factory: &stats.StatsFactory{}, httpClient: &httpclient.HttpClient{}, k8sClient: &k8sclient.K8SClient{}, resource: &resource.FileResource{}}
 
 	from := time.Now().Add(time.Hour * -1)
 	to := time.Now().Add(time.Hour)
