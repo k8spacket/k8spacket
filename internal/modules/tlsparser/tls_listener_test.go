@@ -18,7 +18,7 @@ func TestListen(t *testing.T) {
 	slog.SetDefault(logger)
 
 	service := &mockTlsParserService{}
-	listener := &TlsListener{service}
+	listener := &TlsListener{service: service}
 
 	event := modules.TLSEvent{Client: modules.Address{Addr: "client"},
 		Server:      modules.Address{Addr: "server"},

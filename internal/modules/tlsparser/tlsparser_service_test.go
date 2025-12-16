@@ -137,7 +137,7 @@ func TestStoreInDatabase(t *testing.T) {
 	mockRepository := &mockRepository{}
 	mockCertificateUpdater := &mockCertificateUpdater{}
 
-	service := TlsParserService{mockRepository, mockCertificateUpdater, &httpclient.HttpClient{}, &k8sclient.K8SClient{}}
+	service := TlsParserService{repo: mockRepository, updater: mockCertificateUpdater, httpClient: &httpclient.HttpClient{}, k8sClient: &k8sclient.K8SClient{}}
 
 	tlsConnection := model.TLSConnection{Src: "src"}
 	tlsDetails := model.TLSDetails{UsedTLSVersion: "TLS 1.2"}
@@ -156,7 +156,7 @@ func TestStoreInDatabase(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	mockRepository := &mockRepository{}
-	service := TlsParserService{mockRepository, &update.CertificateUpdater{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}}
+	service := TlsParserService{repo: mockRepository, updater: &update.CertificateUpdater{}, httpClient: &httpclient.HttpClient{}, k8sClient: &k8sclient.K8SClient{}}
 
 	result := service.getConnection("key")
 
@@ -183,7 +183,7 @@ func TestFilterConnections(t *testing.T) {
 
 	mockRepository := &mockRepository{}
 
-	service := TlsParserService{mockRepository, &update.CertificateUpdater{}, &mockHttpClient{}, &k8sclient.K8SClient{}}
+	service := TlsParserService{repo: mockRepository, updater: &update.CertificateUpdater{}, httpClient: &mockHttpClient{}, k8sClient: &k8sclient.K8SClient{}}
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
@@ -224,7 +224,7 @@ func TestBuildConnectionsResponse(t *testing.T) {
 	mockHttpClient := &mockHttpClient{}
 	mockK8SClient := &mockK8SClient{}
 
-	service := TlsParserService{&repository.DbRepository{}, &update.CertificateUpdater{}, mockHttpClient, mockK8SClient}
+	service := TlsParserService{repo: &repository.DbRepository{}, updater: &update.CertificateUpdater{}, httpClient: mockHttpClient, k8sClient: mockK8SClient}
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
@@ -264,7 +264,7 @@ func TestBuildDetailsResponse(t *testing.T) {
 	mockHttpClient := &mockHttpClient{}
 	mockK8SClient := &mockK8SClient{}
 
-	service := TlsParserService{&repository.DbRepository{}, &update.CertificateUpdater{}, mockHttpClient, mockK8SClient}
+	service := TlsParserService{repo: &repository.DbRepository{}, updater: &update.CertificateUpdater{}, httpClient: mockHttpClient, k8sClient: mockK8SClient}
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {

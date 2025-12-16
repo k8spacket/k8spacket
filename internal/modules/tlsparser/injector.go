@@ -22,15 +22,15 @@ func Init(mux *http.ServeMux) modules.Listener[modules.TLSEvent] {
 	handlerDetails, _ := db.New[model.TLSDetails]("tls_details")
 	repo := &repository.DbRepository{DbConnectionHandler: handlerConnections, DbDetailsHandler: handlerDetails}
 	cert := &update.CertificateUpdater{Network: &network.HttpConnectionInspector{}}
-	service := &TlsParserService{repo, cert, &httpclient.HttpClient{}, &k8sclient.K8SClient{}}
-	controller := &Controller{service}
-	o11yController := &O11yController{service}
+	service := &TlsParserService{repo: repo, updater: cert, httpClient: &httpclient.HttpClient{}, k8sClient: &k8sclient.K8SClient{}}
+	controller := &Controller{service: service}
+	o11yController := &O11yController{service: service}
 
 	mux.HandleFunc("/tlsparser/connections/", controller.TLSConnectionHandler)
 	mux.HandleFunc("/tlsparser/api/data", o11yController.TLSParserConnectionsHandler)
 	mux.HandleFunc("/tlsparser/api/data/", o11yController.TLSParserConnectionDetailsHandler)
 
-	listener := &TlsListener{service}
+	listener := &TlsListener{service: service}
 
 	return listener
 
