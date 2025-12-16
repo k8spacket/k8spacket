@@ -8,10 +8,10 @@ import (
 )
 
 func TestBytesGetConfig(t *testing.T) {
-	want := model.Config{Arc1: model.DisplayConfig{DisplayName: "BytesStats received", Color: "blue"},
-		Arc2:          model.DisplayConfig{DisplayName: "BytesStats responded", Color: "yellow"},
-		MainStat:      model.DisplayConfig{DisplayName: "BytesStats received "},
-		SecondaryStat: model.DisplayConfig{DisplayName: "BytesStats responded "}}
+	want := model.Config{Arc1: model.DisplayConfig{DisplayName: "Bytes received", Color: "blue"},
+		Arc2:          model.DisplayConfig{DisplayName: "Bytes responded", Color: "yellow"},
+		MainStat:      model.DisplayConfig{DisplayName: "Bytes received "},
+		SecondaryStat: model.DisplayConfig{DisplayName: "Bytes responded "}}
 
 	bytesStats := &BytesStats{}
 

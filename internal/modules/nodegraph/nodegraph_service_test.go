@@ -273,10 +273,10 @@ func TestGetO11yStatsConfig(t *testing.T) {
 				Field{FieldName: "id", Type: "string", Color: "", DisplayName: ""},
 				Field{FieldName: "title", Type: "string", Color: "", DisplayName: ""},
 				Field{FieldName: "subTitle", Type: "string", Color: "", DisplayName: ""},
-				Field{FieldName: "mainStat", Type: "string", Color: "", DisplayName: "BytesStats received "},
-				Field{FieldName: "secondaryStat", Type: "string", Color: "", DisplayName: "BytesStats responded "},
-				Field{FieldName: "arc__1", Type: "number", Color: "blue", DisplayName: "BytesStats received"},
-				Field{FieldName: "arc__2", Type: "number", Color: "yellow", DisplayName: "BytesStats responded"}}}, ""},
+				Field{FieldName: "mainStat", Type: "string", Color: "", DisplayName: "Bytes received "},
+				Field{FieldName: "secondaryStat", Type: "string", Color: "", DisplayName: "Bytes responded "},
+				Field{FieldName: "arc__1", Type: "number", Color: "blue", DisplayName: "Bytes received"},
+				Field{FieldName: "arc__2", Type: "number", Color: "yellow", DisplayName: "Bytes responded"}}}, ""},
 		{"duration", Fields{
 			EdgesFields: []Field{
 				Field{FieldName: "id", Type: "string", Color: "", DisplayName: ""},
