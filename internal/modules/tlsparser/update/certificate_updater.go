@@ -41,7 +41,7 @@ func scrapeCertificate(updater *CertificateUpdater, tlsDetails *model.TLSDetails
 	dst := tlsDetails.Dst
 	port := tlsDetails.Port
 	if port <= 0 {
-		slog.Info("[updater scraping] dstPort is empty",
+		slog.Info("[certificate scraping] dstPort is empty",
 			"domain", domain,
 			"dst", dst,
 			"port", port,
@@ -57,14 +57,14 @@ func scrapeCertificate(updater *CertificateUpdater, tlsDetails *model.TLSDetails
 
 	certs, err := updater.Network.GetPeerCertificates(domain, port)
 	if err != nil {
-		slog.Error("[updater scraping] Error in Dial",
+		slog.Error("[certificate scraping] Error in Dial",
 			"domain", domain,
 			"port", port,
 			"Trying with the default port...", "")
 		port = 443
 		certs, err = updater.Network.GetPeerCertificates(domain, port)
 		if err != nil {
-			slog.Error("[updater scraping] Error in Dial",
+			slog.Error("[certificate scraping] Error in Dial",
 				"domain", domain,
 				"port", port,
 				"Gave up", "")
@@ -86,7 +86,7 @@ func scrapeCertificate(updater *CertificateUpdater, tlsDetails *model.TLSDetails
 		chain += strings.Replace(certString, "\n\n", "\n", -1)
 	}
 	tlsDetails.Certificate.ServerChain = chain
-	slog.Info("[updater scraping] TLS updater scraped",
+	slog.Info("[certificate scraping] TLS certificate scraped",
 		"domain", domain,
 		"port", port)
 }
