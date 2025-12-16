@@ -10,7 +10,7 @@ import (
 	"github.com/k8spacket/k8spacket/internal/modules/tlsparser/update"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/db"
 	httpclient "github.com/k8spacket/k8spacket/internal/thirdparty/http"
-	"github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
+	k8sclient "github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/network"
 )
 
