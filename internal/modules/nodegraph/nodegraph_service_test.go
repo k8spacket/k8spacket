@@ -17,8 +17,8 @@ import (
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/repository"
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/stats"
 	httpclient "github.com/k8spacket/k8spacket/internal/thirdparty/http"
-	lio "github.com/k8spacket/k8spacket/internal/thirdparty/io"
 	k8sclient "github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
+	"github.com/k8spacket/k8spacket/internal/thirdparty/resource"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -105,7 +105,7 @@ func (br *BrokenReader) Close() error {
 
 type mockHandlerIO struct {
 	scenario string
-	lio.IO
+	resource.Resource
 }
 
 func (mockHandlerIO *mockHandlerIO) Read(name string) ([]byte, error) {
@@ -136,7 +136,7 @@ func TestGetConnections(t *testing.T) {
 	slog.SetDefault(logger)
 
 	mockRepository := &mockRepository{}
-	service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &lio.FileIO{}}
+	service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &resource.FileResource{}}
 
 	from := time.Now().Add(time.Hour * -1)
 	to := time.Now().Add(time.Hour)
@@ -167,7 +167,7 @@ func TestUpdate(t *testing.T) {
 		t.Run(test.item.Src, func(t *testing.T) {
 
 			mockRepository := &mockRepository{result: test.item}
-			service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &lio.FileIO{}}
+			service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &resource.FileResource{}}
 
 			service.update("src", "srcName", "srcNs", "dst", "dstName", "dstNs", true, 100, 200, 1, true)
 
@@ -212,7 +212,7 @@ func TestBuildO11yResponse(t *testing.T) {
 	}
 
 	mockRepository := &mockRepository{}
-	service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &mockHttpClient{}, &mockK8SClient{}, &lio.FileIO{}}
+	service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &mockHttpClient{}, &mockK8SClient{}, &resource.FileResource{}}
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {

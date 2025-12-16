@@ -10,8 +10,8 @@ import (
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/stats"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/db"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/http"
-	lio "github.com/k8spacket/k8spacket/internal/thirdparty/io"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
+	"github.com/k8spacket/k8spacket/internal/thirdparty/resource"
 )
 
 func Init(mux *http.ServeMux) modules.Listener[modules.TCPEvent] {
@@ -21,7 +21,7 @@ func Init(mux *http.ServeMux) modules.Listener[modules.TCPEvent] {
 	handler, _ := db.New[model.ConnectionItem]("tcp_connections")
 	repo := &repository.DbRepository{DbHandler: handler}
 	factory := &stats.StatsFactory{}
-	service := &NodegraphService{repo, factory, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &lio.FileIO{}}
+	service := &NodegraphService{repo: repo, factory: factory, httpClient: &httpclient.HttpClient{}, k8sClient: &k8sclient.K8SClient{}, resource: &resource.FileResource{}}
 	controller := &Controller{service}
 	o11yController := &O11yController{service}
 

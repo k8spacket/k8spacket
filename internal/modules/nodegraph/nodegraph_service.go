@@ -18,8 +18,8 @@ import (
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/stats"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/db"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/http"
-	lio "github.com/k8spacket/k8spacket/internal/thirdparty/io"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
+	"github.com/k8spacket/k8spacket/internal/thirdparty/resource"
 )
 
 type NodegraphService struct {
@@ -27,7 +27,7 @@ type NodegraphService struct {
 	factory    stats.Factory
 	httpClient httpclient.Client
 	k8sClient  k8sclient.Client
-	io         lio.IO
+	resource   resource.Resource
 }
 
 var connectionItemsMutex = sync.RWMutex{}
@@ -75,7 +75,7 @@ func (service *NodegraphService) getConnections(from time.Time, to time.Time, pa
 func (service *NodegraphService) buildO11yResponse(r *http.Request) (model.NodeGraph, error) {
 	var k8spacketIps = service.k8sClient.GetPodIPsBySelectors(os.Getenv("K8S_PACKET_API_FIELD_SELECTOR"), os.Getenv("K8S_PACKET_API_LABEL_SELECTOR"))
 
-	var in []model.ConnectionItem
+	var fetchedConnectionItems []model.ConnectionItem
 	var connectionItems = make(map[string]model.ConnectionItem)
 
 	for _, ip := range k8spacketIps {
@@ -95,13 +95,13 @@ func (service *NodegraphService) buildO11yResponse(r *http.Request) (model.NodeG
 				continue
 			}
 
-			err = json.Unmarshal(responseData, &in)
+			err = json.Unmarshal(responseData, &fetchedConnectionItems)
 			if err != nil {
 				slog.Error("[api] Cannot parse stats response", "Error", err)
 				continue
 			}
 
-			for _, element := range in {
+			for _, element := range fetchedConnectionItems {
 				connectionItems[element.Src+"-"+element.Dst] = element
 			}
 		}
@@ -120,7 +120,7 @@ func (service *NodegraphService) buildO11yResponse(r *http.Request) (model.NodeG
 }
 
 func (service *NodegraphService) getO11yStatsConfig(statsType string) (string, error) {
-	jsonFile, err := service.io.Read("fields.json")
+	jsonFile, err := service.resource.Read("fields.json")
 	if err != nil {
 		slog.Error("Cannot read file", "Error", err.Error())
 		return "", err
@@ -142,27 +142,27 @@ func (service *NodegraphService) getO11yStatsConfig(statsType string) (string, e
 func prepareConnections(connectionItems map[string]model.ConnectionItem, connectionEndpoints map[string]model.ConnectionEndpoint) {
 
 	for _, conn := range connectionItems {
-		var connEndpointSrc = connectionEndpoints[conn.Src]
-		if (model.ConnectionEndpoint{} == connEndpointSrc) {
-			connEndpointSrc = model.ConnectionEndpoint{Ip: conn.Src, Name: conn.SrcName, Namespace: conn.SrcNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
+		var srcEndpoint = connectionEndpoints[conn.Src]
+		if (model.ConnectionEndpoint{} == srcEndpoint) {
+			srcEndpoint = model.ConnectionEndpoint{Ip: conn.Src, Name: conn.SrcName, Namespace: conn.SrcNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
 		}
-		connEndpointSrc.BytesSent += conn.BytesSent
-		connEndpointSrc.BytesReceived += conn.BytesReceived
-		connectionEndpoints[conn.Src] = connEndpointSrc
+		srcEndpoint.BytesSent += conn.BytesSent
+		srcEndpoint.BytesReceived += conn.BytesReceived
+		connectionEndpoints[conn.Src] = srcEndpoint
 
-		var connEndpointDst = connectionEndpoints[conn.Dst]
-		if (model.ConnectionEndpoint{} == connEndpointDst) {
-			connEndpointDst = model.ConnectionEndpoint{Ip: conn.Dst, Name: conn.DstName, Namespace: conn.DstNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
+		var dstEndpoint = connectionEndpoints[conn.Dst]
+		if (model.ConnectionEndpoint{} == dstEndpoint) {
+			dstEndpoint = model.ConnectionEndpoint{Ip: conn.Dst, Name: conn.DstName, Namespace: conn.DstNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
 		}
-		connEndpointDst.ConnCount += conn.ConnCount
-		connEndpointDst.ConnPersistent += conn.ConnPersistent
-		connEndpointDst.BytesSent += conn.BytesReceived
-		connEndpointDst.BytesReceived += conn.BytesSent
-		connEndpointDst.Duration += conn.Duration
-		if conn.MaxDuration > connEndpointDst.MaxDuration {
-			connEndpointDst.MaxDuration = conn.MaxDuration
+		dstEndpoint.ConnCount += conn.ConnCount
+		dstEndpoint.ConnPersistent += conn.ConnPersistent
+		dstEndpoint.BytesSent += conn.BytesReceived
+		dstEndpoint.BytesReceived += conn.BytesSent
+		dstEndpoint.Duration += conn.Duration
+		if conn.MaxDuration > dstEndpoint.MaxDuration {
+			dstEndpoint.MaxDuration = conn.MaxDuration
 		}
-		connectionEndpoints[conn.Dst] = connEndpointDst
+		connectionEndpoints[conn.Dst] = dstEndpoint
 	}
 }
 
