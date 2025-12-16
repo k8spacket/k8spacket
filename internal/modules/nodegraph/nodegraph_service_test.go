@@ -167,7 +167,7 @@ func TestUpdate(t *testing.T) {
 		t.Run(test.item.Src, func(t *testing.T) {
 
 			mockRepository := &mockRepository{result: test.item}
-			service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &resource.FileResource{}}
+			service := &NodegraphService{repo: mockRepository, factory: &stats.StatsFactory{}, httpClient: &httpclient.HttpClient{}, k8sClient: &k8sclient.K8SClient{}, resource: &resource.FileResource{}}
 
 			service.update("src", "srcName", "srcNs", "dst", "dstName", "dstNs", true, 100, 200, 1, true)
 
@@ -212,7 +212,7 @@ func TestBuildO11yResponse(t *testing.T) {
 	}
 
 	mockRepository := &mockRepository{}
-	service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &mockHttpClient{}, &mockK8SClient{}, &resource.FileResource{}}
+	service := &NodegraphService{repo: mockRepository, factory: &stats.StatsFactory{}, httpClient: &mockHttpClient{}, k8sClient: &mockK8SClient{}, resource: &resource.FileResource{}}
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
@@ -300,7 +300,7 @@ func TestGetO11yStatsConfig(t *testing.T) {
 
 			mockRepository := &mockRepository{}
 			mockHandlerIO := &mockHandlerIO{scenario: test.scenario}
-			service := &NodegraphService{mockRepository, &stats.StatsFactory{}, &mockHttpClient{}, &mockK8SClient{}, mockHandlerIO}
+			service := &NodegraphService{repo: mockRepository, factory: &stats.StatsFactory{}, httpClient: &mockHttpClient{}, k8sClient: &mockK8SClient{}, resource: mockHandlerIO}
 
 			result, _ := service.getO11yStatsConfig(test.scenario)
 
