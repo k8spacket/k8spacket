@@ -104,5 +104,5 @@ func IntToIP4(ipNum uint32, fn func(b []byte, c uint32)) string {
 }
 
 func Htons(v uint16) uint16 {
-    return (v<<8)&0xff00 | v>>8
+	return (v<<8)&0xff00 | v>>8
 }

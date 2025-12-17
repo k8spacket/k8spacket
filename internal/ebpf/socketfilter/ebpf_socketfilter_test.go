@@ -17,7 +17,6 @@ func (f *fakeBrokerSF) DistributeEvents()               {}
 func (f *fakeBrokerSF) TCPEvent(event modules.TCPEvent) {}
 func (f *fakeBrokerSF) TLSEvent(event modules.TLSEvent) { f.last = event }
 
-
 func TestDistribute(t *testing.T) {
 	sNum := binary.BigEndian.Uint32([]byte{192, 168, 0, 10})
 	dNum := binary.BigEndian.Uint32([]byte{10, 0, 0, 5})

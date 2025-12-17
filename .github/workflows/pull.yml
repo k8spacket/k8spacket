@@ -16,6 +16,7 @@ jobs:
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
         with:
+          files: ./coverage.filtered.out
           fail_ci_if_error: true # optional (default = false)
           flags: unittests # optional
           verbose: true # optional (default = false)
