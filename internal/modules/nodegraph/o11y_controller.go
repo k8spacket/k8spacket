@@ -7,7 +7,7 @@ import (
 )
 
 type O11yController struct {
-	service IService
+	service Service
 }
 
 func (o11yController *O11yController) Health(w http.ResponseWriter, _ *http.Request) {

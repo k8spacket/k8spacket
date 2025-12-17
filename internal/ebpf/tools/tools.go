@@ -2,12 +2,13 @@ package ebpf_tools
 
 import (
 	"fmt"
-	k8sclient "github.com/k8spacket/k8spacket/internal/external/k8s"
 	"net"
 	"os"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
 
 	"github.com/k8spacket/k8spacket/internal/modules"
 	"github.com/likexian/whois"
@@ -94,4 +95,14 @@ func StoreDomain(ip string, port uint16, domain string) {
 		domainsMap.data[fmt.Sprintf(id_format, ip, port)] = domain
 		domainsMap.mu.Unlock()
 	}
+}
+
+func IntToIP4(ipNum uint32, fn func(b []byte, c uint32)) string {
+	ip := make(net.IP, 4)
+	fn(ip, ipNum)
+	return ip.String()
+}
+
+func Htons(v uint16) uint16 {
+	return (v<<8)&0xff00 | v>>8
 }

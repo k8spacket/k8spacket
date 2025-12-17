@@ -1,6 +1,7 @@
 package ebpf_tools
 
 import (
+	"encoding/binary"
 	"os"
 	"testing"
 
@@ -32,4 +33,21 @@ func TestEnrichAddress(t *testing.T) {
 
 	assert.EqualValues(t, "89-160-20-129.cust.bredband2.com, (SE, Linköping)", address.Name)
 
+}
+
+func TestHtonsBehavior(t *testing.T) {
+	var a uint16 = 0x0102
+	out := Htons(a)
+	// expected swap
+	expected := (a<<8)&0xff00 | (a>>8)&0x00ff
+	assert.Equal(t, expected, out)
+}
+
+func TestIntToIP4(t *testing.T) {
+	// bytes {1,2,3,4} as little endian uint32
+	num := binary.LittleEndian.Uint32([]byte{1, 2, 3, 4})
+	s := IntToIP4(num, binary.BigEndian.PutUint32)
+	assert.Equal(t, "4.3.2.1", s)
+	s = IntToIP4(num, binary.LittleEndian.PutUint32)
+	assert.Equal(t, "1.2.3.4", s)
 }
