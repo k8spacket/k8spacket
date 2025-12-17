@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"log/slog"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -158,10 +157,10 @@ func distribute(event tcTlsHandshakeEvent, tc *EbpfTc) {
 	tlsEvent := modules.TLSEvent{
 		Source: modules.TC,
 		Client: modules.Address{
-			Addr: intToIP4(event.Saddr),
+			Addr: ebpf_tools.IntToIP4(event.Saddr, binary.BigEndian.PutUint32),
 			Port: event.Sport},
 		Server: modules.Address{
-			Addr: intToIP4(event.Daddr),
+			Addr: ebpf_tools.IntToIP4(event.Daddr, binary.BigEndian.PutUint32),
 			Port: event.Dport},
 		TlsVersions:    event.TlsVersions[:tlsVersionsLen],
 		Ciphers:        event.Ciphers[:ciphersLen],
@@ -175,10 +174,4 @@ func distribute(event tcTlsHandshakeEvent, tc *EbpfTc) {
 	ebpf_tools.EnrichAddress(&tlsEvent.Client)
 	ebpf_tools.EnrichAddress(&tlsEvent.Server)
 	tc.Broker.TLSEvent(tlsEvent)
-}
-
-func intToIP4(ipNum uint32) string {
-	ip := make(net.IP, 4)
-	binary.BigEndian.PutUint32(ip, ipNum)
-	return ip.String()
 }

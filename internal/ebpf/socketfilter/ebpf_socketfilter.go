@@ -7,11 +7,9 @@ import (
 	"errors"
 	"log"
 	"log/slog"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
-	"unsafe"
 
 	"github.com/cilium/ebpf"
 
@@ -42,7 +40,7 @@ func (ebpfSocketFilter *EbpfSocketFilter) Init() {
 	}
 	defer objs.Close()
 
-	fd, err := unix.Socket(unix.AF_PACKET, unix.SOCK_RAW, int(htons(unix.ETH_P_ALL)))
+	fd, err := unix.Socket(unix.AF_PACKET, unix.SOCK_RAW, int(ebpf_tools.Htons(unix.ETH_P_ALL)))
 	if err == nil {
 		ssoErr := unix.SetsockoptInt(fd, unix.SOL_SOCKET, unix.SO_ATTACH_BPF, objs.SocketHttpFilter.FD())
 		if ssoErr != nil {
@@ -112,10 +110,10 @@ func distribute(event socketfilterTlsHandshakeEvent, ebpfSocketFilter *EbpfSocke
 	tlsEvent := modules.TLSEvent{
 		Source: modules.SocketFilter,
 		Client: modules.Address{
-			Addr: intToIP4(event.Saddr),
+			Addr: ebpf_tools.IntToIP4(event.Saddr, binary.BigEndian.PutUint32),
 			Port: event.Sport},
 		Server: modules.Address{
-			Addr: intToIP4(event.Daddr),
+			Addr: ebpf_tools.IntToIP4(event.Daddr, binary.BigEndian.PutUint32),
 			Port: event.Dport},
 		TlsVersions:    event.TlsVersions[:tlsVersionsLen],
 		Ciphers:        event.Ciphers[:ciphersLen],
@@ -129,25 +127,4 @@ func distribute(event socketfilterTlsHandshakeEvent, ebpfSocketFilter *EbpfSocke
 	ebpf_tools.EnrichAddress(&tlsEvent.Client)
 	ebpf_tools.EnrichAddress(&tlsEvent.Server)
 	ebpfSocketFilter.Broker.TLSEvent(tlsEvent)
-}
-
-func intToIP4(ipNum uint32) string {
-	ip := make(net.IP, 4)
-	binary.BigEndian.PutUint32(ip, ipNum)
-	return ip.String()
-}
-
-func isLittleEndian() bool {
-	var a uint16 = 1
-
-	return *(*byte)(unsafe.Pointer(&a)) == 1
-}
-
-func htons(a uint16) uint16 {
-	if isLittleEndian() {
-		var arr [2]byte
-		binary.LittleEndian.PutUint16(arr[:], a)
-		return binary.BigEndian.Uint16(arr[:])
-	}
-	return a
 }

@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"log/slog"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,7 +14,7 @@ import (
 	"github.com/cilium/ebpf/perf"
 	"github.com/cilium/ebpf/rlimit"
 	"github.com/k8spacket/k8spacket/internal/broker"
-	ebpf_tools "github.com/k8spacket/k8spacket/internal/ebpf/tools"
+	"github.com/k8spacket/k8spacket/internal/ebpf/tools"
 	"github.com/k8spacket/k8spacket/internal/modules"
 )
 
@@ -102,10 +101,10 @@ func (ebpfInet *EbpfInet) Init() {
 func distribute(event bpfEvent, inet *EbpfInet) {
 	tcpEvent := modules.TCPEvent{
 		Client: modules.Address{
-			Addr: intToIP4(event.Saddr),
+			Addr: ebpf_tools.IntToIP4(event.Saddr, binary.LittleEndian.PutUint32),
 			Port: event.Sport},
 		Server: modules.Address{
-			Addr: intToIP4(event.Daddr),
+			Addr: ebpf_tools.IntToIP4(event.Daddr, binary.LittleEndian.PutUint32),
 			Port: event.Dport},
 		TxB:     event.TxB,
 		RxB:     event.RxB,
@@ -115,10 +114,4 @@ func distribute(event bpfEvent, inet *EbpfInet) {
 	ebpf_tools.EnrichAddress(&tcpEvent.Server)
 
 	inet.Broker.TCPEvent(tcpEvent)
-}
-
-func intToIP4(ipNum uint32) string {
-	ip := make(net.IP, 4)
-	binary.LittleEndian.PutUint32(ip, ipNum)
-	return ip.String()
 }
