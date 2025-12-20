@@ -8,20 +8,12 @@ import (
 
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/model"
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/repository"
-	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/stats"
 	"github.com/k8spacket/k8spacket/internal/thirdparty/db"
-	"github.com/k8spacket/k8spacket/internal/thirdparty/http"
-	"github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
-	"github.com/k8spacket/k8spacket/internal/thirdparty/resource"
 )
 
 type NodegraphUpdater struct {
-	repo       repository.Repository[model.ConnectionItem]
-	factory    stats.Factory
-	httpClient httpclient.Client
-	k8sClient  k8sclient.Client
-	resource   resource.Resource
-	lock       *sync.RWMutex
+	repo repository.Repository[model.ConnectionItem]
+	lock *sync.RWMutex
 }
 
 func NewUpdater(repo repository.Repository[model.ConnectionItem]) *NodegraphUpdater {
@@ -34,7 +26,7 @@ func (updater *NodegraphUpdater) Update(src string, srcName string, srcNamespace
 	defer updater.lock.Unlock()
 	var connection = updater.repo.Read(id)
 	if (model.ConnectionItem{} == connection) {
-		connection = *&model.ConnectionItem{Src: src, Dst: dst}
+		connection = model.ConnectionItem{Src: src, Dst: dst}
 	}
 	connection.SrcName = srcName
 	connection.SrcNamespace = srcNamespace

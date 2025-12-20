@@ -30,7 +30,6 @@ func aggregateConnections(ctx context.Context, podIPs []string, query url.Values
 	var all []model.ConnectionItem
 
 	for _, ip := range podIPs {
-		ip := ip
 		wg.Add(1)
 		sem <- struct{}{}
 		go func() {
@@ -51,7 +50,7 @@ func aggregateConnections(ctx context.Context, podIPs []string, query url.Values
 				slog.Error("[api] Cannot get stats", "Error", err)
 				return
 			}
-			//defer resp.Body.Close()
+			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
 				slog.Error("[api] Cannot get stats", "Error", fmt.Errorf("peer %s status %d", ip, resp.StatusCode))

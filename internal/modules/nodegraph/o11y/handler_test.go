@@ -33,10 +33,10 @@ type Fields struct {
 }
 
 var dbState = []model.ConnectionItem{
-	{LastSeen: time.Now().Add(time.Hour * -1), Src: "client-1", Dst: "server-1", SrcNamespace: "test", SrcName: "test", ConnCount: 10, ConnPersistent: 3, MaxDuration: 1},
-	{LastSeen: time.Now(), Src: "client-1", Dst: "server-2", SrcNamespace: "test", SrcName: "test", ConnCount: 6, ConnPersistent: 4},
-	{LastSeen: time.Now().Add(time.Hour), Src: "client-2", Dst: "server-2", DstNamespace: "test", ConnCount: 4, ConnPersistent: 0},
-	{LastSeen: time.Now().Add(time.Hour), Src: "client-3", Dst: "server-3", DstNamespace: "test", ConnCount: 101, ConnPersistent: 77},
+	{LastSeen: time.Now().Add(time.Hour * -1).UTC(), Src: "client-1", Dst: "server-1", SrcNamespace: "test", SrcName: "test", ConnCount: 10, ConnPersistent: 3, MaxDuration: 1},
+	{LastSeen: time.Now().UTC(), Src: "client-1", Dst: "server-2", SrcNamespace: "test", SrcName: "test", ConnCount: 6, ConnPersistent: 4},
+	{LastSeen: time.Now().Add(time.Hour).UTC(), Src: "client-2", Dst: "server-2", DstNamespace: "test", ConnCount: 4, ConnPersistent: 0},
+	{LastSeen: time.Now().Add(time.Hour).UTC(), Src: "client-3", Dst: "server-3", DstNamespace: "test", ConnCount: 101, ConnPersistent: 77},
 }
 
 type mockResource struct {
@@ -74,7 +74,7 @@ func (mockHttpClient *mockHttpClient) Do(req *http.Request) (*http.Response, err
 		}, nil
 	}
 	if mockHttpClient.scenario == "error" {
-		response := []model.ConnectionItem{}
+		var response []model.ConnectionItem
 		err := errors.New("error")
 		result, _ := json.Marshal(response)
 		return &http.Response{
@@ -186,8 +186,6 @@ func TestNodeGraphFieldsHandler(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
-			t.Parallel()
-
 			mockResource.scenario = test.scenario
 			req, err := http.NewRequest("GET", "/nodegraph/api/graph/fields", nil)
 			if err != nil {
@@ -209,57 +207,56 @@ func TestNodeGraphFieldsHandler(t *testing.T) {
 	}
 }
 
-//func TestNodeGraphDataHandler(t *testing.T) {
-//
-//	var tests = []struct {
-//		scenario string
-//		want     model.NodeGraph
-//		status   int
-//		err      string
-//	}{
-//		{"ok", model.NodeGraph{
-//			Nodes: []model.Node{
-//				{Id: "client-1", Title: "test", SubTitle: "client-1", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
-//				{Id: "server-1", Title: "", SubTitle: "server-1", MainStat: "all: 10", SecondaryStat: "persistent: 3", Arc1: 0.3, Arc2: 0.7, Arc3: 0},
-//				{Id: "server-2", Title: "", SubTitle: "server-2", MainStat: "all: 10", SecondaryStat: "persistent: 4", Arc1: 0.4, Arc2: 0.6, Arc3: 0},
-//				{Id: "client-2", Title: "", SubTitle: "client-2", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
-//				{Id: "client-3", Title: "", SubTitle: "client-3", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
-//				{Id: "server-3", Title: "", SubTitle: "server-3", MainStat: "all: 101", SecondaryStat: "persistent: 77", Arc1: 0.7623762376237624, Arc2: 0.2376237623762376, Arc3: 0}},
-//			Edges: []model.Edge{
-//				{Id: "client-1-server-1", Source: "client-1", Target: "server-1", MainStat: "all: 10", SecondaryStat: "persistent: 3"},
-//				{Id: "client-1-server-2", Source: "client-1", Target: "server-2", MainStat: "all: 6", SecondaryStat: "persistent: 4"},
-//				{Id: "client-2-server-2", Source: "client-2", Target: "server-2", MainStat: "all: 4", SecondaryStat: "persistent: 0"},
-//				{Id: "client-3-server-3", Source: "client-3", Target: "server-3", MainStat: "all: 101", SecondaryStat: "persistent: 77"}}}, http.StatusOK, ""},
-//		{"error", model.NodeGraph{}, http.StatusInternalServerError, "error"},
-//	}
-//
-//	mockResource := &mockResource{}
-//	mockHttpClient := &mockHttpClient{}
-//	mockK8SClient := &mockK8SClient{}
-//	o11yController := NewO11yHandler(&stats.StatsFactory{}, mockHttpClient, mockK8SClient, mockResource)
-//
-//	for _, test := range tests {
-//		t.Run(test.scenario, func(t *testing.T) {
-//			t.Parallel()
-//
-//			mockHttpClient.scenario = test.scenario
-//			req, err := http.NewRequest("GET", "/nodegraph/api/graph/data", nil)
-//			if err != nil {
-//				t.Fatal(err)
-//			}
-//			req.Header.Set("scenario", test.scenario)
-//
-//			rr := httptest.NewRecorder()
-//			handler := http.HandlerFunc(o11yController.NodeGraphDataHandler)
-//			handler.ServeHTTP(rr, req)
-//
-//			assert.EqualValues(t, test.status, rr.Code)
-//
-//			var resultGraph model.NodeGraph
-//			json.Unmarshal([]byte(rr.Body.String()), &resultGraph)
-//
-//			assert.EqualValues(t, test.want.Nodes, resultGraph.Nodes)
-//			assert.EqualValues(t, test.want.Edges, resultGraph.Edges)
-//		})
-//	}
-//}
+func TestNodeGraphDataHandler(t *testing.T) {
+
+	var tests = []struct {
+		scenario string
+		want     model.NodeGraph
+		status   int
+	}{
+		{"ok", model.NodeGraph{
+			Nodes: []model.Node{
+				{Id: "client-1", Title: "test", SubTitle: "client-1", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
+				{Id: "server-1", Title: "", SubTitle: "server-1", MainStat: "all: 10", SecondaryStat: "persistent: 3", Arc1: 0.3, Arc2: 0.7, Arc3: 0},
+				{Id: "server-2", Title: "", SubTitle: "server-2", MainStat: "all: 10", SecondaryStat: "persistent: 4", Arc1: 0.4, Arc2: 0.6, Arc3: 0},
+				{Id: "client-2", Title: "", SubTitle: "client-2", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
+				{Id: "client-3", Title: "", SubTitle: "client-3", MainStat: "all: N/A", SecondaryStat: "persistent: N/A", Arc1: 0, Arc2: 0, Arc3: 0},
+				{Id: "server-3", Title: "", SubTitle: "server-3", MainStat: "all: 101", SecondaryStat: "persistent: 77", Arc1: 0.7623762376237624, Arc2: 0.2376237623762376, Arc3: 0}},
+			Edges: []model.Edge{
+				{Id: "client-1-server-1", Source: "client-1", Target: "server-1", MainStat: "all: 10", SecondaryStat: "persistent: 3"},
+				{Id: "client-1-server-2", Source: "client-1", Target: "server-2", MainStat: "all: 6", SecondaryStat: "persistent: 4"},
+				{Id: "client-2-server-2", Source: "client-2", Target: "server-2", MainStat: "all: 4", SecondaryStat: "persistent: 0"},
+				{Id: "client-3-server-3", Source: "client-3", Target: "server-3", MainStat: "all: 101", SecondaryStat: "persistent: 77"}}}, http.StatusOK},
+		{"error", model.NodeGraph{}, http.StatusOK},
+		{"read", model.NodeGraph{}, http.StatusOK},
+		{"parse", model.NodeGraph{}, http.StatusOK},
+	}
+
+	mockResource := &mockResource{}
+	mockHttpClient := &mockHttpClient{}
+	mockK8SClient := &mockK8SClient{}
+	o11yController := NewO11yHandler(&stats.StatsFactory{}, mockHttpClient, mockK8SClient, mockResource)
+
+	for _, test := range tests {
+		t.Run(test.scenario, func(t *testing.T) {
+			mockHttpClient.scenario = test.scenario
+			req, err := http.NewRequest("GET", "/nodegraph/api/graph/data", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Set("scenario", test.scenario)
+
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(o11yController.NodeGraphDataHandler)
+			handler.ServeHTTP(rr, req)
+
+			assert.EqualValues(t, test.status, rr.Code)
+
+			var resultGraph model.NodeGraph
+			json.Unmarshal([]byte(rr.Body.String()), &resultGraph)
+
+			assert.ElementsMatch(t, test.want.Nodes, resultGraph.Nodes)
+			assert.ElementsMatch(t, test.want.Edges, resultGraph.Edges)
+		})
+	}
+}
