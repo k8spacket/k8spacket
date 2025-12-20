@@ -15,10 +15,10 @@ import (
 )
 
 var dbState = []model.ConnectionItem{
-	{LastSeen: time.Now().Add(time.Hour * -1).Truncate(0), Src: "client-1", Dst: "server-1", ConnCount: 10, ConnPersistent: 3, MaxDuration: 1},
-	{LastSeen: time.Now().Truncate(0), Src: "client-1", Dst: "server-2", SrcNamespace: "test", SrcName: "test", ConnCount: 6, ConnPersistent: 4},
-	{LastSeen: time.Now().Add(time.Hour).Truncate(0), Src: "client-2", Dst: "server-2", DstNamespace: "test", ConnCount: 4, ConnPersistent: 0},
-	{LastSeen: time.Now().Add(time.Hour).Truncate(0), Src: "client-3", Dst: "server-3", DstNamespace: "test", ConnCount: 101, ConnPersistent: 77},
+	{LastSeen: time.Now().Add(time.Hour * -1).UTC(), Src: "client-1", Dst: "server-1", ConnCount: 10, ConnPersistent: 3, MaxDuration: 1},
+	{LastSeen: time.Now().UTC(), Src: "client-1", Dst: "server-2", SrcNamespace: "test", SrcName: "test", ConnCount: 6, ConnPersistent: 4},
+	{LastSeen: time.Now().Add(time.Hour).UTC(), Src: "client-2", Dst: "server-2", DstNamespace: "test", ConnCount: 4, ConnPersistent: 0},
+	{LastSeen: time.Now().Add(time.Hour).UTC(), Src: "client-3", Dst: "server-3", DstNamespace: "test", ConnCount: 101, ConnPersistent: 77},
 }
 
 type mockRepository struct {
