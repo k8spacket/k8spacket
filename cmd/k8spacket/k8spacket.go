@@ -28,15 +28,15 @@ func main() {
 
 	nodegraphListener := nodegraph.Init(mux)
 	tlsParserListener := tlsparser.Init(mux)
-	broker := broker.Init(nodegraphListener, tlsParserListener)
+	distributionBroker := broker.Init(nodegraphListener, tlsParserListener)
 
-	inetEbpf := &ebpf_inet.EbpfInet{Broker: broker}
-	tcEbpf := &ebpf_tc.EbpfTc{Broker: broker}
-	socketFilterEbpf := &ebpf_socketfilter.EbpfSocketFilter{Broker: broker}
+	inetEbpf := &ebpf_inet.EbpfInet{Broker: distributionBroker}
+	tcEbpf := &ebpf_tc.EbpfTc{Broker: distributionBroker}
+	socketFilterEbpf := &ebpf_socketfilter.EbpfSocketFilter{Broker: distributionBroker}
 	loader := ebpf.Init(inetEbpf, tcEbpf, socketFilterEbpf)
 
 	buildLogger()
-	startApp(broker, loader, mux)
+	startApp(distributionBroker, loader, mux)
 }
 
 func startApp(broker broker.Broker, loader ebpf.Loader, mux *http.ServeMux) {

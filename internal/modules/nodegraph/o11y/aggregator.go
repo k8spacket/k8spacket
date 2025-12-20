@@ -32,7 +32,7 @@ func aggregateConnections(ctx context.Context, podIPs []string, query url.Values
 	for _, ip := range podIPs {
 		wg.Add(1)
 		sem <- struct{}{}
-		go func() {
+		go func(ip string) {
 			defer wg.Done()
 			defer func() { <-sem }()
 
@@ -72,7 +72,7 @@ func aggregateConnections(ctx context.Context, podIPs []string, query url.Values
 			mu.Lock()
 			all = append(all, fetched...)
 			mu.Unlock()
-		}()
+		}(ip)
 	}
 
 	wg.Wait()

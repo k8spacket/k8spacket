@@ -3,6 +3,7 @@ package repository
 import (
 	"log/slog"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/model"
@@ -11,10 +12,11 @@ import (
 
 type DbRepository struct {
 	dbHandler db.Db[model.ConnectionItem]
+	lock      *sync.RWMutex
 }
 
 func NewDbRepository(db db.Db[model.ConnectionItem]) *DbRepository {
-	return &DbRepository{dbHandler: db}
+	return &DbRepository{dbHandler: db, lock: &sync.RWMutex{}}
 }
 
 func (repository *DbRepository) Read(key string) model.ConnectionItem {
@@ -70,6 +72,8 @@ func (repository *DbRepository) Query(from time.Time, to time.Time, patternNs *r
 }
 
 func (repository *DbRepository) Set(key string, value *model.ConnectionItem) {
+	repository.lock.Lock()
+	defer repository.lock.Unlock()
 	err := repository.dbHandler.Upsert(key, value)
 	if err != nil {
 		slog.Error("[db:tcp_connections:Upsert]", "Error", err)
