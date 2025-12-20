@@ -1,7 +1,8 @@
-package nodegraph
+package http
 
 import (
 	"encoding/json"
+	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/repository"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -12,12 +13,16 @@ import (
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/model"
 )
 
-type Controller struct {
-	service Service
+type Handler struct {
+	repo repository.Repository[model.ConnectionItem]
 }
 
-func (controller *Controller) ConnectionHandler(w http.ResponseWriter, r *http.Request) {
-	var response = filterConnections(controller, r.URL.Query())
+func NewHandler(repo repository.Repository[model.ConnectionItem]) *Handler {
+	return &Handler{repo: repo}
+}
+
+func (handler *Handler) ConnectionHandler(w http.ResponseWriter, r *http.Request) {
+	var response = handler.filterConnections(r.URL.Query())
 
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(response)
@@ -27,7 +32,7 @@ func (controller *Controller) ConnectionHandler(w http.ResponseWriter, r *http.R
 	}
 }
 
-func filterConnections(controller *Controller, query url.Values) []model.ConnectionItem {
+func (handler *Handler) filterConnections(query url.Values) []model.ConnectionItem {
 	var from = query["from"]
 	var rangeFrom = time.Time{}
 	if len(from) > 0 {
@@ -66,5 +71,17 @@ func filterConnections(controller *Controller, query url.Values) []model.Connect
 		patternEx = regexp.MustCompile(exclude[0])
 	}
 
-	return controller.service.getConnections(rangeFrom, rangeTo, patternNs, patternIn, patternEx)
+	return handler.getConnections(rangeFrom, rangeTo, patternNs, patternIn, patternEx)
+}
+
+func (handler *Handler) getConnections(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
+
+	slog.Info("[api:params]",
+		"patternNs", patternNs,
+		"patternIn", patternIn,
+		"patternEx", patternEx,
+		"from", from.Format(time.DateTime),
+		"to", to.Format(time.DateTime))
+
+	return handler.repo.Query(from, to, patternNs, patternIn, patternEx)
 }

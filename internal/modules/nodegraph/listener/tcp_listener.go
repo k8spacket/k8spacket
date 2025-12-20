@@ -1,6 +1,7 @@
-package nodegraph
+package listener
 
 import (
+	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/updater"
 	"log/slog"
 	"os"
 	"strconv"
@@ -11,7 +12,11 @@ import (
 )
 
 type TcpListener struct {
-	service Service
+	updater updater.Updater
+}
+
+func NewListener(updater updater.Updater) modules.Listener[modules.TCPEvent] {
+	return &TcpListener{updater: updater}
 }
 
 func (listener *TcpListener) Listen(event modules.TCPEvent) {
@@ -22,7 +27,7 @@ func (listener *TcpListener) Listen(event modules.TCPEvent) {
 		persistent = true
 	}
 
-	listener.service.update(event.Client.Addr, event.Client.Name, event.Client.Namespace, event.Server.Addr, event.Server.Name, event.Server.Namespace, persistent, float64(event.TxB), float64(event.RxB), float64(event.DeltaUs), event.Closed)
+	listener.updater.Update(event.Client.Addr, event.Client.Name, event.Client.Namespace, event.Server.Addr, event.Server.Name, event.Server.Namespace, persistent, float64(event.TxB), float64(event.RxB), float64(event.DeltaUs), event.Closed)
 
 	if event.Closed {
 		sendPrometheusMetrics(event, persistent)

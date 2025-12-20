@@ -10,11 +10,15 @@ import (
 )
 
 type DbRepository struct {
-	DbHandler db.Db[model.ConnectionItem]
+	dbHandler db.Db[model.ConnectionItem]
+}
+
+func NewDbRepository(db db.Db[model.ConnectionItem]) *DbRepository {
+	return &DbRepository{dbHandler: db}
 }
 
 func (repository *DbRepository) Read(key string) model.ConnectionItem {
-	result, err := repository.DbHandler.Read(key)
+	result, err := repository.dbHandler.Read(key)
 	if err != nil {
 		// can happen, silent
 		return model.ConnectionItem{}
@@ -24,7 +28,7 @@ func (repository *DbRepository) Read(key string) model.ConnectionItem {
 
 func (repository *DbRepository) Query(from time.Time, to time.Time, patternNs *regexp.Regexp, patternIn *regexp.Regexp, patternEx *regexp.Regexp) []model.ConnectionItem {
 
-	query := repository.DbHandler.QueryMatchFunc("Src", func(record *model.ConnectionItem) (bool, error) {
+	query := repository.dbHandler.QueryMatchFunc("Src", func(record *model.ConnectionItem) (bool, error) {
 		valid := true
 		if !from.IsZero() {
 			valid = record.LastSeen.After(from) &&
@@ -57,7 +61,7 @@ func (repository *DbRepository) Query(from time.Time, to time.Time, patternNs *r
 		return valid, nil
 	})
 
-	result, err := repository.DbHandler.Query(&query)
+	result, err := repository.dbHandler.Query(&query)
 	if err != nil {
 		slog.Error("[db:tcp_connections:Query]", "Error", err)
 		return []model.ConnectionItem{}
@@ -66,7 +70,7 @@ func (repository *DbRepository) Query(from time.Time, to time.Time, patternNs *r
 }
 
 func (repository *DbRepository) Set(key string, value *model.ConnectionItem) {
-	err := repository.DbHandler.Upsert(key, value)
+	err := repository.dbHandler.Upsert(key, value)
 	if err != nil {
 		slog.Error("[db:tcp_connections:Upsert]", "Error", err)
 	}

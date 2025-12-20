@@ -1,6 +1,10 @@
 package nodegraph
 
 import (
+	http2 "github.com/k8spacket/k8spacket/internal/modules/nodegraph/http"
+	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/listener"
+	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/o11y"
+	updater2 "github.com/k8spacket/k8spacket/internal/modules/nodegraph/updater"
 	"net/http"
 
 	"github.com/k8spacket/k8spacket/internal/modules"
@@ -19,19 +23,18 @@ func Init(mux *http.ServeMux) modules.Listener[modules.TCPEvent] {
 	prometheus.Init()
 
 	handler, _ := db.New[model.ConnectionItem]("tcp_connections")
-	repo := &repository.DbRepository{DbHandler: handler}
-	factory := &stats.StatsFactory{}
-	service := &NodegraphService{repo: repo, factory: factory, httpClient: &httpclient.HttpClient{}, k8sClient: &k8sclient.K8SClient{}, resource: &resource.FileResource{}}
-	controller := &Controller{service}
-	o11yController := &O11yController{service}
+	repo := repository.NewDbRepository(handler)
+	controller := http2.NewHandler(repo)
+	o11yController := o11y.NewO11yHandler(&stats.StatsFactory{}, &httpclient.HttpClient{}, &k8sclient.K8SClient{}, &resource.FileResource{})
 
 	mux.HandleFunc("/nodegraph/connections", controller.ConnectionHandler)
 	mux.HandleFunc("/nodegraph/api/health", o11yController.Health)
 	mux.HandleFunc("/nodegraph/api/graph/fields", o11yController.NodeGraphFieldsHandler)
 	mux.HandleFunc("/nodegraph/api/graph/data", o11yController.NodeGraphDataHandler)
 
-	listener := &TcpListener{service}
+	updater := updater2.NewUpdater(repo)
+	tcpListener := listener.NewListener(updater)
 
-	return listener
+	return tcpListener
 
 }
