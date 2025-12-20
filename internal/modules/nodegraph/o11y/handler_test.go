@@ -240,7 +240,7 @@ func TestNodeGraphDataHandler(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.scenario, func(t *testing.T) {
 			mockHttpClient.scenario = test.scenario
-			req, err := http.NewRequest("GET", "/nodegraph/api/graph/data", nil)
+			req, err := http.NewRequest("GET", "/nodegraph/api/graph/data?stats-type=connection", nil)
 			if err != nil {
 				t.Fatal(err)
 			}
