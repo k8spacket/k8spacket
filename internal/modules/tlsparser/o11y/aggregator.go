@@ -33,10 +33,9 @@ func aggregateTLSResponses[T model.TLSDetails | []model.TLSConnection](ctx conte
 	var wg sync.WaitGroup
 
 	for _, ip := range podIPs {
-		ip := ip
 		wg.Add(1)
 		sem <- struct{}{}
-		go func() {
+		go func(ip string) {
 			defer wg.Done()
 			defer func() { <-sem }()
 
@@ -45,7 +44,7 @@ func aggregateTLSResponses[T model.TLSDetails | []model.TLSConnection](ctx conte
 
 			req, err := http.NewRequestWithContext(reqCtx, http.MethodGet, fmt.Sprintf(urlTemplate, ip), nil)
 			if err != nil {
-				slog.Error("[api] Cannot get stats", "Error", err)
+				slog.Error("[api] Cannot create HTTP request for stats", "Error", err)
 				resCh <- result{err: err}
 				return
 			}
@@ -56,7 +55,7 @@ func aggregateTLSResponses[T model.TLSDetails | []model.TLSConnection](ctx conte
 				resCh <- result{err: err}
 				return
 			}
-			if resp.Body == nil {
+			if resp == nil || resp.Body == nil {
 				err = fmt.Errorf("peer %s returned empty body", ip)
 				slog.Error("[api] Cannot read stats response", "Error", err)
 				resCh <- result{err: err}
@@ -86,7 +85,7 @@ func aggregateTLSResponses[T model.TLSDetails | []model.TLSConnection](ctx conte
 			}
 
 			resCh <- result{value: fetched}
-		}()
+		}(ip)
 	}
 
 	wg.Wait()

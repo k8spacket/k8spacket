@@ -28,36 +28,28 @@ func NewO11yHandler(httpClient httpclient.Client, k8sClient k8sclient.Client) *O
 }
 
 func (handler *O11yHandler) TLSParserConnectionsHandler(w http.ResponseWriter, req *http.Request) {
-	out, err := handler.buildConnectionsResponse(fmt.Sprintf("http://%%s:%s/tlsparser/connections/?%s", os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), req.URL.Query().Encode()))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	out := handler.buildConnectionsResponse(fmt.Sprintf("http://%%s:%s/tlsparser/connections/?%s", os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), req.URL.Query().Encode()))
 	prepareResponse(w, out)
 }
 
 func (handler *O11yHandler) TLSParserConnectionDetailsHandler(w http.ResponseWriter, req *http.Request) {
 	idParam := strings.TrimPrefix(req.URL.Path, connectionDetailsUri)
 	if len(strings.TrimSpace(idParam)) > 0 {
-		out, err := handler.buildDetailsResponse(fmt.Sprintf("http://%%s:%s/tlsparser/connections/%s?%s", os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), idParam, req.URL.Query().Encode()))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		out := handler.buildDetailsResponse(fmt.Sprintf("http://%%s:%s/tlsparser/connections/%s?%s", os.Getenv("K8S_PACKET_TCP_LISTENER_PORT"), idParam, req.URL.Query().Encode()))
 		prepareResponse(w, out)
 	} else {
 		handler.TLSParserConnectionsHandler(w, req)
 	}
 }
 
-func (handler *O11yHandler) buildConnectionsResponse(url string) ([]model.TLSConnection, error) {
+func (handler *O11yHandler) buildConnectionsResponse(url string) []model.TLSConnection {
 	resultFunc := func(destination, source []model.TLSConnection) []model.TLSConnection {
 		return append(destination, source...)
 	}
 	return buildResponse(handler, url, []model.TLSConnection{}, resultFunc)
 }
 
-func (handler *O11yHandler) buildDetailsResponse(url string) (model.TLSDetails, error) {
+func (handler *O11yHandler) buildDetailsResponse(url string) model.TLSDetails {
 	resultFunc := func(destination, source model.TLSDetails) model.TLSDetails {
 		if !reflect.DeepEqual(source, model.TLSDetails{}) {
 			return source
@@ -68,7 +60,7 @@ func (handler *O11yHandler) buildDetailsResponse(url string) (model.TLSDetails, 
 	return buildResponse(handler, url, model.TLSDetails{}, resultFunc)
 }
 
-func buildResponse[T model.TLSDetails | []model.TLSConnection](handler *O11yHandler, url string, t T, resultFunc func(d T, s T) T) (T, error) {
+func buildResponse[T model.TLSDetails | []model.TLSConnection](handler *O11yHandler, url string, t T, resultFunc func(d T, s T) T) T {
 	var k8spacketIps = handler.k8sClient.GetPodIPsBySelectors(os.Getenv("K8S_PACKET_API_FIELD_SELECTOR"), os.Getenv("K8S_PACKET_API_LABEL_SELECTOR"))
 
 	out, errs := aggregateTLSResponses(context.Background(), k8spacketIps, url, handler.httpClient, t, resultFunc)
@@ -76,7 +68,7 @@ func buildResponse[T model.TLSDetails | []model.TLSConnection](handler *O11yHand
 		slog.Warn("[api] tlsparser aggregation completed with errors", "errors", errs)
 	}
 
-	return out, nil
+	return out
 }
 
 func prepareResponse[T model.TLSDetails | []model.TLSConnection](w http.ResponseWriter, out T) {
