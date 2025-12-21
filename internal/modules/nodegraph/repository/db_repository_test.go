@@ -78,7 +78,7 @@ func TestRead(t *testing.T) {
 
 	mockDBHandler := &mockDb{}
 
-	repository := DbRepository{DbHandler: mockDBHandler}
+	repository := NewDbRepository(mockDBHandler)
 
 	for _, test := range tests {
 		t.Run(test.key, func(t *testing.T) {
@@ -115,7 +115,7 @@ func TestQuery(t *testing.T) {
 
 	mockDBHandler := &mockDb{}
 
-	repository := DbRepository{DbHandler: mockDBHandler}
+	repository := NewDbRepository(mockDBHandler)
 
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {
@@ -148,7 +148,7 @@ func TestSet(t *testing.T) {
 
 	mockDBHandler := &mockDb{}
 
-	repository := DbRepository{DbHandler: mockDBHandler}
+	repository := NewDbRepository(mockDBHandler)
 
 	for _, test := range tests {
 		t.Run(test.key, func(t *testing.T) {
