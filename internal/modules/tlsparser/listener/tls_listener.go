@@ -1,7 +1,8 @@
-package tlsparser
+package listener
 
 import (
 	"encoding/json"
+	"github.com/k8spacket/k8spacket/internal/modules/tlsparser/storer"
 	"log/slog"
 	"strconv"
 	"time"
@@ -13,7 +14,11 @@ import (
 )
 
 type TlsListener struct {
-	service Service
+	storer storer.Storer
+}
+
+func NewListener(storer storer.Storer) modules.Listener[modules.TLSEvent] {
+	return &TlsListener{storer: storer}
 }
 
 func (listener *TlsListener) Listen(tlsEvent modules.TLSEvent) {
@@ -44,7 +49,7 @@ func (listener *TlsListener) Listen(tlsEvent modules.TLSEvent) {
 		tlsDetails.ClientCipherSuites = append(tlsDetails.ClientCipherSuites, dict.ParseCipherSuite(cipher))
 	}
 
-	listener.service.storeInDatabase(&tlsConnection, &tlsDetails)
+	listener.storer.StoreInDatabase(&tlsConnection, &tlsDetails)
 
 	sendPrometheusMetrics(tlsConnection, tlsDetails)
 

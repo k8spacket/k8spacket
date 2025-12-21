@@ -32,7 +32,7 @@ func TestListen(t *testing.T) {
 	slog.SetDefault(logger)
 
 	mockUpdater := &mockUpdater{}
-	listener := &TcpListener{updater: mockUpdater}
+	listener := NewListener(mockUpdater)
 
 	event := modules.TCPEvent{Client: modules.Address{Addr: "client"}, Server: modules.Address{Addr: "server"}, DeltaUs: 2, Closed: true}
 	listener.Listen(event)
