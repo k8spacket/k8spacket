@@ -15,7 +15,11 @@ import (
 )
 
 type CertificateUpdater struct {
-	Network network.ConnectionInspector
+	network network.ConnectionInspector
+}
+
+func NewUpdater(network network.ConnectionInspector) Updater {
+	return &CertificateUpdater{network: network}
 }
 
 func (updater *CertificateUpdater) Update(newValue *model.TLSDetails, oldValue *model.TLSDetails) {
@@ -51,18 +55,18 @@ func scrapeCertificate(updater *CertificateUpdater, tlsDetails *model.TLSDetails
 		return
 	}
 	// check if domain is valid, if not - use destination IP
-	if len(domain) <= 0 || !updater.Network.IsDomainReachable(domain) {
+	if len(domain) <= 0 || !updater.network.IsDomainReachable(domain) {
 		domain = dst
 	}
 
-	certs, err := updater.Network.GetPeerCertificates(domain, port)
+	certs, err := updater.network.GetPeerCertificates(domain, port)
 	if err != nil {
 		slog.Error("[certificate scraping] Error in Dial",
 			"domain", domain,
 			"port", port,
 			"Trying with the default port...", "")
 		port = 443
-		certs, err = updater.Network.GetPeerCertificates(domain, port)
+		certs, err = updater.network.GetPeerCertificates(domain, port)
 		if err != nil {
 			slog.Error("[certificate scraping] Error in Dial",
 				"domain", domain,

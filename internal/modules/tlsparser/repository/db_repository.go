@@ -9,13 +9,17 @@ import (
 )
 
 type DbRepository struct {
-	DbConnectionHandler db.Db[model.TLSConnection]
-	DbDetailsHandler    db.Db[model.TLSDetails]
+	dbConnectionHandler db.Db[model.TLSConnection]
+	dbDetailsHandler    db.Db[model.TLSDetails]
+}
+
+func NewDbRepository(db db.Db[model.TLSConnection], dbDetails db.Db[model.TLSDetails]) *DbRepository {
+	return &DbRepository{dbConnectionHandler: db, dbDetailsHandler: dbDetails}
 }
 
 func (repository *DbRepository) Query(from time.Time, to time.Time) []model.TLSConnection {
 
-	query := repository.DbConnectionHandler.QueryMatchFunc("Src", func(record *model.TLSConnection) (bool, error) {
+	query := repository.dbConnectionHandler.QueryMatchFunc("Src", func(record *model.TLSConnection) (bool, error) {
 		valid := true
 		if !from.IsZero() {
 			valid = record.LastSeen.After(from) &&
@@ -29,7 +33,7 @@ func (repository *DbRepository) Query(from time.Time, to time.Time) []model.TLSC
 		return valid, nil
 	})
 
-	result, err := repository.DbConnectionHandler.Query(&query)
+	result, err := repository.dbConnectionHandler.Query(&query)
 	if err != nil {
 		slog.Error("[db:tls_connections:Query]", "Error", err)
 		return []model.TLSConnection{}
@@ -38,14 +42,14 @@ func (repository *DbRepository) Query(from time.Time, to time.Time) []model.TLSC
 }
 
 func (repository *DbRepository) UpsertConnection(key string, value *model.TLSConnection) {
-	err := repository.DbConnectionHandler.Upsert(key, value)
+	err := repository.dbConnectionHandler.Upsert(key, value)
 	if err != nil {
 		slog.Error("[db:tls_connections:Upsert]", "Error", err)
 	}
 }
 
 func (repository *DbRepository) Read(key string) model.TLSDetails {
-	result, err := repository.DbDetailsHandler.Read(key)
+	result, err := repository.dbDetailsHandler.Read(key)
 	if err != nil {
 		slog.Warn("[db:tls_details:Read]", "Error", err)
 		//can happen, silent
@@ -59,7 +63,7 @@ type Fn func(newValue *model.TLSDetails, oldValue *model.TLSDetails)
 func (repository *DbRepository) UpsertDetails(key string, value *model.TLSDetails, fn Fn) {
 	old := repository.Read(key)
 	fn(value, &old)
-	err := repository.DbDetailsHandler.Upsert(key, value)
+	err := repository.dbDetailsHandler.Upsert(key, value)
 	if err != nil {
 		slog.Error("[db:tls_details:Upsert]", "Error", err)
 	}

@@ -113,7 +113,7 @@ func TestQuery(t *testing.T) {
 	mockConnectionDBHandler := &mockConnectionDb{}
 	mockDetailsDBHandler := &mockDetailsDb{}
 
-	repository := DbRepository{DbConnectionHandler: mockConnectionDBHandler, DbDetailsHandler: mockDetailsDBHandler}
+	repository := NewDbRepository(mockConnectionDBHandler, mockDetailsDBHandler)
 
 	for _, test := range tests {
 		t.Run(test.msg, func(t *testing.T) {
@@ -140,7 +140,7 @@ func TestRead(t *testing.T) {
 	mockConnectionDBHandler := &mockConnectionDb{}
 	mockDetailsDBHandler := &mockDetailsDb{}
 
-	repository := DbRepository{DbConnectionHandler: mockConnectionDBHandler, DbDetailsHandler: mockDetailsDBHandler}
+	repository := NewDbRepository(mockConnectionDBHandler, mockDetailsDBHandler)
 
 	for _, test := range tests {
 		t.Run(test.key, func(t *testing.T) {
@@ -173,7 +173,7 @@ func TestUpsertConnection(t *testing.T) {
 	mockConnectionDBHandler := &mockConnectionDb{}
 	mockDetailsDBHandler := &mockDetailsDb{}
 
-	repository := DbRepository{DbConnectionHandler: mockConnectionDBHandler, DbDetailsHandler: mockDetailsDBHandler}
+	repository := NewDbRepository(mockConnectionDBHandler, mockDetailsDBHandler)
 
 	for _, test := range tests {
 		t.Run(test.key, func(t *testing.T) {
