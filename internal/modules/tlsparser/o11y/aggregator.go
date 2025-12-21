@@ -4,142 +4,107 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/stats"
 	"io"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"sync"
 	"time"
 
-	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/model"
+	"github.com/k8spacket/k8spacket/internal/modules/tlsparser/model"
 	httpclient "github.com/k8spacket/k8spacket/internal/thirdparty/http"
 )
 
-func aggregateConnections(ctx context.Context, podIPs []string, query url.Values, port string, client httpclient.Client) []model.ConnectionItem {
+// aggregateTLSResponses fetches TLS responses from peer k8spacket pods concurrently and merges them.
+func aggregateTLSResponses[T model.TLSDetails | []model.TLSConnection](ctx context.Context, podIPs []string, urlTemplate string, client httpclient.Client, zero T, merge func(dst T, src T) T) (T, []error) {
 	if len(podIPs) == 0 {
-		return nil
+		return zero, nil
 	}
 
 	const maxConcurrent = 5
 	const requestTimeout = 5 * time.Second
 
+	type result struct {
+		value T
+		err   error
+	}
+
 	sem := make(chan struct{}, maxConcurrent)
+	resCh := make(chan result, len(podIPs))
 	var wg sync.WaitGroup
-	var mu sync.Mutex
-	var all []model.ConnectionItem
 
 	for _, ip := range podIPs {
+		ip := ip
 		wg.Add(1)
 		sem <- struct{}{}
-		go func(ip string) {
+		go func() {
 			defer wg.Done()
 			defer func() { <-sem }()
 
 			reqCtx, cancel := context.WithTimeout(ctx, requestTimeout)
 			defer cancel()
 
-			req, err := http.NewRequestWithContext(reqCtx, http.MethodGet, fmt.Sprintf("http://%s:%s/nodegraph/connections?%s", ip, port, query.Encode()), nil)
+			req, err := http.NewRequestWithContext(reqCtx, http.MethodGet, fmt.Sprintf(urlTemplate, ip), nil)
 			if err != nil {
 				slog.Error("[api] Cannot get stats", "Error", err)
+				resCh <- result{err: err}
 				return
 			}
 
 			resp, err := client.Do(req)
 			if err != nil {
 				slog.Error("[api] Cannot get stats", "Error", err)
+				resCh <- result{err: err}
+				return
+			}
+			if resp.Body == nil {
+				err = fmt.Errorf("peer %s returned empty body", ip)
+				slog.Error("[api] Cannot read stats response", "Error", err)
+				resCh <- result{err: err}
 				return
 			}
 			defer resp.Body.Close()
 
 			if resp.StatusCode != http.StatusOK {
-				slog.Error("[api] Cannot get stats", "Error", fmt.Errorf("peer %s status %d", ip, resp.StatusCode))
+				err = fmt.Errorf("peer %s status %d", ip, resp.StatusCode)
+				slog.Error("[api] Cannot get stats", "Error", err)
+				resCh <- result{err: err}
 				return
 			}
 
-			data, err := io.ReadAll(resp.Body)
+			body, err := io.ReadAll(resp.Body)
 			if err != nil {
 				slog.Error("[api] Cannot read stats response", "Error", err)
+				resCh <- result{err: err}
 				return
 			}
 
-			var fetched []model.ConnectionItem
-			if err := json.Unmarshal(data, &fetched); err != nil {
+			var fetched T
+			if err := json.Unmarshal(body, &fetched); err != nil {
 				slog.Error("[api] Cannot parse stats response", "Error", err)
+				resCh <- result{err: err}
 				return
 			}
 
-			mu.Lock()
-			all = append(all, fetched...)
-			mu.Unlock()
-		}(ip)
+			resCh <- result{value: fetched}
+		}()
 	}
 
 	wg.Wait()
-	return all
-}
+	close(resCh)
 
-func prepareConnections(connectionItems map[string]model.ConnectionItem, connectionEndpoints map[string]model.ConnectionEndpoint) {
-
-	for _, conn := range connectionItems {
-		var srcEndpoint = connectionEndpoints[conn.Src]
-		if (model.ConnectionEndpoint{} == srcEndpoint) {
-			srcEndpoint = model.ConnectionEndpoint{Ip: conn.Src, Name: conn.SrcName, Namespace: conn.SrcNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
+	out := zero
+	var errs []error
+	for res := range resCh {
+		if res.err != nil {
+			errs = append(errs, res.err)
+			continue
 		}
-		srcEndpoint.BytesSent += conn.BytesSent
-		srcEndpoint.BytesReceived += conn.BytesReceived
-		connectionEndpoints[conn.Src] = srcEndpoint
-
-		var dstEndpoint = connectionEndpoints[conn.Dst]
-		if (model.ConnectionEndpoint{} == dstEndpoint) {
-			dstEndpoint = model.ConnectionEndpoint{Ip: conn.Dst, Name: conn.DstName, Namespace: conn.DstNamespace, ConnCount: 0, ConnPersistent: 0, BytesSent: 0, BytesReceived: 0, Duration: 0, MaxDuration: 0}
-		}
-		dstEndpoint.ConnCount += conn.ConnCount
-		dstEndpoint.ConnPersistent += conn.ConnPersistent
-		dstEndpoint.BytesSent += conn.BytesReceived
-		dstEndpoint.BytesReceived += conn.BytesSent
-		dstEndpoint.Duration += conn.Duration
-		if conn.MaxDuration > dstEndpoint.MaxDuration {
-			dstEndpoint.MaxDuration = conn.MaxDuration
-		}
-		connectionEndpoints[conn.Dst] = dstEndpoint
-	}
-}
-
-func buildApiResponse(connectionItems map[string]model.ConnectionItem, connectionEndpoints map[string]model.ConnectionEndpoint, statsImpl stats.Stats) model.NodeGraph {
-
-	var nodeArray []model.Node
-	var edgeArray []model.Edge
-
-	for _, item := range connectionEndpoints {
-		nodeArray = fillNodesArray(item.Ip, nodeArray, connectionEndpoints, statsImpl)
+		out = merge(out, res.value)
 	}
 
-	for _, item := range connectionItems {
-		edgeArray = fillEdgesArray(item.Src+"-"+item.Dst, edgeArray, connectionItems, statsImpl)
+	if len(errs) > 0 {
+		slog.Warn("[api] partial tlsparser aggregation failures", "errors", errs)
 	}
 
-	return model.NodeGraph{Nodes: nodeArray, Edges: edgeArray}
-}
-
-func fillNodesArray(id string, nodeArray []model.Node, connectionEndpoints map[string]model.ConnectionEndpoint, statsImpl stats.Stats) []model.Node {
-	var connEndpoint = connectionEndpoints[id]
-	var node = model.Node{}
-	node.Id = id
-	node.Title = connEndpoint.Name
-	node.SubTitle = connEndpoint.Ip
-	statsImpl.FillNodeStats(&node, connEndpoint)
-	nodeArray = append(nodeArray, node)
-	return nodeArray
-}
-
-func fillEdgesArray(id string, edgeArray []model.Edge, connectionItems map[string]model.ConnectionItem, statsImpl stats.Stats) []model.Edge {
-	var connItem = connectionItems[id]
-	var edge = model.Edge{}
-	edge.Id = id
-	edge.Source = connItem.Src
-	edge.Target = connItem.Dst
-	statsImpl.FillEdgeStats(&edge, connItem)
-	edgeArray = append(edgeArray, edge)
-	return edgeArray
+	return out, errs
 }

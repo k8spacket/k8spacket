@@ -1,16 +1,17 @@
 package o11y
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	httpclient "github.com/k8spacket/k8spacket/internal/thirdparty/http"
-	k8sclient "github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
+
+	httpclient "github.com/k8spacket/k8spacket/internal/thirdparty/http"
+	k8sclient "github.com/k8spacket/k8spacket/internal/thirdparty/k8s"
 
 	"github.com/k8spacket/k8spacket/internal/modules/tlsparser/model"
 )
@@ -70,34 +71,9 @@ func (handler *O11yHandler) buildDetailsResponse(url string) (model.TLSDetails, 
 func buildResponse[T model.TLSDetails | []model.TLSConnection](handler *O11yHandler, url string, t T, resultFunc func(d T, s T) T) (T, error) {
 	var k8spacketIps = handler.k8sClient.GetPodIPsBySelectors(os.Getenv("K8S_PACKET_API_FIELD_SELECTOR"), os.Getenv("K8S_PACKET_API_LABEL_SELECTOR"))
 
-	var in T
-	out := t
-
-	for _, ip := range k8spacketIps {
-		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(url, ip), nil)
-		resp, err := handler.httpClient.Do(req)
-
-		if err != nil {
-			slog.Error("[api] Cannot get stats", "Error", err)
-			continue
-		}
-
-		if resp.StatusCode == http.StatusOK {
-
-			responseData, err := io.ReadAll(resp.Body)
-			if err != nil {
-				slog.Error("[api] Cannot read stats response", "Error", err)
-				continue
-			}
-
-			err = json.Unmarshal(responseData, &in)
-			if err != nil {
-				slog.Error("[api] Cannot parse stats response", "Error", err)
-				continue
-			}
-
-			out = resultFunc(out, in)
-		}
+	out, errs := aggregateTLSResponses(context.Background(), k8spacketIps, url, handler.httpClient, t, resultFunc)
+	if len(errs) > 0 {
+		slog.Warn("[api] tlsparser aggregation completed with errors", "errors", errs)
 	}
 
 	return out, nil

@@ -101,8 +101,6 @@ func TestTLSConnectionHandler_FilterConnections(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			fmt.Println(req.URL.Query())
-
 			rr := httptest.NewRecorder()
 			httpHandler := http.HandlerFunc(handler.TLSConnectionHandler)
 
