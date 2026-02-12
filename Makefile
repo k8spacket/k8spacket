@@ -33,7 +33,7 @@ build:
 	env CGO_ENABLED=0 go build -o ./k8spacket ./cmd/k8spacket
 
 test:
-	go env -w GOTOOLCHAIN=go1.25.5+auto && K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v ./... -coverpkg=./... -coverprofile=coverage.out
+	GOTOOLCHAIN=go1.26.0+auto K8S_PACKET_K8S_RESOURCES_DISABLED=true go test -v ./... -coverpkg=./... -coverprofile=coverage.out
 
 run:
 	go run ./cmd/k8spacket
