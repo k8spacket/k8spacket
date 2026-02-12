@@ -29,6 +29,8 @@ func (bytes *Bytes) FillNodeStats(node *model.Node, connEndpoint model.Connectio
 		node.MainStat = fmt.Sprint("recv: N/A")
 		node.SecondaryStat = fmt.Sprint("resp: N/A")
 	}
+	node.Arc1Color = "blue"
+	node.Arc2Color = "yellow"
 }
 
 func (bytes *Bytes) FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {

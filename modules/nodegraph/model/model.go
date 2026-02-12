@@ -54,8 +54,11 @@ type Node struct {
 	MainStat      string  `json:"mainStat"`
 	SecondaryStat string  `json:"secondaryStat"`
 	Arc1          float64 `json:"arc__1"`
+	Arc1Color     string  `json:"arc__1_color"`
 	Arc2          float64 `json:"arc__2"`
+	Arc2Color     string  `json:"arc__2_color"`
 	Arc3          float64 `json:"arc__3"`
+	Arc3Color     string  `json:"arc__3_color"`
 }
 
 type Edge struct {

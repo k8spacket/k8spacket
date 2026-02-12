@@ -26,6 +26,8 @@ func (connection *Connection) FillNodeStats(node *model.Node, connEndpoint model
 		node.MainStat = fmt.Sprint("all: N/A")
 		node.SecondaryStat = fmt.Sprint("persistent: N/A")
 	}
+	node.Arc1Color = "green"
+	node.Arc2Color = "red"
 }
 
 func (connection *Connection) FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {

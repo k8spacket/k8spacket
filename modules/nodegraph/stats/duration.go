@@ -36,6 +36,8 @@ func (duration *Duration) FillNodeStats(node *model.Node, connEndpoint model.Con
 		node.MainStat = fmt.Sprint("avg: N/A")
 		node.SecondaryStat = fmt.Sprint("max: N/A")
 	}
+	node.Arc1Color = "purple"
+	node.Arc2Color = "white"
 }
 
 func (duration *Duration) FillEdgeStats(edge *model.Edge, connItem model.ConnectionItem) {
