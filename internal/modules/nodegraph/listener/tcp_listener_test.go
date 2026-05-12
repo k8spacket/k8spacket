@@ -26,6 +26,7 @@ func TestListen(t *testing.T) {
 
 	os.Setenv("K8S_PACKET_TCP_PERSISTENT_DURATION", "1ms")
 	os.Setenv("K8S_PACKET_TCP_METRICS_HIDE_SRC_PORT", "true")
+	os.Setenv("K8S_PACKET_TCP_METRICS_ENABLED", "true")
 
 	logger := slog.New(slog.NewTextHandler(&str, nil))
 

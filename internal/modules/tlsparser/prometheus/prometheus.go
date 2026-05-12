@@ -32,9 +32,12 @@ var (
 )
 
 func Init() {
-	sendTLSMetrics, _ := strconv.ParseBool(os.Getenv("K8S_PACKET_TLS_METRICS_ENABLED"))
-	if sendTLSMetrics {
+	sendTLSRecordsMetrics, _ := strconv.ParseBool(os.Getenv("K8S_PACKET_TLS_RECORDS_METRICS_ENABLED"))
+	if sendTLSRecordsMetrics {
 		prometheus.MustRegister(K8sPacketTLSRecordMetric)
+	}
+	sendTLSExpirationMetrics, _ := strconv.ParseBool(os.Getenv("K8S_PACKET_TLS_EXPIRATION_METRICS_ENABLED"))
+	if sendTLSExpirationMetrics {
 		prometheus.MustRegister(K8sPacketTLSCertificateExpirationMetric)
 		prometheus.MustRegister(K8sPacketTLSCertificateExpirationCounterMetric)
 	}

@@ -2,7 +2,7 @@ package ebpf_tools
 
 import (
 	"encoding/binary"
-	"os"
+	"regexp"
 	"testing"
 
 	"github.com/k8spacket/k8spacket/internal/modules"
@@ -10,9 +10,12 @@ import (
 )
 
 func TestEnrichAddress(t *testing.T) {
-
-	os.Setenv("K8S_PACKET_REVERSE_WHOIS_REGEXP", "(?:OrgName:|org-name:)\\s*(.*)")
-	os.Setenv("K8S_PACKET_REVERSE_GEOIP2_DB_PATH", "../../../tests/units/GeoLite2-City-Test.mmdb")
+	t.Setenv("K8S_PACKET_REVERSE_GEOIP2_DB_PATH", "../../../tests/units/GeoLite2-City-Test.mmdb")
+	oldRegexp := reReverseWhois
+	reReverseWhois = regexp.MustCompile("(?:OrgName:|org-name:)\\s*(.*)")
+	t.Cleanup(func() {
+		reReverseWhois = oldRegexp
+	})
 
 	address := modules.Address{Addr: "8.8.8.8"}
 

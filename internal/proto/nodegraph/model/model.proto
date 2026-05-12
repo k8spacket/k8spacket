@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package proto.nodegraph.model;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/k8spacket/k8spacket/internal/proto/nodegraph/model";
+
+message ConnectionItem {
+  string src = 1;
+  string srcName = 2;
+  string srcNamespace = 3;
+  string dst = 4;
+  string dstName = 5;
+  string dstNamespace = 6;
+  int64 connCount = 7;
+  int64 connPersistent = 8;
+  double bytesSent = 9;
+  double bytesReceived = 10;
+  double duration = 11;
+  double maxDuration = 12;
+  google.protobuf.Timestamp lastSeen = 13;
+}

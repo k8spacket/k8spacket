@@ -2,10 +2,12 @@ package listener
 
 import (
 	"bytes"
+	"log/slog"
+	"os"
+	"testing"
+
 	"github.com/k8spacket/k8spacket/internal/modules/tlsparser/model"
 	"github.com/k8spacket/k8spacket/internal/modules/tlsparser/storer"
-	"log/slog"
-	"testing"
 
 	"github.com/k8spacket/k8spacket/internal/modules"
 	"github.com/stretchr/testify/assert"
@@ -28,6 +30,9 @@ func (mock *mockStorer) StoreInDatabase(tlsConnection *model.TLSConnection, tlsD
 func TestListen(t *testing.T) {
 
 	var str bytes.Buffer
+
+	os.Setenv("K8S_PACKET_TLS_RECORDS_METRICS_ENABLED", "true")
+	os.Setenv("K8S_PACKET_TLS_EXPIRATION_METRICS_ENABLED", "true")
 
 	logger := slog.New(slog.NewTextHandler(&str, nil))
 

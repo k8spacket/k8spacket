@@ -26,6 +26,7 @@ type SafeMap struct {
 
 var domainsMap = &SafeMap{data: make(map[string]string)}
 var reverseLookupMap = &SafeMap{data: make(map[string]string)}
+var reReverseWhois = regexp.MustCompile(os.Getenv("K8S_PACKET_REVERSE_WHOIS_REGEXP"))
 
 func EnrichAddress(addr *modules.Address) {
 	name, namespace := k8sclient.GetNameAndNamespace(addr.Addr)
@@ -55,8 +56,7 @@ func reverseLookup(ip string, port uint16) string {
 
 		result, _ := whois.Whois(ip)
 
-		re := regexp.MustCompile(os.Getenv("K8S_PACKET_REVERSE_WHOIS_REGEXP"))
-		matches := re.FindStringSubmatch(result)
+		matches := reReverseWhois.FindStringSubmatch(result)
 
 		reverseLookup := ""
 

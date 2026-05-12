@@ -13,6 +13,8 @@ import (
 	"github.com/k8spacket/k8spacket/internal/modules/nodegraph/model"
 )
 
+var reMatchAll = regexp.MustCompile("")
+
 type Handler struct {
 	repo repository.Repository[model.ConnectionItem]
 }
@@ -54,19 +56,19 @@ func (handler *Handler) filterConnections(query url.Values) []model.ConnectionIt
 	}
 
 	var namespace = query["namespace"]
-	var patternNs = regexp.MustCompile("")
+	var patternNs = reMatchAll
 	if len(namespace) > 0 {
 		patternNs = regexp.MustCompile(namespace[0])
 	}
 
 	var include = query["include"]
-	var patternIn = regexp.MustCompile("")
+	var patternIn = reMatchAll
 	if len(include) > 0 {
 		patternIn = regexp.MustCompile(include[0])
 	}
 
 	var exclude = query["exclude"]
-	var patternEx = regexp.MustCompile("")
+	var patternEx = reMatchAll
 	if len(exclude) > 0 {
 		patternEx = regexp.MustCompile(exclude[0])
 	}

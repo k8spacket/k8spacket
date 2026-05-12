@@ -2,11 +2,12 @@ package db
 
 import (
 	"fmt"
+	"hash/fnv"
+
 	tcp_model "github.com/k8spacket/k8spacket/internal/modules/nodegraph/model"
 	tls_model "github.com/k8spacket/k8spacket/internal/modules/tlsparser/model"
 	"github.com/timshannon/bolthold"
 	"go.etcd.io/bbolt"
-	"hash/fnv"
 )
 
 type BoltDb[T tls_model.TLSDetails | tls_model.TLSConnection | tcp_model.ConnectionItem] struct {
@@ -14,7 +15,14 @@ type BoltDb[T tls_model.TLSDetails | tls_model.TLSConnection | tcp_model.Connect
 }
 
 func New[T tls_model.TLSDetails | tls_model.TLSConnection | tcp_model.ConnectionItem](dbname string) (Db[T], error) {
-	database, err := bolthold.Open(fmt.Sprintf("%s.db", dbname), 0600, nil)
+	database, err := bolthold.Open(fmt.Sprintf("%s.db", dbname), 0600, &bolthold.Options{
+		Encoder: func(v interface{}) ([]byte, error) {
+			return marshalProto(v)
+		},
+		Decoder: func(data []byte, v interface{}) error {
+			return unmarshalProto(data, v)
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
