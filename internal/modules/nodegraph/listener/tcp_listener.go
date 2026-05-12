@@ -12,11 +12,13 @@ import (
 )
 
 type TcpListener struct {
-	updater updater.Updater
+	updater           updater.Updater
+	tcpMetricsEnabled bool
 }
 
 func NewListener(updater updater.Updater) modules.Listener[modules.TCPEvent] {
-	return &TcpListener{updater: updater}
+	tcpMetricsEnabled, _ := strconv.ParseBool(os.Getenv("K8S_PACKET_TCP_METRICS_ENABLED"))
+	return &TcpListener{updater: updater, tcpMetricsEnabled: tcpMetricsEnabled}
 }
 
 func (listener *TcpListener) Listen(event modules.TCPEvent) {
@@ -30,7 +32,7 @@ func (listener *TcpListener) Listen(event modules.TCPEvent) {
 	listener.updater.Update(event.Client.Addr, event.Client.Name, event.Client.Namespace, event.Server.Addr, event.Server.Name, event.Server.Namespace, persistent, float64(event.TxB), float64(event.RxB), float64(event.DeltaUs), event.Closed)
 
 	if event.Closed {
-		sendPrometheusMetrics(event, persistent)
+		sendPrometheusMetrics(event, persistent, listener.tcpMetricsEnabled)
 		slog.Info("Connection",
 			"src", event.Client.Addr,
 			"srcName", event.Client.Name,
@@ -47,7 +49,10 @@ func (listener *TcpListener) Listen(event modules.TCPEvent) {
 	}
 }
 
-func sendPrometheusMetrics(event modules.TCPEvent, persistent bool) {
+func sendPrometheusMetrics(event modules.TCPEvent, persistent bool, tcpMetricsEnabled bool) {
+	if !tcpMetricsEnabled {
+		return
+	}
 	hideSrcPort, _ := strconv.ParseBool(os.Getenv("K8S_PACKET_TCP_METRICS_HIDE_SRC_PORT"))
 	var srcPortMetrics = strconv.Itoa(int(event.Client.Port))
 	if hideSrcPort {
