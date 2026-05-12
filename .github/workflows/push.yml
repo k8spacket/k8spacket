@@ -1,9 +1,12 @@
 name: Build and push image
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Docker image tag"
+        required: true
+        default: "latest"
 
 jobs:
   unit:
@@ -26,4 +29,4 @@ jobs:
         with:
           push: true
           platforms: linux/amd64
-          tags: docker.io/k8spacket/k8spacket:${{ vars.IMAGE_TAG }}
+          tags: docker.io/k8spacket/k8spacket:${{ github.event.inputs.tag }}
