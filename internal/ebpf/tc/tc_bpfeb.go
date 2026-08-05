@@ -31,6 +31,15 @@ type tcTlsHandshakeEvent struct {
 	UsedCipher        uint16
 }
 
+// Names of all BPF objects in the ELF.
+//
+// Used for safe lookups in a Collection or CollectionSpec.
+const (
+	tcMapEvents       = "events"
+	tcMapOutputEvents = "output_events"
+	tcProgTcFilter    = "tc_filter"
+)
+
 // loadTc returns the embedded CollectionSpec for tc.
 func loadTc() (*ebpf.CollectionSpec, error) {
 	reader := bytes.NewReader(_TcBytes)
@@ -51,7 +60,7 @@ func loadTc() (*ebpf.CollectionSpec, error) {
 //	*tcMaps
 //
 // See ebpf.CollectionSpec.LoadAndAssign documentation for details.
-func loadTcObjects(obj interface{}, opts *ebpf.CollectionOptions) error {
+func loadTcObjects(obj any, opts *ebpf.CollectionOptions) error {
 	spec, err := loadTc()
 	if err != nil {
 		return err

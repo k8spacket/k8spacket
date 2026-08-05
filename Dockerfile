@@ -1,4 +1,4 @@
-FROM ubuntu:24.04 AS libbpf
+FROM ubuntu:26.04 AS libbpf
 
 RUN apt-get update && apt-get install -y libelf-dev libpcap-dev libbfd-dev libssl-dev binutils-dev build-essential make
 RUN apt-get install -y linux-tools-common git curl
@@ -18,7 +18,7 @@ COPY ./libbpf.sh .
 RUN ./libbpf.sh
 
 
-FROM golang:1.26.3 AS build
+FROM golang:1.26.5 AS build
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y clang llvm
 
@@ -41,7 +41,7 @@ RUN cd /home/k8spacket/internal/ebpf/socketfilter && go generate -ldflags "-w -s
 RUN cd /home/k8spacket && env CGO_ENABLED=0 go build ./cmd/k8spacket
 
 
-FROM gcr.io/distroless/static-debian12
+FROM gcr.io/distroless/static-debian13
 
 WORKDIR /home/k8spacket
 

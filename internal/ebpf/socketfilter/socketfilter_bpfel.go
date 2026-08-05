@@ -31,6 +31,15 @@ type socketfilterTlsHandshakeEvent struct {
 	UsedCipher        uint16
 }
 
+// Names of all BPF objects in the ELF.
+//
+// Used for safe lookups in a Collection or CollectionSpec.
+const (
+	socketfilterMapEvents            = "events"
+	socketfilterMapOutputEvents      = "output_events"
+	socketfilterProgSocketHttpFilter = "socket__http_filter"
+)
+
 // loadSocketfilter returns the embedded CollectionSpec for socketfilter.
 func loadSocketfilter() (*ebpf.CollectionSpec, error) {
 	reader := bytes.NewReader(_SocketfilterBytes)
@@ -51,7 +60,7 @@ func loadSocketfilter() (*ebpf.CollectionSpec, error) {
 //	*socketfilterMaps
 //
 // See ebpf.CollectionSpec.LoadAndAssign documentation for details.
-func loadSocketfilterObjects(obj interface{}, opts *ebpf.CollectionOptions) error {
+func loadSocketfilterObjects(obj any, opts *ebpf.CollectionOptions) error {
 	spec, err := loadSocketfilter()
 	if err != nil {
 		return err

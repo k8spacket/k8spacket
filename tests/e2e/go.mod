@@ -1,10 +1,10 @@
 module github.com/k8spacket/k8spacket
 
-go 1.26.3
+go 1.26.5
 
 require (
 	github.com/stretchr/testify v1.11.1
-	github.com/tidwall/gjson v1.18.0
+	github.com/tidwall/gjson v1.19.0
 )
 
 require (
