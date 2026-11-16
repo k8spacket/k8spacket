@@ -34,6 +34,21 @@ jobs:
         with:
           name: k8spacket
           path: ./k8spacket
+  e2e-7_3:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "7.3"
+  e2e-6_18:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "6.18"
+  e2e-6_12:
+    needs: e2e-build
+    uses: ./.github/workflows/reusable-workflow.yml
+    with:
+      kernel: "6.12"
   e2e-6_10:
     needs: e2e-build
     uses: ./.github/workflows/reusable-workflow.yml
